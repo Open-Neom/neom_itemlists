@@ -8,5 +8,6 @@ abstract class AppItemService {
   void setItemState(AppItemState newState);
   Future<void> getItemlistItemDetails(AppItem appItem);
   Future<bool> addItemToItemlist(AppItem appItem, String itemlistId);
+  void loadItemsFromList();
 
 }

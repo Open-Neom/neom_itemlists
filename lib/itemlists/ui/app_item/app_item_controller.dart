@@ -1,6 +1,5 @@
-// ignore_for_file: annotate_overrides
-
 import 'package:get/get.dart';
+import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/firestore/band_firestore.dart';
 
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
@@ -10,7 +9,6 @@ import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
@@ -92,19 +90,7 @@ class AppItemController extends GetxController implements AppItemService {
     itemlistItems = <String, AppItem>{};
   }
 
-  void loadItemsFromList(){
-    Map<String, AppItem> items = {};
-
-    itemlist.appItems?.forEach((s) {
-      logger.d(s.name);
-      items[s.id] = s;
-    });
-
-    itemlistItems = items;
-    update([AppPageIdConstants.itemlistItem]);
-  }
-
-
+  @override
   Future<void> updateItemlistItem(AppItem updatedItem) async {
     logger.d("Preview state ${updatedItem.state}");
     if(updatedItem.state == itemState) {
@@ -139,7 +125,7 @@ class AppItemController extends GetxController implements AppItemService {
     }
   }
 
-
+  @override
   Future<bool> addItemToItemlist(AppItem appItem, String itemlistId) async {
 
     logger.d("Item ${appItem.name} would be added as $itemState for Itemlist $itemlistId");
@@ -182,7 +168,7 @@ class AppItemController extends GetxController implements AppItemService {
     return false;
   }
 
-
+  @override
   Future<bool> removeItemFromList(AppItem appItem) async {
     logger.d("removing itemlistItem ${appItem.toString()}");
 
@@ -231,18 +217,33 @@ class AppItemController extends GetxController implements AppItemService {
   }
 
 
+  @override
   void setItemState(AppItemState newState){
     logger.d("Setting new itemState $newState");
     itemState = newState.value;
     update([AppPageIdConstants.itemlistItem, AppPageIdConstants.appItem]);
   }
 
-
+  @override
   Future<void> getItemlistItemDetails(AppItem appItem) async {
     logger.d("");
-    Get.toNamed(AppRouteConstants.bookDetails, arguments: [appItem]);
+    Get.toNamed(AppFlavour.getItemDetailsRoute(),
+        arguments: [appItem]
+    );
     update([AppPageIdConstants.itemlistItem]);
   }
 
+  @override
+  void loadItemsFromList(){
+    Map<String, AppItem> items = {};
 
+    itemlist.appItems?.forEach((s) {
+      logger.d(s.name);
+      items[s.id] = s;
+    });
+
+    itemlistItems = items;
+    update([AppPageIdConstants.itemlistItem]);
+  }
+  
 }

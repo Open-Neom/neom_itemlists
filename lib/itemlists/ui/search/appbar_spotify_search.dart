@@ -11,7 +11,6 @@ import 'spotify_search_controller.dart';
 class AppBarSpotifySearch extends StatelessWidget implements PreferredSizeWidget {
 
   final SpotifySearchController spotifySearchController;
-
   const AppBarSpotifySearch(this.spotifySearchController, {Key? key}) : super(key: key);
   
   @override

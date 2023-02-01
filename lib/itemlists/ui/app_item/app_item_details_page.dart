@@ -135,7 +135,7 @@ class AppItemDetailsPage extends StatelessWidget {
                             title: AppTranslationConstants.appItemPrefs.tr,
                             content: Column(
                               children: <Widget>[
-                                _.userController.profile.type == ProfileType.musician ?
+                                _.userController.profile.type == ProfileType.instrumentist ?
                                 Obx(()=>
                                   DropdownButton<String>(
                                     items: AppItemState.values.map((AppItemState itemState) {
@@ -221,7 +221,7 @@ class AppItemDetailsPage extends StatelessWidget {
                                     : Text(AppTranslationConstants.add.tr,
                                 )),
                                 onPressed: () async => {
-                                  _.userController.profile.type == ProfileType.musician ?
+                                  _.userController.profile.type == ProfileType.instrumentist ?
                                   (_.appItemState > 0 ? await _.addItemlistItem(context, fanItemState: _.appItemState) :
                                     Get.snackbar(
                                       AppTranslationConstants.appItemPrefs.tr,

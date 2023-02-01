@@ -1,7 +1,9 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/auth/ui/login/login_controller.dart';
+import 'package:neom_commons/core/app_flavour.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'package:neom_commons/core/utils/app_color.dart';
@@ -106,35 +108,39 @@ class ItemlistPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    _.outOfSync ? Column(
-                      children: [
-                        SizedBox(
-                          child: DefaultTextStyle(
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                            ),
-                            child: AnimatedTextKit(
-                              repeatForever: true,
-                              animatedTexts: [
-                                FlickerAnimatedText("${AppTranslationConstants.suggestedReading.tr}  "),
-                              ],
-                              onTap: () {
-                                Get.toNamed(AppRouteConstants.PDFViewer,
-                                    arguments: ["https://www.escritoresmxi.org/wp-content/uploads/2022/09/Insignificante-Flipbok.pdf", 0, 150]);
-                              },
-                            ),
-                          ),
+                    AppFlavour.appInUse == AppInUse.emxi || _.outOfSync
+                        ? SizedBox(
+                      child: DefaultTextStyle(
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
                         ),
-                      ],
+                        child: AnimatedTextKit(
+                          repeatForever: true,
+                          animatedTexts: [
+                            FlickerAnimatedText(
+                                AppFlavour.appInUse == AppInUse.gigmeout ?
+                                AppTranslationConstants.synchronizeSpotifyPlaylists
+                                : "${AppTranslationConstants.suggestedReading.tr}  "),
+                          ],
+                          onTap: () {
+                            AppFlavour.appInUse == AppInUse.gigmeout
+                                ? _.synchronizeSpotifyPlaylists()
+                                : Get.toNamed(AppRouteConstants.PDFViewer,
+                                arguments: [Get.find<LoginController>().appInfo.suggestedUrl, 0, 150]);
+                            },
+                        ),
+                      ),
                     ) : Container(),
                     FloatingActionButton(
                       heroTag: AppPageIdConstants.spotifySync,
                       elevation: AppTheme.elevationFAB,
                       tooltip: AppTranslationConstants.createItemlist.tr,
-                      child: const Icon(FontAwesomeIcons.bookOpenReader),
+                      child: Icon(AppFlavour.getSyncIcon()),
                       onPressed: () => {
-                        Get.toNamed(AppRouteConstants.PDFViewer,
-                        arguments: ["https://www.escritoresmxi.org/wp-content/uploads/2022/09/Insignificante-Flipbok.pdf", 0, 150])
+                        AppFlavour.appInUse == AppInUse.gigmeout
+                        ? _.synchronizeSpotifyPlaylists()
+                        : Get.toNamed(AppRouteConstants.PDFViewer,
+                        arguments: [Get.find<LoginController>().appInfo.suggestedUrl, 0, 150])
                       },
                     ),
                   ],

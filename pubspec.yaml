@@ -19,6 +19,10 @@ dependencies:
   neom_events:
     path: ../neom_events
 
+  spotify_sdk: ^2.3.0
+  percent_indicator: ^4.2.2
+  audioplayers: ^3.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

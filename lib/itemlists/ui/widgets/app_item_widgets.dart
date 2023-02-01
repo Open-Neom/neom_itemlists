@@ -2,6 +2,8 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/app_flavour.dart';
+import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'package:neom_commons/core/domain/model/app_item.dart';
@@ -9,12 +11,12 @@ import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/constants/app_assets.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/constants/url_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/profile_type.dart';
 import '../app_item/app_item_controller.dart';
 import '../search/spotify_search_controller.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 Widget buildItemList(BuildContext context, AppItemController _) {
   return ListView.separated(
@@ -33,7 +35,7 @@ Widget buildItemList(BuildContext context, AppItemController _) {
                 ? "${appItem.artist.substring(0,AppConstants.maxArtistNameLength)}..."
                 : appItem.artist),
               const SizedBox(width:5),
-              (_.userController.profile.type == ProfileType.musician && !_.isFixed) ?
+              (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed) ?
               RatingBar(
                 initialRating: appItem.state.toDouble(),
                 minRating: 1,
@@ -59,7 +61,7 @@ Widget buildItemList(BuildContext context, AppItemController _) {
               child: Image.network(
                   appItem.albumImgUrl.isNotEmpty ? appItem.albumImgUrl
                       : appItem.artistImgUrl.isNotEmpty ? appItem.artistImgUrl
-                      : UrlConstants.noImageUrl
+                      : AppFlavour.getNoImageUrl()
               ),
             ),
           ),
@@ -162,9 +164,82 @@ Widget buildItemSearchList(BuildContext context, SpotifySearchController _) {
         leading: Hero(
           tag: CoreUtilities.getAppItemHeroTag(index),
           child: Image.network(appItem.albumImgUrl.isNotEmpty
-              ? appItem.albumImgUrl : UrlConstants.noImageUrl,
+              ? appItem.albumImgUrl : AppFlavour.getNoImageUrl(),
               width: 56.0
           ),
+        ),
+      );
+    },
+  );
+}
+
+Widget buildSpotifySongList(BuildContext context, SpotifySearchController _) {
+  return ListView.separated(
+    separatorBuilder: (context, index) => const Divider(),
+    itemCount: _.appItems.length,
+    itemBuilder: (context, index) {
+      AppItem song = _.appItems.values.elementAt(index);
+      return ListTile(
+        title: Text(song.name.isEmpty ? ""
+            : song.name.length > AppConstants.maxAppItemNameLength
+            ? "${song.name.substring(0,AppConstants.maxAppItemNameLength)}..."
+            : song.name),
+        subtitle: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(song.artist.isEmpty ? ""
+                  : song.artist.length > AppConstants.maxArtistNameLength
+                  ? "${song.artist.substring(0,AppConstants.maxArtistNameLength)}..."
+                  : song.artist),
+              AppTheme.widthSpace5,
+              Row(
+                children: [
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: Icon(song.state > 0 ? FontAwesomeIcons.solidHeart
+                        : FontAwesomeIcons.heart,
+                        size:15),
+                    onPressed: () => _.handleItemlistItems(song, AppItemState.heardIt),
+                  ),
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: Icon(song.state > 1 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                        size:15),
+                    onPressed: () => _.handleItemlistItems(song, AppItemState.learningIt),
+                  ),
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: Icon(song.state > 2 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                        size:15),
+                    onPressed: () => _.handleItemlistItems(song, AppItemState.needToPractice),
+                  ),
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: Icon(song.state > 3 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                        size:15),
+                    onPressed: () => _.handleItemlistItems(song, AppItemState.readyToPlay),
+                  ),
+                  IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
+                    icon: Icon(song.state > 4 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+                        size:15),
+                    onPressed: () => _.handleItemlistItems(song, AppItemState.knowByHeart),
+                  ),
+                ],
+              )
+            ]),
+        tileColor: _.addedItems.contains(song) ? AppColor.getMain() : Colors.transparent,
+        onTap: () => _.handleItemlistItems(song, AppItemState.heardIt),
+        onLongPress: () => _.getAppItemDetails(song),
+        leading: Image.network(
+            song.albumImgUrl.isNotEmpty ? song.albumImgUrl
+                : song.artistImgUrl.isNotEmpty ? song.artistImgUrl
+                : AppFlavour.getNoImageUrl()
         ),
       );
     },

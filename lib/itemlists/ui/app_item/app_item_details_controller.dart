@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 
@@ -11,6 +12,7 @@ import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
 import 'package:neom_events/events/ui/event_details_controller.dart';
@@ -64,6 +66,8 @@ class AppItemDetailsController extends GetxController {
   bool get isButtonDisabled => _isButtonDisabled.value;
   set isButtonDisabled(bool isButtonDisabled) => _isButtonDisabled.value = isButtonDisabled;
 
+  final AudioPlayer audioPlayer = AudioPlayer(playerId: AppInUse.gigmeout.value);
+
   @override
   void onInit() async {
     super.onInit();
@@ -74,6 +78,9 @@ class AppItemDetailsController extends GetxController {
       band = userController.band;
       itemlistOwner = userController.itemlistOwner;
 
+      audioPlayer.setReleaseMode(ReleaseMode.stop);
+      audioPlayer.stop();
+      audioPlayer.release();
       if(itemlistOwner == ItemlistOwner.profile) {
         itemlists.assignAll(profile.itemlists ?? {});
       } else if(itemlistOwner == ItemlistOwner.band) {
@@ -114,11 +121,13 @@ class AppItemDetailsController extends GetxController {
     update([AppPageIdConstants.appItemDetails]);
   }
 
-
   @override
   void dispose() {
     super.dispose();
     clear();
+    audioPlayer.stop();
+    audioPlayer.release();
+    isPlaying = false;
   }
 
   void clear() {
@@ -164,6 +173,9 @@ class AppItemDetailsController extends GetxController {
 
       if(fanItemState > 0) appItemState = fanItemState;
       if(itemlistId.isEmpty) itemlistId = itemlists.values.first.id;
+
+      await audioPlayer.stop();
+      isPlaying = false;
 
       AppItemController appItemController;
 
@@ -223,7 +235,10 @@ class AppItemDetailsController extends GetxController {
 
   Future<void> removeItem() async {
     logger.d("removing Item ${appItem.toString()} from itemlist");
-    
+
+    await audioPlayer.stop();
+    isPlaying = false;
+
     AppItemController appItemController;
     try {
       appItemController = Get.find<AppItemController>();
@@ -271,10 +286,9 @@ class AppItemDetailsController extends GetxController {
 
     logger.d("Previewing appItem ${appItem.name}");
 
-
-    isPlaying = true;
     try {
-
+      await audioPlayer.play(UrlSource(appItem.previewUrl));
+      isPlaying = true;
     } catch(e) {
       logger.e(e.toString());
     }
@@ -284,12 +298,11 @@ class AppItemDetailsController extends GetxController {
 
   Future<void> pausePreview() async {
     try {
+      await audioPlayer.pause();
       isPlaying = false;
-
     } catch(e) {
       logger.e(e.toString());
     }
-
 
     update([AppPageIdConstants.appItemDetails]);
   }
@@ -299,7 +312,9 @@ class AppItemDetailsController extends GetxController {
     logger.d("Stopping appItem ${appItem.name}");
 
     try {
-
+      await audioPlayer.stop();
+      await audioPlayer.release();
+      isPlaying = false;
     } catch(e) {
       logger.e(e.toString());
     }

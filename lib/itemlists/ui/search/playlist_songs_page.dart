@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/app_flavour.dart';
 
 import 'package:neom_commons/core/ui/widgets/appbar_child.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
@@ -7,12 +8,13 @@ import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
+import 'package:neom_itemlists/itemlists/ui/widgets/app_item_widgets.dart';
 import 'spotify_search_controller.dart';
 
 class PlaylistItemsPage extends StatelessWidget {
   const PlaylistItemsPage({Key? key}) : super(key: key);
-
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +26,9 @@ class PlaylistItemsPage extends StatelessWidget {
             : _.itemlist.name),
         body: Container(
           decoration: AppTheme.appBoxDecoration,
-          child: Container() //Obx(()=> buildSpotifySongList(context, _)),
+          child: AppFlavour.appInUse == AppInUse.gigmeout
+              ? Obx(()=> buildSpotifySongList(context, _))
+              : Container(),
         ),
         floatingActionButton: _.addedItems.isNotEmpty ?
           FloatingActionButton(

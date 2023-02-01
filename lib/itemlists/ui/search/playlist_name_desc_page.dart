@@ -14,7 +14,6 @@ import 'spotify_search_controller.dart';
 class PlaylistNameDescPage extends StatelessWidget {
   const PlaylistNameDescPage({Key? key}) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
     return GetBuilder<SpotifySearchController>(
@@ -124,4 +123,5 @@ class PlaylistNameDescPage extends StatelessWidget {
       }
     );
   }
+
 }
