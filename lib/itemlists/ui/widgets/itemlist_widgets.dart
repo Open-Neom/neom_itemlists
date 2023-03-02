@@ -30,7 +30,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
                 ? (itemlist.appItems!.first.albumImgUrl.isNotEmpty
                 ? CachedNetworkImage(imageUrl: itemlist.appItems!.first.albumImgUrl)
                 : CachedNetworkImage(imageUrl: AppFlavour.getNoImageUrl()))
-                : Container()
+                : CachedNetworkImage(imageUrl: AppFlavour.getAppLogoUrl())
         ),
         title: Row(
             children: <Widget>[

@@ -176,7 +176,7 @@ class AppItemController extends GetxController implements AppItemService {
       if(itemlistOwner == ItemlistOwner.profile) {
         if(await ItemlistFirestore().removeItem(profileId, appItem, itemlist.id)){
           logger.d("");
-          if(await ProfileFirestore().removeItem(profileId, appItem.id)) {
+          if(await ProfileFirestore().removeAppItem(profileId, appItem.id)) {
             if (userController.profile.itemlists != null &&
                 userController.profile.itemlists!.isNotEmpty) {
               logger.d("Removing item from global itemlist from userController");

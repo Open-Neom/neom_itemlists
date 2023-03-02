@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/auth/ui/login/login_controller.dart';
@@ -94,8 +97,9 @@ class ItemlistPage extends StatelessWidget {
                         DialogButton(
                           height: 50,
                           color: AppColor.bondiBlue75,
-                          onPressed: () async => {
-                            await _.createItemlist(),
+                          onPressed: () async {
+                            await _.createItemlist();
+                            Navigator.pop(context);
                           },
                           child: Text(
                             AppTranslationConstants.add.tr,
@@ -105,6 +109,7 @@ class ItemlistPage extends StatelessWidget {
                   ).show()
                 }),
                 AppTheme.heightSpace20,
+                AppFlavour.appInUse == AppInUse.emxi || (Platform.isAndroid || kDebugMode) ?
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
@@ -134,7 +139,6 @@ class ItemlistPage extends StatelessWidget {
                     FloatingActionButton(
                       heroTag: AppPageIdConstants.spotifySync,
                       elevation: AppTheme.elevationFAB,
-                      tooltip: AppTranslationConstants.createItemlist.tr,
                       child: Icon(AppFlavour.getSyncIcon()),
                       onPressed: () => {
                         AppFlavour.appInUse == AppInUse.gigmeout
@@ -144,7 +148,7 @@ class ItemlistPage extends StatelessWidget {
                       },
                     ),
                   ],
-                )
+                ) : Container()
               ]
           )
         )

@@ -93,8 +93,7 @@ class AppItemDetailsController extends GetxController {
       existsInItemlist = itemAlreadyInList();
 
       if (arguments.length > 1) { //to save in previously selected itemlist
-        Itemlist itemlist =  arguments.elementAt(1);
-        itemlistId = itemlist.id;
+        itemlistId =  arguments.elementAt(1);
       }
 
       if(itemlists.isNotEmpty && itemlists.isNotEmpty && itemlistId.isEmpty) {

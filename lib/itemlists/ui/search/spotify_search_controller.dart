@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/firestore/band_firestore.dart';
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_item.dart';
@@ -10,12 +11,14 @@ import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import 'package:neom_commons/emxi/data/api_services/google_books/google_books_api.dart';
 import 'package:neom_commons/emxi/domain/google_book.dart';
+import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_search.dart';
 import 'package:neom_itemlists/itemlists/data/firestore/band_itemlist_firestore.dart';
 import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
 import '../../data/firestore/app_item_firestore.dart';
@@ -140,21 +143,31 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
     try {
       switch(_spotifySearchType) {
         case(SpotifySearchType.song):
-          List<GoogleBook> googleBooks = await GoogleBooksApi.searchBooks(searchParam);
+          switch(AppFlavour.appInUse){
+            case AppInUse.gigmeout:
+              appItems = await SpotifySearch().searchSongs(searchParam);
+              break;
+            case AppInUse.emxi:
+              List<GoogleBook> googleBooks = await GoogleBooksApi.searchBooks(searchParam);
 
-          for (var googleBook in googleBooks) {
-            AppItem book = GoogleBook.toAppItem(googleBook);
-            appItems[book.id] = book;
+              for (var googleBook in googleBooks) {
+                AppItem book = GoogleBook.toAppItem(googleBook);
+                appItems[book.id] = book;
+              }
+              break;
+            case AppInUse.cyberneom:
+              break;
           }
-          logger.d("${appItems.length} books retrieved");
+
+          logger.d("${appItems.length} appItems retrieved");
           break;
         case(SpotifySearchType.playlist):
-          // itemlists = await SpotifySearch().searchPlaylists(searchParam);
-          //
-          // itemlists.forEach((playlistId, itemlist) async {
-          //   itemlist.items = await SpotifySearch().loadItemsFromPlaylist(playlistId);
-          //   itemlists[playlistId] = itemlist;
-          // });
+          itemlists = await SpotifySearch().searchPlaylists(searchParam);
+
+          itemlists.forEach((playlistId, itemlist) async {
+            itemlist.appItems = await SpotifySearch().loadSongsFromPlaylist(playlistId);
+            itemlists[playlistId] = itemlist;
+          });
 
           logger.d("${itemlists.length} playlists retrieved");
           break;
@@ -193,8 +206,8 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
 
   @override
   void getAppItemDetails(AppItem appItem) {
-    logger.d("Sending book with title ${appItem.name} to item controller");
-    Get.toNamed(AppRouteConstants.bookDetails, arguments: [appItem, itemlist.id]);
+    logger.d("Sending appItem with title ${appItem.name} to item controller");
+    Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appItem, itemlist.id]);
   }
 
 

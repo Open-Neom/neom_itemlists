@@ -144,7 +144,6 @@ class ItemlistController extends GetxController implements ItemlistService {
     logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
 
     try {
-      Get.back();
       
       if(newItemlistNameController.text.isNotEmpty) {
         Itemlist basicItemlist = Itemlist.createBasic(newItemlistNameController.text, newItemlistDescController.text);
@@ -213,7 +212,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         if(itemlist.appItems?.isNotEmpty ?? false) {
           for(var appItem in itemlist.appItems ?? []) {
-            if(await ProfileFirestore().removeItem(profile.id, appItem.id)) {
+            if(await ProfileFirestore().removeAppItem(profile.id, appItem.id)) {
               if (userController.profile.appItems != null &&
                   userController.profile.appItems!.isNotEmpty) {
                 logger.d("Removing item from global items for profile from userController");
