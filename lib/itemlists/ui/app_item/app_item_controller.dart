@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
+import 'package:neom_commons/core/data/api_services/push_notification/firebase_messaging_calls.dart';
 import 'package:neom_commons/core/data/firestore/band_firestore.dart';
 
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
@@ -12,6 +13,7 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
+import 'package:neom_commons/core/utils/enums/push_notification_type.dart';
 import 'package:neom_itemlists/itemlists/data/firestore/band_itemlist_firestore.dart';
 import '../../domain/use_cases/app_item_service.dart';
 
@@ -143,6 +145,14 @@ class AppItemController extends GetxController implements AppItemService {
               itemlist = userController.profile.itemlists![itemlistId]!;
               loadItemsFromList();
             }
+
+            FirebaseMessagingCalls.sendGlobalPushNotification(
+              fromProfile: userController.profile,
+              notificationType: PushNotificationType.appItemAdded,
+              referenceId: appItem.id,
+              imgUrl: appItem.albumImgUrl
+            );
+
             return true;
           }
         }

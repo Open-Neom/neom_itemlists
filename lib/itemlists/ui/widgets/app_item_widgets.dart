@@ -112,8 +112,8 @@ Widget buildItemList(BuildContext context, AppItemController _) {
                       },
                       value: CoreUtilities.getItemState(_.itemState).name,
                       icon: const Icon(Icons.arrow_downward),
-                      iconSize: 24,
-                      elevation: 16,
+                      iconSize: 15,
+                      elevation: 15,
                       style: const TextStyle(color: Colors.white),
                       dropdownColor: AppColor.getMain(),
                       underline: Container(
