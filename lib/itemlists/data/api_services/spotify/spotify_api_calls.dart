@@ -1,4 +1,5 @@
 import 'package:http/http.dart' as http;
+import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_itemlists/itemlists/utils/constants/app_spotify_constants.dart';
 import 'package:spotify/spotify.dart' as spotify;
@@ -11,11 +12,11 @@ class SpotifyApiCalls {
     String spotifyToken = "";
 
     if(await SpotifySdk.connectToSpotifyRemote(
-      clientId: AppSpotifyConstants.clientId,
+      clientId: AppFlavour.getSpotifyClientId(),
       redirectUrl: AppSpotifyConstants.redirectUrl,)
     ) {
       spotifyToken = await SpotifySdk.getAccessToken(
-          clientId: AppSpotifyConstants.clientId,
+          clientId: AppFlavour.getSpotifyClientId(),
           redirectUrl: AppSpotifyConstants.redirectUrl,
           scope: AppSpotifyConstants.scope
       );

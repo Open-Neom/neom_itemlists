@@ -124,7 +124,7 @@ class ItemlistPage extends StatelessWidget {
                           animatedTexts: [
                             FlickerAnimatedText(
                                 AppFlavour.appInUse == AppInUse.gigmeout ?
-                                AppTranslationConstants.synchronizeSpotifyPlaylists
+                                AppTranslationConstants.synchronizeSpotifyPlaylists.tr
                                 : "${AppTranslationConstants.suggestedReading.tr}  "),
                           ],
                           onTap: () {

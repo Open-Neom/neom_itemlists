@@ -12,6 +12,7 @@ import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
+import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
@@ -99,6 +100,7 @@ class AppItemDetailsController extends GetxController {
       if(itemlists.isNotEmpty && itemlists.isNotEmpty && itemlistId.isEmpty) {
         itemlistId = itemlists.values.first.id;
       }
+
     } catch (e) {
       logger.e(e.toString());
     }
@@ -109,9 +111,13 @@ class AppItemDetailsController extends GetxController {
   @override
   void onReady() async {
     super.onReady();
-    logger.i("Book ${appItem.id} Details Controller Ready");
+    logger.i("AppItem ${appItem.id} Details Controller Ready");
 
     try {
+      if(itemlists.isEmpty) {
+        Get.offAllNamed(AppRouteConstants.home);
+        AppUtilities.showSnackBar(AppTranslationConstants.noItemlistsMsg, AppTranslationConstants.noItemlistsMsg2);
+      }
     } catch(e) {
       logger.e(e.toString());
     }

@@ -1,6 +1,6 @@
 name: neom_itemlists
-description: Itemlists for apps like Gigmeout, Emxi, Cyberneom and so forth.
-version: 0.0.1
+description: Itemlists for Cyberneom.
+version: 1.0.0
 homepage: https://github.com/emmanuel-montoya/neom_itemlists
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
