@@ -184,14 +184,13 @@ class AppItemController extends GetxController implements AppItemService {
 
     try {
       if(itemlistOwner == ItemlistOwner.profile) {
-        if(await ItemlistFirestore().removeItem(profileId, appItem, itemlist.id)){
+        if(await ItemlistFirestore().removeItem(profileId, appItem, itemlist.id)) {
           logger.d("");
           if(await ProfileFirestore().removeAppItem(profileId, appItem.id)) {
             if (userController.profile.itemlists != null &&
                 userController.profile.itemlists!.isNotEmpty) {
               logger.d("Removing item from global itemlist from userController");
-              userController.profile.itemlists![itemlist.id]!.appItems!.remove(appItem);
-              //userController.profile.items!.remove(appItem.id);
+              userController.profile.itemlists = await ItemlistFirestore().retrieveItemlists(userController.profile.id);
               itemlistItems.remove(appItem.id);
             }
           }
@@ -247,6 +246,13 @@ class AppItemController extends GetxController implements AppItemService {
   void loadItemsFromList(){
     Map<String, AppItem> items = {};
 
+    if(itemlist.appReleaseItems?.isNotEmpty ?? false) {
+      itemlist.appReleaseItems?.forEach((releaseItem) {
+        AppItem item = AppItem.fromReleaseItem(releaseItem);
+        logger.d(releaseItem.name);
+        items[item.id] = item;
+      });
+    }
     itemlist.appItems?.forEach((s) {
       logger.d(s.name);
       items[s.id] = s;

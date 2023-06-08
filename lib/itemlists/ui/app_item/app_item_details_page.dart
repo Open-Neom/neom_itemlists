@@ -40,23 +40,28 @@ class AppItemDetailsPage extends StatelessWidget {
           decoration: AppTheme.appBoxDecoration,
           child: _.isLoading ? const Center(child: CircularProgressIndicator())
             : Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: <Widget>[
-                    Column(
-                      children: [
-                        AppTheme.heightSpace20,
-                        SizedBox(width: 200, child: _.appItem.albumImgUrl.isEmpty ? const Text("") : Image.network(_.appItem.albumImgUrl)),
-                        AppTheme.heightSpace20,
-                        Text(_.appItem.name.isEmpty ? ""
-                            : _.appItem.name.length > AppConstants.maxAppItemNameLength ?
-                        "${_.appItem.name.substring(0,AppConstants.maxAppItemNameLength)}...": _.appItem.name,
-                            style: AppTheme.textStyle.merge(const TextStyle(fontSize: 24))),
-                        AppTheme.heightSpace5,
-                        Text(_.appItem.artist,
-                            style: AppTheme.textStyle.merge(
-                                const TextStyle(fontSize: 18, color: Colors.white54))),
-                        AppTheme.heightSpace20,
-                        Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Column(
+                    children: [
+                      AppTheme.heightSpace20,
+                      SizedBox(width: 200, child: _.appItem.albumImgUrl.isEmpty ? const Text("") : Image.network(_.appItem.albumImgUrl)),
+                      AppTheme.heightSpace20,
+                      Text(_.appItem.name.isEmpty ? ""
+                          : _.appItem.name.length > AppConstants.maxAppItemNameLength ?
+                      "${_.appItem.name.substring(0,AppConstants.maxAppItemNameLength)}...": _.appItem.name,
+                          style: AppTheme.textStyle.merge(const TextStyle(fontSize: 24))),
+                      AppTheme.heightSpace5,
+                      Text(_.appItem.artist,
+                          style: AppTheme.textStyle.merge(
+                              const TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white54
+                              )
+                          )
+                      ),
+                      AppTheme.heightSpace20,
+                      Row(
                           children: <Widget>[
                             Container(
                               width: 150,
@@ -178,7 +183,7 @@ class AppItemDetailsPage extends StatelessWidget {
                                     iconSize: 20,
                                     elevation: 16,
                                     style: const TextStyle(color: Colors.white),
-                                    dropdownColor: AppColor.getMain(),
+                                    dropdownColor: AppColor.main75,
                                     underline: Container(
                                       height: 1,
                                       color: Colors.grey,
@@ -206,7 +211,7 @@ class AppItemDetailsPage extends StatelessWidget {
                                   iconSize: 20,
                                   elevation: 16,
                                   style: const TextStyle(color: Colors.white),
-                                  dropdownColor: AppColor.getMain(),
+                                  dropdownColor: AppColor.main75,
                                   underline: Container(
                                     height: 1,
                                     color: Colors.grey,

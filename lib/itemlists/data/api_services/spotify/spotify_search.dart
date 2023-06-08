@@ -85,7 +85,7 @@ class SpotifySearch {
             Itemlist giglist = await Itemlist.mapPlaylistToItemlist(item);
             giglists[giglist.id] = giglist;
           } else if (item is PlaylistSimple) {
-            Itemlist giglist = Itemlist.mapPlaylistSimpleToGiglist(item);
+            Itemlist giglist = Itemlist.mapPlaylistSimpleToItemlist(item);
             giglists[giglist.id] = giglist;
           }
         }

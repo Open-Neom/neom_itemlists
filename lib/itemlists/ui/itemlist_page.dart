@@ -144,7 +144,7 @@ class ItemlistPage extends StatelessWidget {
                         AppFlavour.appInUse == AppInUse.gigmeout
                         ? _.synchronizeSpotifyPlaylists()
                         : Get.toNamed(AppRouteConstants.PDFViewer,
-                        arguments: [Get.find<LoginController>().appInfo.suggestedUrl, 0, 150])
+                        arguments: [Get.find<LoginController>().appInfo.suggestedUrl, true, 0, 250])
                       },
                     ),
                   ],

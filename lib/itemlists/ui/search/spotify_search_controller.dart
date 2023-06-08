@@ -254,7 +254,7 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
   void addItemlistImage() async {
     logger.d("");
     try {
-      await postUploadController.handleEventImage();
+      await postUploadController.handleImage();
     } catch (e) {
       logger.e(e.toString());
     }

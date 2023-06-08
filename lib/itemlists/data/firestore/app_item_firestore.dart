@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:neom_commons/core/data/firestore/constants/app_firestore_collection_constants.dart';
-import 'package:neom_commons/core/data/firestore/constants/app_firestore_constants.dart';
 import 'package:neom_commons/core/domain/model/app_item.dart';
+import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import '../../domain/repository/app_item_repository.dart';
 
@@ -112,10 +112,14 @@ class AppItemFirestore implements AppItemRepository {
           .then((querySnapshot) async {
         for (var document in querySnapshot.docs) {
           if(document.id == profileId) {
+            DocumentSnapshot snapshot  = await document.reference.collection(AppFirestoreCollectionConstants.itemlists)
+                .doc(itemlistId).get();
+
+            Itemlist itemlist = Itemlist.fromJSON(snapshot.data());
+            itemlist.appItems?.removeWhere((element) => element.id == appItem.id);
             await document.reference.collection(AppFirestoreCollectionConstants.itemlists)
-                .doc(itemlistId).update({
-                  AppFirestoreConstants.appItems: FieldValue.arrayRemove([appItem.toJSON()])
-                });
+                .doc(itemlistId).update(itemlist.toJSON());
+
           }
         }
       });

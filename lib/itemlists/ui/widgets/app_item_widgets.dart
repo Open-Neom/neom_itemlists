@@ -30,31 +30,33 @@ Widget buildItemList(BuildContext context, AppItemController _) {
                 : appItem.name.length > AppConstants.maxAppItemNameLength
                 ? "${appItem.name.substring(0,AppConstants.maxAppItemNameLength)}..."
                 : appItem.name),
-            subtitle: Row(children: [Text(appItem.artist.isEmpty ? ""
+            subtitle: Row(
+                children: [Text(appItem.artist.isEmpty ? ""
                 : appItem.artist.length > AppConstants.maxArtistNameLength
                 ? "${appItem.artist.substring(0,AppConstants.maxArtistNameLength)}..."
                 : appItem.artist),
-              const SizedBox(width:5),
-              (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed) ?
-              RatingBar(
-                initialRating: appItem.state.toDouble(),
-                minRating: 1,
-                ignoreGestures: true,
-                direction: Axis.horizontal,
-                allowHalfRating: false,
-                itemCount: 5,
-                ratingWidget: RatingWidget(
-                  full: CoreUtilities.ratingImage(AppAssets.heart),
-                  half: CoreUtilities.ratingImage(AppAssets.heartHalf),
-                  empty: CoreUtilities.ratingImage(AppAssets.heartBorder),
-                ),
-                itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
-                itemSize: 15,
-                onRatingUpdate: (rating) {
-                  _.logger.i("New Rating set to $rating");
-                },
-              ) : Container(),
-            ]),
+                  const SizedBox(width:5),
+                  (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed) ?
+                  RatingBar(
+                    initialRating: appItem.state.toDouble(),
+                    minRating: 1,
+                    ignoreGestures: true,
+                    direction: Axis.horizontal,
+                    allowHalfRating: false,
+                    itemCount: 5,
+                    ratingWidget: RatingWidget(
+                      full: CoreUtilities.ratingImage(AppAssets.heart),
+                      half: CoreUtilities.ratingImage(AppAssets.heartHalf),
+                      empty: CoreUtilities.ratingImage(AppAssets.heartBorder),
+                    ),
+                    itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
+                    itemSize: 15,
+                    onRatingUpdate: (rating) {
+                      _.logger.i("New Rating set to $rating");
+                    },
+                  ) : Container(),
+                ]
+            ),
             onTap: () => _.isFixed ? {} : _.getItemlistItemDetails(appItem),
             leading: Hero(
               tag: CoreUtilities.getAppItemHeroTag(index),

@@ -270,4 +270,16 @@ class BandItemlistFirestore implements ItemlistRepository {
     return false;
   }
 
+  @override
+  Future<bool> addReleaseItem({required String profileId, required String itemlistId, required releaseItem}) {
+    // TODO: implement addReleaseItem
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> removeReleaseItem({required String profileId, required String itemlistId, required releaseItem}) {
+    // TODO: implement removeReleaseItem
+    throw UnimplementedError();
+  }
+
 }

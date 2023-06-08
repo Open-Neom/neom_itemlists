@@ -309,7 +309,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       appItemController.itemlist = itemlist;
       appItemController.loadItemsFromList();
     } catch (e) {
-      logger.e(e.toString());
+      logger.w(e.toString());
       logger.i("Controller is not active");
     }
 
@@ -442,7 +442,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         for (var playlist in spotifyPlaylistSimples) {
           if(playlist.id?.isNotEmpty ?? false) {
-            spotifyItemlists[playlist.id!] = Itemlist.mapPlaylistSimpleToGiglist(playlist);
+            spotifyItemlists[playlist.id!] = Itemlist.mapPlaylistSimpleToItemlist(playlist);
           }
         }
 

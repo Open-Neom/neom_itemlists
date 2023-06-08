@@ -46,7 +46,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           backgroundColor: AppColor.main25,
           avatar: CircleAvatar(
             backgroundColor: AppColor.white80,
-            child: Text(itemlist.appItems!.length.toString()),
+            child: Text(((itemlist.appItems?.length ?? 0) + (itemlist.appReleaseItems?.length ?? 0)).toString()),
           ),
           label: Icon(Icons.book, color: AppColor.white80),
           onPressed: () {
