@@ -2,10 +2,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/api_services/google_books/google_books_api.dart';
+import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/band_firestore.dart';
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
+import 'package:neom_commons/core/domain/model/app_release_item.dart';
 import 'package:neom_commons/core/domain/model/band.dart';
 import 'package:neom_commons/core/domain/model/google_book.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
@@ -67,6 +69,8 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
   Band _band = Band();
   Itemlist itemlist = Itemlist();
   ItemlistOwner itemlistOwner = ItemlistOwner.profile;
+
+  Map<String, AppReleaseItem> items = {};
 
   @override
   void onInit() async {
@@ -148,8 +152,18 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
               appItems = await SpotifySearch().searchSongs(searchParam);
               break;
             case AppInUse.emxi:
-              List<GoogleBook> googleBooks = await GoogleBooksApi.searchBooks(searchParam);
 
+              if(items.isEmpty) {
+                items = await AppReleaseItemFirestore().retrieveAll();
+              }
+
+              items.values.forEach((value) {
+                if(value.name.toLowerCase().contains(searchParam) || value.ownerName.toLowerCase().contains(searchParam)){
+                  appItems[value.id] = AppItem.fromReleaseItem(value);
+                }
+              });
+
+              List<GoogleBook> googleBooks = await GoogleBooksApi.searchBooks(searchParam);
               for (var googleBook in googleBooks) {
                 AppItem book = GoogleBook.toAppItem(googleBook);
                 appItems[book.id] = book;
