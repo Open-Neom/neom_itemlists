@@ -1,9 +1,13 @@
 import 'package:enum_to_string/enum_to_string.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
+import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
+import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'package:neom_commons/core/domain/model/app_item.dart';
@@ -24,20 +28,17 @@ Widget buildItemList(BuildContext context, AppItemController _) {
     itemCount: _.itemlistItems.length,
     itemBuilder: (context, index) {
       AppItem appItem = _.itemlistItems.values.elementAt(index);
-      return GestureDetector(
-          child: ListTile(
-            title: Text(appItem.name.isEmpty ? ""
-                : appItem.name.length > AppConstants.maxAppItemNameLength
-                ? "${appItem.name.substring(0,AppConstants.maxAppItemNameLength)}..."
-                : appItem.name),
-            subtitle: Row(
-                children: [Text(appItem.artist.isEmpty ? ""
-                : appItem.artist.length > AppConstants.maxArtistNameLength
-                ? "${appItem.artist.substring(0,AppConstants.maxArtistNameLength)}..."
-                : appItem.artist),
+      return ListTile(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(appItem.name.isEmpty ? ""
+                    : appItem.name.length > AppConstants.maxAppItemNameLength
+                    ? "${appItem.name.substring(0,AppConstants.maxAppItemNameLength)}..."
+                    : appItem.name),
                   const SizedBox(width:5),
-                  (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed) ?
-                  RatingBar(
+                  (AppFlavour.appInUse == AppInUse.cyberneom || (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed)) ?
+                    RatingBar(
                     initialRating: appItem.state.toDouble(),
                     minRating: 1,
                     ignoreGestures: true,
@@ -45,19 +46,23 @@ Widget buildItemList(BuildContext context, AppItemController _) {
                     allowHalfRating: false,
                     itemCount: 5,
                     ratingWidget: RatingWidget(
-                      full: CoreUtilities.ratingImage(AppAssets.heart),
-                      half: CoreUtilities.ratingImage(AppAssets.heartHalf),
-                      empty: CoreUtilities.ratingImage(AppAssets.heartBorder),
+                    full: CoreUtilities.ratingImage(AppAssets.heart),
+                    half: CoreUtilities.ratingImage(AppAssets.heartHalf),
+                    empty: CoreUtilities.ratingImage(AppAssets.heartBorder),
                     ),
                     itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
                     itemSize: 15,
                     onRatingUpdate: (rating) {
-                      _.logger.i("New Rating set to $rating");
+                    _.logger.i("New Rating set to $rating");
                     },
-                  ) : Container(),
+                    ) : Container(),
                 ]
             ),
-            onTap: () => _.isFixed ? {} : _.getItemlistItemDetails(appItem),
+            subtitle: (AppFlavour.appInUse == AppInUse.cyberneom && appItem.description.isNotEmpty) ?
+            Text(appItem.description, textAlign: TextAlign.justify,) :
+            Text(appItem.artist.isEmpty ? "" : appItem.artist.length > AppConstants.maxArtistNameLength
+                ? "${appItem.artist.substring(0,AppConstants.maxArtistNameLength)}..." : appItem.artist),
+            onTap: () => AppFlavour.appInUse == AppInUse.cyberneom || !_.isFixed ? _.getItemlistItemDetails(appItem) : {},
             leading: Hero(
               tag: CoreUtilities.getAppItemHeroTag(index),
               child: Image.network(
@@ -66,8 +71,18 @@ Widget buildItemList(BuildContext context, AppItemController _) {
                       : AppFlavour.getNoImageUrl()
               ),
             ),
+          trailing: IconButton(
+              icon: const Icon(
+                  CupertinoIcons.forward
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () {
+                ChamberPreset preset = _.itemlist.chamberPresets!.firstWhere((element) => element.id == appItem.id);
+                Get.toNamed(AppRouteConstants.generator,  arguments: [preset.clone()]);
+              }
           ),
-          onLongPress: () => _.isFixed ? {} : Alert(
+          onLongPress: () => AppFlavour.appInUse != AppInUse.cyberneom || !_.isFixed ? Alert(
               context: context,
               title: AppTranslationConstants.appItemPrefs.tr,
               style: AlertStyle(
@@ -77,16 +92,16 @@ Widget buildItemList(BuildContext context, AppItemController _) {
               content: Column(
                 children: <Widget>[
                   Obx(() =>
-                    DropdownButton<String>(
+                      DropdownButton<String>(
                         items: AppItemState.values.map((AppItemState appItemState) {
                           return DropdownMenuItem<String>(
-                            value: appItemState.name,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(appItemState.name.tr),
-                                appItemState.value == 0 ? Container() : const Text(" - "),
-                                appItemState.value == 0 ? Container() :
+                              value: appItemState.name,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(appItemState.name.tr),
+                                  appItemState.value == 0 ? Container() : const Text(" - "),
+                                  appItemState.value == 0 ? Container() :
                                   RatingBar(
                                     initialRating: appItemState.value.toDouble(),
                                     minRating: 1,
@@ -107,22 +122,22 @@ Widget buildItemList(BuildContext context, AppItemController _) {
                                   ),
                                 ],
                               )
-                        );
-                      }).toList(),
-                      onChanged: (String? newItemState) {
-                        _.setItemState(EnumToString.fromString(AppItemState.values, newItemState!) ?? AppItemState.noState);
-                      },
-                      value: CoreUtilities.getItemState(_.itemState).name,
-                      icon: const Icon(Icons.arrow_downward),
-                      iconSize: 15,
-                      elevation: 15,
-                      style: const TextStyle(color: Colors.white),
-                      dropdownColor: AppColor.getMain(),
-                      underline: Container(
-                        height: 1,
-                        color: Colors.grey,
+                          );
+                        }).toList(),
+                        onChanged: (String? newItemState) {
+                          _.setItemState(EnumToString.fromString(AppItemState.values, newItemState!) ?? AppItemState.noState);
+                        },
+                        value: CoreUtilities.getItemState(_.itemState).name,
+                        icon: const Icon(Icons.arrow_downward),
+                        iconSize: 15,
+                        elevation: 15,
+                        style: const TextStyle(color: Colors.white),
+                        dropdownColor: AppColor.getMain(),
+                        underline: Container(
+                          height: 1,
+                          color: Colors.grey,
+                        ),
                       ),
-                    ),
                   ),
                 ],
               ),
@@ -146,7 +161,7 @@ Widget buildItemList(BuildContext context, AppItemController _) {
                   },
                 ),
               ]
-          ).show()
+          ).show() : {}
       );
     },
   );

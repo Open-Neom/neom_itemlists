@@ -98,6 +98,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   void onReady() async {
+    super.onReady();
     try {
       if(AppFlavour.appInUse == AppInUse.gigmeout && !Platform.isIOS) {
         await getSpotifyToken();
@@ -231,7 +232,6 @@ class ItemlistController extends GetxController implements ItemlistService {
     }
 
     isLoading = false;
-    Get.back();
     update([AppPageIdConstants.itemlist]);
   }
 
@@ -303,18 +303,22 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   Future<void> gotoItemlistItems(Itemlist itemlist) async {
 
-    AppItemController appItemController;
-    try {
-      appItemController = Get.find<AppItemController>();
-      appItemController.itemlist = itemlist;
-      appItemController.loadItemsFromList();
-    } catch (e) {
-      logger.w(e.toString());
-      logger.i("Controller is not active");
-    }
+    if(AppFlavour.appInUse == AppInUse.cyberneom) {
+      await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
+    } else {
+      AppItemController appItemController;
+      try {
+        appItemController = Get.find<AppItemController>();
+        appItemController.itemlist = itemlist;
+        appItemController.loadItemsFromList();
+      } catch (e) {
+        logger.w(e.toString());
+        logger.i("Controller is not active");
+      }
 
-    await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
-    update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
+      await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
+      update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
+    }
 
   }
 
@@ -402,7 +406,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       } else {
         Get.snackbar(
             MessageTranslationConstants.spotifySynchronization.tr,
-            "Itemlist ${itemlist.name} ${MessageTranslationConstants.upToDate.tr}",
+            "Giglist ${itemlist.name} ${MessageTranslationConstants.upToDate.tr}",
             snackPosition: SnackPosition.bottom,
             duration: const Duration(seconds: 1)
         );

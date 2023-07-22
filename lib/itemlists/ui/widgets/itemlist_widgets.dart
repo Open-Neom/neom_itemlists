@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'package:neom_commons/core/domain/model/item_list.dart';
@@ -46,13 +47,18 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           backgroundColor: AppColor.main25,
           avatar: CircleAvatar(
             backgroundColor: AppColor.white80,
-            child: Text(((itemlist.appItems?.length ?? 0) + (itemlist.appReleaseItems?.length ?? 0)).toString()),
+            child: Text(((itemlist.appItems?.length ?? 0) + (itemlist.appReleaseItems?.length ?? 0)+ (itemlist.chamberPresets?.length ?? 0)).toString()),
           ),
-          label: Icon(Icons.book, color: AppColor.white80),
-          onPressed: () {
-            Get.toNamed(AppRouteConstants.itemSearch,
-                arguments: [SpotifySearchType.song, itemlist]);
-            },
+          label: Icon(AppFlavour.getAppItemIcon(), color: AppColor.white80),
+          onPressed: () async {
+            if(AppFlavour.appInUse == AppInUse.cyberneom) {
+              await _.gotoItemlistItems(itemlist);
+            } else {
+              Get.toNamed(AppRouteConstants.itemSearch,
+                  arguments: [SpotifySearchType.song, itemlist]
+              );
+            }
+          },
         ),
         onTap: () async {
           await _.gotoItemlistItems(itemlist);
@@ -98,12 +104,15 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
                 DialogButton(
                   color: AppColor.bondiBlue75,
                   child: Text(AppTranslationConstants.remove.tr),
-                  onPressed: () async => {
-                    itemlist.isFav ?
-                    AppUtilities.showAlert(context,
-                        AppTranslationConstants.itemlistPrefs.tr,
-                        AppTranslationConstants.cantRemoveMainItemlist.tr)
-                        : await _.deleteItemlist(itemlist)
+                  onPressed: () async {
+                    if(itemlist.isFav) {
+                      AppUtilities.showAlert(context,
+                          AppTranslationConstants.itemlistPrefs.tr,
+                          AppTranslationConstants.cantRemoveMainItemlist.tr);
+                    } else {
+                      Navigator.pop(context);
+                      await _.deleteItemlist(itemlist);
+                    }
                   },
                 ),
                 if(!itemlist.isFav) DialogButton(

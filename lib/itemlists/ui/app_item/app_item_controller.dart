@@ -8,8 +8,10 @@ import 'package:neom_commons/core/domain/model/app_item.dart';
 import 'package:neom_commons/core/domain/model/band.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/data/implementations/user_controller.dart';
+import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
@@ -72,6 +74,10 @@ class AppItemController extends GetxController implements AppItemService {
         loadItemsFromList();
       } else {
         logger.i("ItemlistItemController Init ready loco with no itemlist");
+      }
+
+      if(AppFlavour.appInUse == AppInUse.cyberneom) {
+        isFixed = true;
       }
     } catch (e) {
       logger.e(e.toString());
@@ -236,9 +242,19 @@ class AppItemController extends GetxController implements AppItemService {
   @override
   Future<void> getItemlistItemDetails(AppItem appItem) async {
     logger.d("");
-    Get.toNamed(AppFlavour.getItemDetailsRoute(),
-        arguments: [appItem]
-    );
+    if(AppFlavour.appInUse == AppInUse.cyberneom) {
+      ChamberPreset chamberPreset = itemlist.chamberPresets?.firstWhere((element) => element.name == appItem.name) ?? ChamberPreset();
+      if(chamberPreset.name.isNotEmpty) {
+        Get.toNamed(AppFlavour.getItemDetailsRoute(),
+            arguments: [chamberPreset.clone()]
+        );
+      }
+    } else {
+      Get.toNamed(AppFlavour.getItemDetailsRoute(),
+          arguments: [appItem]
+      );
+    }
+
     update([AppPageIdConstants.itemlistItem]);
   }
 
@@ -253,6 +269,15 @@ class AppItemController extends GetxController implements AppItemService {
         items[item.id] = item;
       });
     }
+
+    if(itemlist.chamberPresets?.isNotEmpty ?? false) {
+      itemlist.chamberPresets?.forEach((preset) {
+        AppItem item = AppItem.fromChamberPreset(preset);
+        logger.d(item.name);
+        items[item.id] = item;
+      });
+    }
+
     itemlist.appItems?.forEach((s) {
       logger.d(s.name);
       items[s.id] = s;

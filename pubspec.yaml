@@ -1,11 +1,11 @@
 name: neom_itemlists
 description: Itemlists for Cyberneom.
-version: 1.0.1
-homepage: https://github.com/emmanuel-montoya/neom_itemlists
+version: 1.0.2
+homepage: https://github.com/Cyberneom/neom_itemlists
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
 environment:
-  sdk: '>=2.18.6 <3.0.0'
+  sdk: ">=3.0.0 <4.0.0"
   flutter: ">=1.17.0"
 
 dependencies:
@@ -35,6 +35,8 @@ dependency_overrides:
     path: ../neom_commons
   neom_posts:
     path: ../neom_posts
+  neom_events:
+    path: ../neom_events
   intl: 0.18.1
   
 # The following section is specific to Flutter packages.

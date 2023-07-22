@@ -78,21 +78,22 @@ class ItemlistPage extends StatelessWidget {
                       style: AlertStyle(backgroundColor: AppColor.main50, titleStyle: const TextStyle(color: Colors.white)),
                       title: AppTranslationConstants.addNewItemlist.tr,
                       content: Column(
-                          children: <Widget>[
-                            //TODO Change lines colors to white.
-                            TextField(
-                              controller: _.newItemlistNameController,
-                              decoration: InputDecoration(
-                                labelText: AppTranslationConstants.itemlistName.tr,
-                              ),
+                        children: <Widget>[
+                          //TODO Change lines colors to white.
+                          TextField(
+                            controller: _.newItemlistNameController,
+                            decoration: InputDecoration(
+                              labelText: AppTranslationConstants.itemlistName.tr,
                             ),
-                            TextField(
-                              controller: _.newItemlistDescController,
-                              decoration: InputDecoration(
-                                labelText: AppTranslationConstants.description.tr,
-                              ),
+                          ),
+                          TextField(
+                            controller: _.newItemlistDescController,
+                            decoration: InputDecoration(
+                              labelText: AppTranslationConstants.description.tr,
                             ),
-                          ]),
+                          ),
+                        ],
+                      ),
                       buttons: [
                         DialogButton(
                           height: 50,
@@ -109,7 +110,8 @@ class ItemlistPage extends StatelessWidget {
                   ).show()
                 }),
                 AppTheme.heightSpace20,
-                AppFlavour.appInUse == AppInUse.emxi || (Platform.isAndroid || kDebugMode) ?
+                AppFlavour.appInUse != AppInUse.cyberneom
+                    && (AppFlavour.appInUse == AppInUse.emxi || (Platform.isAndroid || kDebugMode)) ?
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [

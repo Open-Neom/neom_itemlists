@@ -6,6 +6,7 @@ import 'package:neom_commons/core/data/firestore/constants/app_firestore_collect
 import 'package:neom_commons/core/data/firestore/constants/app_firestore_constants.dart';
 import 'package:neom_commons/core/domain/model/app_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
+import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/domain/repository/itemlist_repository.dart';
 
@@ -279,6 +280,24 @@ class BandItemlistFirestore implements ItemlistRepository {
   @override
   Future<bool> removeReleaseItem({required String profileId, required String itemlistId, required releaseItem}) {
     // TODO: implement removeReleaseItem
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> addPreset({required String profileId, required String chamberId, required ChamberPreset preset}) {
+    // TODO: implement addPreset
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> removePreset(String profileId, ChamberPreset preset, String chamberId) {
+    // TODO: implement removePreset
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> updatePreset(String profileId, String chamberId, ChamberPreset preset) {
+    // TODO: implement updatePreset
     throw UnimplementedError();
   }
 

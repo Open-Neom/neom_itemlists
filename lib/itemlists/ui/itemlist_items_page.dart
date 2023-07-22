@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:neom_commons/core/ui/widgets/appbar_child.dart';
+import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
@@ -21,13 +22,16 @@ class ItemlistItemsPage extends StatelessWidget {
       id: AppPageIdConstants.itemlistItem,
       init: AppItemController(),
       builder: (_) => Scaffold(
+        backgroundColor: AppColor.getMain(),
         appBar: AppBarChild(title: _.itemlist.name.length > AppConstants.maxItemlistNameLength
             ? "${_.itemlist.name.substring(0,AppConstants.maxItemlistNameLength)}..."
             : _.itemlist.name),
         body: Container(
-        decoration: AppTheme.appBoxDecoration,
-        child: _.isLoading ? const Center(child: CircularProgressIndicator())
-          : Obx(()=> buildItemList(context, _)),
+          width: AppTheme.fullWidth(context),
+          height: AppTheme.fullHeight(context),
+          decoration: AppTheme.appBoxDecoration, 
+          child: _.isLoading ? const Center(child: CircularProgressIndicator()) 
+              : Obx(()=> buildItemList(context, _)),
         ),
         floatingActionButton: _.isFixed ? Container()
             : FloatingActionButton(
