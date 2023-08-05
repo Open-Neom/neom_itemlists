@@ -35,10 +35,6 @@ class AppItemController extends GetxController implements AppItemService {
   Map<String, AppItem> get itemlistItems => _itemlistItems;
   set itemlistItems(Map<String, AppItem> itemlistItems) => _itemlistItems.value  = itemlistItems;
 
-  final RxBool _isPlaying = false.obs;
-  bool get isPlaying => _isPlaying.value;
-  set isPlaying(bool isPlaying) => _isPlaying.value = isPlaying;
-
   final RxBool _isLoading = true.obs;
   bool get isLoading => _isLoading.value;
   set isLoading(bool isLoading) => _isLoading.value = isLoading;

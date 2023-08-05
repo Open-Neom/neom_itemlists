@@ -3,19 +3,10 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
 
-import 'package:neom_commons/core/domain/model/app_item.dart';
-import 'package:neom_commons/core/domain/model/app_profile.dart';
-import 'package:neom_commons/core/domain/model/band.dart';
-import 'package:neom_commons/core/domain/model/item_list.dart';
-import 'package:neom_commons/core/data/implementations/user_controller.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/enums/app_in_use.dart';
-import 'package:neom_commons/core/utils/enums/app_item_state.dart';
-import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
+import 'package:neom_commons/core/domain/model/app_release_item.dart';
+import 'package:neom_commons/neom_commons.dart';
 import 'package:neom_events/events/ui/event_details_controller.dart';
 import '../../data/firestore/app_item_firestore.dart';
 import 'app_item_controller.dart';
@@ -69,6 +60,15 @@ class AppItemDetailsController extends GetxController {
 
   final AudioPlayer audioPlayer = AudioPlayer(playerId: AppInUse.gigmeout.value);
 
+  AppReleaseItem releasedItem = AppReleaseItem();
+  String releasedItemId = "";
+  bool isReleaseItem = false;
+  bool allowFullAccess = true;
+
+   AppCurrency currentCurrency = AppCurrency.mxn;
+   double digitalAmount = 0;
+  double physicalAmount = 0;
+
   @override
   void onInit() async {
     super.onInit();
@@ -88,13 +88,21 @@ class AppItemDetailsController extends GetxController {
         itemlists.assignAll(band.itemlists ?? {});
       }
 
-      List<dynamic> arguments  = Get.arguments;
+      List<dynamic> arguments  = Get.arguments ?? [];
 
-      appItem =  arguments.elementAt(0);
-      existsInItemlist = itemAlreadyInList();
+      if(arguments.isNotEmpty) {
+        if(Get.arguments[0] is AppItem) {
+          appItem =  arguments.elementAt(0);
+          releasedItemId = appItem.id;
+        } else if(Get.arguments[0] is String) {
+          releasedItemId = Get.arguments[0];
+        }
 
-      if (arguments.length > 1) { //to save in previously selected itemlist
-        itemlistId =  arguments.elementAt(1);
+        existsInItemlist = itemAlreadyInList();
+
+        if (arguments.length > 1) { //to save in previously selected itemlist
+          itemlistId =  arguments.elementAt(1);
+        }
       }
 
       if(itemlists.isNotEmpty && itemlists.isNotEmpty && itemlistId.isEmpty) {
@@ -114,6 +122,24 @@ class AppItemDetailsController extends GetxController {
     logger.i("AppItem ${appItem.id} Details Controller Ready");
 
     try {
+
+      if(releasedItemId.isNotEmpty) {
+        releasedItem = await AppReleaseItemFirestore().retrieve(releasedItemId);
+        if(releasedItem.id.isNotEmpty) {
+          isReleaseItem = true;
+          appItem = AppItem.fromReleaseItem(releasedItem);
+          digitalAmount = releasedItem.digitalPrice!.amount;
+          physicalAmount = releasedItem.physicalPrice?.amount ?? 0;
+          currentCurrency = releasedItem.digitalPrice!.currency;
+          if((releasedItem.boughtUsers?.contains(userController.user!.id) ?? false)
+              || (userController.user!.releaseItemIds?.contains(releasedItem.id) ?? false)
+              || (userController.user!.boughtItems?.contains(releasedItem.id) ?? false)
+          ) {
+            allowFullAccess = true;
+          }
+        }
+      }
+
       if(itemlists.isEmpty) {
         Get.offAllNamed(AppRouteConstants.home);
         AppUtilities.showSnackBar(AppTranslationConstants.noItemlistsMsg, AppTranslationConstants.noItemlistsMsg2);
@@ -286,13 +312,19 @@ class AppItemDetailsController extends GetxController {
     return itemAlreadyInList;
   }
 
-
   Future<void> playPreview() async {
 
     logger.d("Previewing appItem ${appItem.name}");
 
     try {
+      audioPlayer.onDurationChanged.listen((duration) {
+        AppUtilities.logger.i(duration);
+        durationMinutes = AppUtilities.getDurationInMinutes(duration.inMilliseconds);
+      });
+
       await audioPlayer.play(UrlSource(appItem.previewUrl));
+
+
       isPlaying = true;
     } catch(e) {
       logger.e(e.toString());
