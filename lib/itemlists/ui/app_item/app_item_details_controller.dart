@@ -65,8 +65,8 @@ class AppItemDetailsController extends GetxController {
   bool isReleaseItem = false;
   bool allowFullAccess = true;
 
-   AppCurrency currentCurrency = AppCurrency.mxn;
-   double digitalAmount = 0;
+  AppCurrency currentCurrency = AppCurrency.mxn;
+  double digitalAmount = 0;
   double physicalAmount = 0;
 
   @override

@@ -104,8 +104,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         await getSpotifyToken();
         if (userController.user!.spotifyToken.isNotEmpty
             && userController.profile.lastSpotifySync < DateTime
-                .now()
-                .subtract(const Duration(days: 30))
+                .now().subtract(const Duration(days: 30))
                 .millisecondsSinceEpoch
         ) {
           logger.d("Spotify Last Sync was more than 30 days");
@@ -429,7 +428,6 @@ class ItemlistController extends GetxController implements ItemlistService {
       userController.user!.spotifyToken = spotifyToken;
       await UserFirestore().updateSpotifyToken(userController.user!.id, spotifyToken);
     }
-
   }
 
   Future<void> synchronizeSpotifyPlaylists() async {
