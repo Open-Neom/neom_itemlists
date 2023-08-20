@@ -78,8 +78,8 @@ class BandItemlistFirestore implements ItemlistRepository {
 
 
   @override
-  Future<String> insert(String bandId, Itemlist itemlist) async {
-    logger.d("Retrieving itemlists for $bandId");
+  Future<String> insert(Itemlist itemlist) async {
+    logger.d("Retrieving itemlists for ${itemlist.ownerId}");
     String itemlistId = "";
 
     try {
@@ -88,7 +88,7 @@ class BandItemlistFirestore implements ItemlistRepository {
       await bandReference.get()
         .then((querySnapshot) {
           for (var document in querySnapshot.docs) {
-          if (document.id == bandId) {
+          if (document.id == itemlist.ownerId) {
             documentReference = document.reference;
           }
         }
@@ -101,7 +101,7 @@ class BandItemlistFirestore implements ItemlistRepository {
         itemlistId = docRef.id;
       }
 
-      logger.d("Itemlist $itemlistId inserted to band $bandId");
+      logger.d("Itemlist $itemlistId inserted to band ${itemlist.ownerId}");
     } catch (e) {
       logger.e(e.toString());
     }

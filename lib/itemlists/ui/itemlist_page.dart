@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -56,60 +57,86 @@ class ItemlistPage extends StatelessWidget {
             decoration: AppTheme.appBoxDecoration,
             child: _.isLoading ? const Center(child: CircularProgressIndicator())
             : Column(
-              children: <Widget>[
+              children: [
+                ListTile(
+                  title: Text(AppTranslationConstants.createItemlist.tr),
+                  leading: SizedBox.square(
+                    dimension: 40,
+                    child: Center(
+                      child: Icon(
+                        Icons.add_rounded,
+                        color: Theme.of(context).iconTheme.color,
+                      ),
+                    ),
+                  ),
+                  onTap: () async {
+                    Alert(
+                        context: context,
+                        style: AlertStyle(backgroundColor: AppColor.main50, titleStyle: const TextStyle(color: Colors.white)),
+                        title: AppTranslationConstants.addNewItemlist.tr,
+                        content: Column(
+                          children: <Widget>[
+                            //TODO Change lines colors to white.
+                            TextField(
+                              controller: _.newItemlistNameController,
+                              decoration: InputDecoration(
+                                labelText: AppTranslationConstants.itemlistName.tr,
+                              ),
+                            ),
+                            TextField(
+                              controller: _.newItemlistDescController,
+                              decoration: InputDecoration(
+                                labelText: AppTranslationConstants.description.tr,
+                              ),
+                            ),
+                            SizedBox(height: 10), // Add some spacing for the segmented control
+                            Obx(() => Container(
+                              alignment: Alignment.center,
+                              child: GestureDetector(
+                                child: Row(
+                                  children: <Widget>[
+                                    Checkbox(
+                                      value: _.isPublicNewItemlist,
+                                      onChanged: (bool? newValue) {
+                                        _.setPrivacyOption();
+                                      },
+                                    ),
+                                    Text(AppTranslationConstants.publicList.tr, style: TextStyle(fontSize: 15)),
+                                  ],
+                                ),
+                                onTap: ()=> _.setPrivacyOption(),
+                              ),
+                            ),),
+                          ],
+                        ),
+                        buttons: [
+                          DialogButton(
+                            height: 50,
+                            color: AppColor.bondiBlue75,
+                            onPressed: () async {
+                              await _.createItemlist();
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              AppTranslationConstants.add.tr,
+                            ),
+                          ),
+                        ]
+                    ).show();
+                  },
+                ),
                 Expanded(
                   child: buildItemlistList(context, _),
                 ),
-              ]
-            ),
+              ],
+            )
           ),
-          floatingActionButton: _.isLoading ? Container() :Column(
+          floatingActionButton: _.isLoading ? Container() : Container(
+            margin: EdgeInsets.only(bottom: 100),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                FloatingActionButton(
-                heroTag: AppPageIdConstants.itemlist,
-                elevation: AppTheme.elevationFAB,
-                tooltip: AppTranslationConstants.createItemlist.tr,
-                child: const Icon(Icons.playlist_add),
-                onPressed: () => {
-                  Alert(
-                      context: context,
-                      style: AlertStyle(backgroundColor: AppColor.main50, titleStyle: const TextStyle(color: Colors.white)),
-                      title: AppTranslationConstants.addNewItemlist.tr,
-                      content: Column(
-                        children: <Widget>[
-                          //TODO Change lines colors to white.
-                          TextField(
-                            controller: _.newItemlistNameController,
-                            decoration: InputDecoration(
-                              labelText: AppTranslationConstants.itemlistName.tr,
-                            ),
-                          ),
-                          TextField(
-                            controller: _.newItemlistDescController,
-                            decoration: InputDecoration(
-                              labelText: AppTranslationConstants.description.tr,
-                            ),
-                          ),
-                        ],
-                      ),
-                      buttons: [
-                        DialogButton(
-                          height: 50,
-                          color: AppColor.bondiBlue75,
-                          onPressed: () async {
-                            await _.createItemlist();
-                            Navigator.pop(context);
-                          },
-                          child: Text(
-                            AppTranslationConstants.add.tr,
-                          ),
-                        ),
-                      ]
-                  ).show()
-                }),
-                AppTheme.heightSpace20,
                 AppFlavour.appInUse != AppInUse.cyberneom
                     && (AppFlavour.appInUse == AppInUse.emxi || (Platform.isAndroid || kDebugMode)) ?
                 Row(
@@ -152,7 +179,7 @@ class ItemlistPage extends StatelessWidget {
                   ],
                 ) : Container()
               ]
-          )
+          ),),
         )
       )
     );

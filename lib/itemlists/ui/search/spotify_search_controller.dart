@@ -312,9 +312,11 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
 
       String itemlistId = "";
       if(itemlistOwner == ItemlistOwner.profile) {
-        itemlistId = await ItemlistFirestore().insert(_profile.id, itemlist);
+        itemlist.ownerId = _profile.id;
+        itemlistId = await ItemlistFirestore().insert(itemlist);
       } else if(itemlistOwner == ItemlistOwner.band) {
-        itemlistId = await BandItemlistFirestore().insert(_band.id, itemlist);
+        itemlist.ownerId = _band.id;
+        itemlistId = await BandItemlistFirestore().insert(itemlist);
       }
 
       logger.d("Itemlist inserted with id $itemlistId");

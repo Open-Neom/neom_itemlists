@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
+import 'package:neom_commons/core/data/firestore/public_itemlist_firestore.dart';
 import 'package:neom_commons/core/data/firestore/user_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
@@ -24,7 +25,7 @@ import '../data/firestore/app_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 import 'app_item/app_item_controller.dart';
 import 'package:spotify/spotify.dart' as spotify;
-
+import 'package:geolocator/geolocator.dart';
 class ItemlistController extends GetxController implements ItemlistService {
 
   final logger = AppUtilities.logger;
@@ -67,6 +68,10 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   TextEditingController newItemlistNameController = TextEditingController();
   TextEditingController newItemlistDescController = TextEditingController();
+
+  final RxBool _isPublicNewItemlist = true.obs;
+  bool get isPublicNewItemlist => _isPublicNewItemlist.value;
+  set isPublicNewItemlist(bool isPublicNewItemlist) => _isPublicNewItemlist.value = isPublicNewItemlist;
 
   bool outOfSync = false;
   bool spotifyAvailable = true;
@@ -146,14 +151,25 @@ class ItemlistController extends GetxController implements ItemlistService {
     try {
       
       if(newItemlistNameController.text.isNotEmpty) {
-        Itemlist basicItemlist = Itemlist.createBasic(newItemlistNameController.text, newItemlistDescController.text);
-        String newItemlistId = await ItemlistFirestore().insert(profile.id, basicItemlist);
-        logger.i("Empty Itemlist created successfully for profile ${profile.id}");
+        Itemlist newItemlist = Itemlist.createBasic(newItemlistNameController.text, newItemlistDescController.text);
+        newItemlist.ownerId = profile.id;
+        String newItemlistId = "";
+        if (profile.position?.latitude != 0.0) {
+          newItemlist.position = profile.position!;
+        }
+        if(isPublicNewItemlist) {
+          logger.i("Inserting Public Itemlist to Public collection");
+          newItemlistId = await PublicItemlistFirestore().insert(newItemlist);
+        } else {
+          logger.i("Inserting Private Itemlist to collection for profileId ${newItemlist.ownerId}");
+          newItemlistId = await ItemlistFirestore().insert(newItemlist);
+        }
 
-        basicItemlist.id = newItemlistId;
+        logger.i("Empty Itemlist created successfully for profile ${newItemlist.ownerId}");
+        newItemlist.id = newItemlistId;
 
         if(newItemlistId.isNotEmpty){
-          itemlists[newItemlistId] = basicItemlist;
+          itemlists[newItemlistId] = newItemlist;
           logger.i("Itemlists $itemlists");
           clearNewItemlist();
         } else {
@@ -358,7 +374,8 @@ class ItemlistController extends GetxController implements ItemlistService {
 
       if(itemlistId.isEmpty) {
         if(itemlistOwner == ItemlistOwner.profile) {
-          itemlistId = await ItemlistFirestore().insert(profile.id, itemlist);
+          itemlist.ownerId = profile.id;
+          itemlistId = await ItemlistFirestore().insert(itemlist);
         } else if(itemlistOwner == ItemlistOwner.band) {
           //TODO Add sync for band itemlist
           //itemlistId = await BandItemlistFirestore().insert(_gigBand.id, itemlist);
@@ -556,6 +573,13 @@ class ItemlistController extends GetxController implements ItemlistService {
     isLoading = false;
     isButtonDisabled = false;
     update();
+  }
+
+  Future<void> setPrivacyOption() async {
+    logger.d("");
+    isPublicNewItemlist = !isPublicNewItemlist;
+    logger.d("New Itemlist would be ${isPublicNewItemlist ? 'Public':'Private'}");
+    update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
   }
 
 }

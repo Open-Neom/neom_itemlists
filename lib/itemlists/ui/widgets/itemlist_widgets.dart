@@ -19,6 +19,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
   return ListView.separated(
     separatorBuilder: (context, index) => const Divider(),
     itemCount: _.itemlists.length,
+    shrinkWrap: true,
     itemBuilder: (context, index) {
       Itemlist itemlist = _.itemlists.values.elementAt(index);
       return ListTile(
