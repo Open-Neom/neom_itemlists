@@ -21,6 +21,9 @@ dependencies:
   neom_events:
     git:
       url: https://github.com/Cyberneom/neom_events.git
+  neom_music_player:
+    git:
+      url: https://github.com/Cyberneom/neom_music_player.git
 
   spotify_sdk: ^2.3.0
   percent_indicator: ^4.2.2
@@ -37,6 +40,8 @@ dependency_overrides:
     path: ../neom_posts
   neom_events:
     path: ../neom_events
+  neom_music_player:
+    path: ../neom_music_player
   intl: 0.18.1
   
 # The following section is specific to Flutter packages.

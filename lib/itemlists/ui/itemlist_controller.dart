@@ -7,7 +7,7 @@ import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
 import 'package:neom_commons/core/data/firestore/public_itemlist_firestore.dart';
 import 'package:neom_commons/core/data/firestore/user_firestore.dart';
-import 'package:neom_commons/core/domain/model/app_item.dart';
+import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/use_cases/itemlist_service.dart';
@@ -21,11 +21,11 @@ import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_api_calls.dart';
 import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_search.dart';
-import '../data/firestore/app_item_firestore.dart';
+import 'package:neom_itemlists/itemlists/data/firestore/app_media_item_firestore.dart';
+import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
-import 'app_item/app_item_controller.dart';
 import 'package:spotify/spotify.dart' as spotify;
-import 'package:geolocator/geolocator.dart';
+
 class ItemlistController extends GetxController implements ItemlistService {
 
   final logger = AppUtilities.logger;
@@ -53,7 +53,8 @@ class ItemlistController extends GetxController implements ItemlistService {
   List<Itemlist> get addedItemlists => _addedItemlists;
   set addedItemlists(List<Itemlist> addedItemlists) => _addedItemlists.value = addedItemlists;
 
-  Itemlist _favItemlist = Itemlist();
+  ///DEPRECATE
+  // Itemlist _favItemlist = Itemlist();
   AppProfile profile = AppProfile();
 
   final RxBool _isLoading = true.obs;
@@ -93,7 +94,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         itemlists = profile.itemlists!;
       } else {
         logger.d("Itemlists loaded from Firestore");
-        itemlists = await ItemlistFirestore().retrieveItemlists(profile.id);
+        itemlists = await PublicItemlistFirestore().fetchAll(profileId: profile.id);
       }
     } catch (e) {
       logger.e(e.toString());
@@ -150,27 +151,32 @@ class ItemlistController extends GetxController implements ItemlistService {
 
     try {
       
-      if(newItemlistNameController.text.isNotEmpty) {
+      if((isPublicNewItemlist && newItemlistNameController.text.isNotEmpty && newItemlistDescController.text.isNotEmpty)
+          || (!isPublicNewItemlist && newItemlistNameController.text.isNotEmpty)) {
         Itemlist newItemlist = Itemlist.createBasic(newItemlistNameController.text, newItemlistDescController.text);
         newItemlist.ownerId = profile.id;
         String newItemlistId = "";
         if (profile.position?.latitude != 0.0) {
           newItemlist.position = profile.position!;
         }
-        if(isPublicNewItemlist) {
-          logger.i("Inserting Public Itemlist to Public collection");
-          newItemlistId = await PublicItemlistFirestore().insert(newItemlist);
-        } else {
-          logger.i("Inserting Private Itemlist to collection for profileId ${newItemlist.ownerId}");
-          newItemlistId = await ItemlistFirestore().insert(newItemlist);
-        }
+
+        newItemlist.public = isPublicNewItemlist;
+        newItemlistId = await PublicItemlistFirestore().insert(newItemlist);
+
+        // if(isPublicNewItemlist) {
+        //   logger.i("Inserting Public Itemlist to Public collection");
+        //   newItemlistId = await PublicItemlistFirestore().insert(newItemlist);
+        // } else {
+        //   logger.i("Inserting Private Itemlist to collection for profileId ${newItemlist.ownerId}");
+        //   newItemlistId = await ItemlistFirestore().insert(newItemlist);
+        // }
 
         logger.i("Empty Itemlist created successfully for profile ${newItemlist.ownerId}");
         newItemlist.id = newItemlistId;
 
         if(newItemlistId.isNotEmpty){
           itemlists[newItemlistId] = newItemlist;
-          logger.i("Itemlists $itemlists");
+          logger.v("Itemlists $itemlists");
           clearNewItemlist();
         } else {
           logger.d("Something happens trying to insert itemlist");
@@ -223,16 +229,16 @@ class ItemlistController extends GetxController implements ItemlistService {
       isLoading = true;
       update([AppPageIdConstants.itemlist]);
 
-      if(await ItemlistFirestore().remove(profile.id, itemlist.id)) {
+      if(await PublicItemlistFirestore().remove(itemlist.id)) {
         logger.d("Itemlist ${itemlist.id} removed");
 
-        if(itemlist.appItems?.isNotEmpty ?? false) {
-          for(var appItem in itemlist.appItems ?? []) {
-            if(await ProfileFirestore().removeAppItem(profile.id, appItem.id)) {
-              if (userController.profile.appItems != null &&
-                  userController.profile.appItems!.isNotEmpty) {
+        if(itemlist.appMediaItems?.isNotEmpty ?? false) {
+          for(var appItem in itemlist.appMediaItems ?? []) {
+            if(await ProfileFirestore().removeAppMediaItem(profile.id, appItem.id)) {
+              if (userController.profile.appMediaItems != null &&
+                  userController.profile.appMediaItems!.isNotEmpty) {
                 logger.d("Removing item from global items for profile from userController");
-                userController.profile.appItems!.remove(appItem.id);
+                userController.profile.appMediaItems!.remove(appItem.id);
               }
             }
           }
@@ -251,31 +257,31 @@ class ItemlistController extends GetxController implements ItemlistService {
   }
 
 
-  @override
-  Future<void> setAsFavorite(Itemlist itemlist) async {
-    logger.d("Making favorite for $itemlist");
-
-    try {
-      if(await ItemlistFirestore().setAsFavorite(profile.id, itemlist)){
-        itemlist.isFav = true;
-        itemlists[itemlist.id] = itemlist;
-        logger.i("Itemlist ${itemlist.id} set as favorite");
-        if(await ItemlistFirestore().unsetOfFavorite(profile.id, _favItemlist)) {
-          logger.i("Itemlist ${profile.id} unset from favorite");
-          _favItemlist.isFav = false;
-          itemlists[_favItemlist.id] = _favItemlist;
-        }
-        _favItemlist = itemlist;
-      } else {
-        logger.e("Something happens trying to remove itemlist");
-      }
-    } catch (e) {
-      logger.e(e.toString());
-    }
-
-    Get.back();
-    update([AppPageIdConstants.itemlist]);
-  }
+  // @override
+  // Future<void> setAsFavorite(Itemlist itemlist) async {
+  //   logger.d("Making favorite for $itemlist");
+  //
+  //   try {
+  //     if(await ItemlistFirestore().setAsFavorite(profile.id, itemlist)){
+  //       itemlist.isFav = true;
+  //       itemlists[itemlist.id] = itemlist;
+  //       logger.i("Itemlist ${itemlist.id} set as favorite");
+  //       if(await ItemlistFirestore().unsetOfFavorite(profile.id, _favItemlist)) {
+  //         logger.i("Itemlist ${profile.id} unset from favorite");
+  //         _favItemlist.isFav = false;
+  //         itemlists[_favItemlist.id] = _favItemlist;
+  //       }
+  //       _favItemlist = itemlist;
+  //     } else {
+  //       logger.e("Something happens trying to remove itemlist");
+  //     }
+  //   } catch (e) {
+  //     logger.e(e.toString());
+  //   }
+  //
+  //   Get.back();
+  //   update([AppPageIdConstants.itemlist]);
+  // }
 
 
   @override
@@ -297,7 +303,7 @@ class ItemlistController extends GetxController implements ItemlistService {
           itemlist.description = newItemlistDescController.text;
         }
 
-        if(await ItemlistFirestore().update(profile.id, itemlist)){
+        if(await PublicItemlistFirestore().update(itemlist)){
           logger.d("Itemlist $itemlistId updated");
           _itemlists[itemlist.id] = itemlist;
           clearNewItemlist();
@@ -321,9 +327,9 @@ class ItemlistController extends GetxController implements ItemlistService {
     if(AppFlavour.appInUse == AppInUse.cyberneom) {
       await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
     } else {
-      AppItemController appItemController;
+      AppMediaItemController appItemController;
       try {
-        appItemController = Get.find<AppItemController>();
+        appItemController = Get.find<AppMediaItemController>();
         appItemController.itemlist = itemlist;
         appItemController.loadItemsFromList();
       } catch (e) {
@@ -346,7 +352,8 @@ class ItemlistController extends GetxController implements ItemlistService {
 
       String itemlistId = "";
       Itemlist? existingItemlist;
-      List<Itemlist>? existingItemlists = userController.profile.itemlists?.values.where((element) => element.name == itemlist.name).toList();
+      List<Itemlist>? existingItemlists = userController.profile.itemlists?.values
+          .where((element) => element.name == itemlist.name).toList();
 
       if(existingItemlists?.isNotEmpty ?? false) {
         existingItemlist= existingItemlists?.first;
@@ -354,18 +361,18 @@ class ItemlistController extends GetxController implements ItemlistService {
 
       if(existingItemlist?.id.isNotEmpty ?? false) {
 
-        List<AppItem> currentItems = [];
+        List<AppMediaItem> currentItems = [];
         itemlistId = existingItemlist?.id ?? "";
 
-        itemlist.appItems?.forEach((appItem) {
-          List<AppItem>? itemlistItems = existingItemlist?.appItems?.where((element) => element.id == appItem.id).toList();
+        itemlist.appMediaItems?.forEach((appItem) {
+          List<AppMediaItem>? itemlistItems = existingItemlist?.appMediaItems?.where((element) => element.id == appItem.id).toList();
           if(itemlistItems?.isNotEmpty ?? false) {
             currentItems.add(appItem);
           }
         });
 
-        for (AppItem currentItem in currentItems) {
-          itemlist.appItems?.removeWhere((appItem) => appItem.id == currentItem.id);
+        for (AppMediaItem currentItem in currentItems) {
+          itemlist.appMediaItems?.removeWhere((appItem) => appItem.id == currentItem.id);
           logger.d("Removing item ${currentItem.name} from being synchronized");
         }
 
@@ -375,7 +382,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       if(itemlistId.isEmpty) {
         if(itemlistOwner == ItemlistOwner.profile) {
           itemlist.ownerId = profile.id;
-          itemlistId = await ItemlistFirestore().insert(itemlist);
+          itemlistId = await PublicItemlistFirestore().insert(itemlist);
         } else if(itemlistOwner == ItemlistOwner.band) {
           //TODO Add sync for band itemlist
           //itemlistId = await BandItemlistFirestore().insert(_gigBand.id, itemlist);
@@ -384,25 +391,25 @@ class ItemlistController extends GetxController implements ItemlistService {
         logger.i("Itemlist inserted with id $itemlistId");
       }
 
-      if(itemlistId.isNotEmpty && (itemlist.appItems?.isNotEmpty ?? false)) {
+      if(itemlistId.isNotEmpty && (itemlist.appMediaItems?.isNotEmpty ?? false)) {
         itemlist.id = itemlistId;
 
         if(itemlistOwner == ItemlistOwner.profile) {
           userController.profile.itemlists![itemlist.id] = itemlist;
           currentItemlist = itemlist;
 
-          for (AppItem appItem in itemlist.appItems ?? []) {
+          for (AppMediaItem appItem in itemlist.appMediaItems ?? []) {
 
             itemName.value = appItem.name;
             itemNumber++;
             update([AppPageIdConstants.itemlist, AppPageIdConstants.playlistSong]);
 
-            AppItemFirestore().existsOrInsert(appItem);
+            AppMediaItemFirestore().existsOrInsert(appItem);
 
-            if(await ProfileFirestore().addAppItem(profile.id, appItem.id)) {
+            if(await ProfileFirestore().addAppMediaItem(profile.id, appItem.id)) {
               if (userController.profile.itemlists!.isNotEmpty) {
                 logger.d("Adding item to global itemlist from userController");
-                userController.profile.appItems!.add(appItem.id);
+                userController.profile.appMediaItems!.add(appItem.id);
               }
             }
 
@@ -411,9 +418,9 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         } else if(itemlistOwner == ItemlistOwner.band) {
           userController.band.itemlists![itemlist.id] = itemlist;
-          for (var appItem in itemlist.appItems ?? []) {
+          for (var appItem in itemlist.appMediaItems ?? []) {
 
-            AppItemFirestore().existsOrInsert(appItem);
+            AppMediaItemFirestore().existsOrInsert(appItem);
             //TODO Add sync for band itemlist
           }
         }
@@ -422,7 +429,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       } else {
         Get.snackbar(
             MessageTranslationConstants.spotifySynchronization.tr,
-            "Giglist ${itemlist.name} ${MessageTranslationConstants.upToDate.tr}",
+            "Playlist ${itemlist.name} ${MessageTranslationConstants.upToDate.tr}",
             snackPosition: SnackPosition.bottom,
             duration: const Duration(seconds: 1)
         );
@@ -475,17 +482,17 @@ class ItemlistController extends GetxController implements ItemlistService {
     update([AppPageIdConstants.itemlist]);
   }
 
-  void handlePlaylistList(Itemlist spotifyGiglist) {
+  void handlePlaylistList(Itemlist spotifyItemlist) {
 
     try {
-      if (addedItemlists.contains(spotifyGiglist)) {
-        logger.d("Removing gigList ${spotifyGiglist.name}");
-        addedItemlists.remove(spotifyGiglist);
-        totalItemsToSynch -= spotifyPlaylistSimples.where((element) => element.id == spotifyGiglist.id).first.tracksLink?.total ?? 0;
+      if (addedItemlists.contains(spotifyItemlist)) {
+        logger.d("Removing gigList ${spotifyItemlist.name}");
+        addedItemlists.remove(spotifyItemlist);
+        totalItemsToSynch -= spotifyPlaylistSimples.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
       } else {
-        logger.d("Adding giglist with name ${spotifyGiglist.name}");
-        addedItemlists.add(spotifyGiglist);
-        totalItemsToSynch += spotifyPlaylistSimples.where((element) => element.id == spotifyGiglist.id).first.tracksLink?.total ?? 0;
+        logger.d("Adding giglist with name ${spotifyItemlist.name}");
+        addedItemlists.add(spotifyItemlist);
+        totalItemsToSynch += spotifyPlaylistSimples.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
       }
     } catch (e) {
       logger.e(e.toString());
@@ -497,8 +504,8 @@ class ItemlistController extends GetxController implements ItemlistService {
   //TODO Verify if needed
   void loadSongsForPlaylist(spotify.PlaylistSimple playlist) {
     itemlists.forEach((playlistId, giglist) async {
-      giglist.appItems = await SpotifySearch().loadSongsFromPlaylist(playlistId);
-      logger.i("Adding ${giglist.appItems?.length} song to Giglist ${giglist.name}");
+      giglist.appMediaItems = await SpotifySearch().loadSongsFromPlaylist(playlistId);
+      logger.i("Adding ${giglist.appMediaItems?.length} song to Giglist ${giglist.name}");
       itemlists[playlistId] = giglist;
     });
   }
@@ -515,8 +522,8 @@ class ItemlistController extends GetxController implements ItemlistService {
       }
 
       if(spotifyPlaylist.href?.isNotEmpty ?? false) {
-        itemlist.appItems = await AppItem.mapTracksToSongs(spotifyPlaylist.tracks!);
-        logger.d("${itemlist.appItems?.length ?? 0} songs were mapped from ${spotifyPlaylist.name}");
+        itemlist.appMediaItems = await AppMediaItem.mapTracksToSongs(spotifyPlaylist.tracks!);
+        logger.d("${itemlist.appMediaItems?.length ?? 0} songs were mapped from ${spotifyPlaylist.name}");
       }
     } catch (e) {
       logger.e(e.toString());
@@ -527,7 +534,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   }
 
-  Future<void> synchronizeGiglists() async {
+  Future<void> synchronizeItemlists() async {
     logger.i("Synchronizing ${addedItemlists.length} Giglists from Spotify Playlists");
 
     Map<Itemlist, bool> wereSynchronized = {};
@@ -537,17 +544,17 @@ class ItemlistController extends GetxController implements ItemlistService {
 
     try {
       spotify.Playlist playlistToSync = spotify.Playlist();
-      for (var addedGiglist in addedItemlists) {
-        spotify.PlaylistSimple playlistSimple = spotifyPlaylistSimples.where((element) => element.href == addedGiglist.href).first;
+      for (var addedItemlist in addedItemlists) {
+        spotify.PlaylistSimple playlistSimple = spotifyPlaylistSimples.where((element) => element.href == addedItemlist.href).first;
 
         if(playlistSimple.id?.isNotEmpty ?? false) {
           playlistToSync = await SpotifyApiCalls.getPlaylist(spotifyToken: userController.user!.spotifyToken, playlistId: playlistSimple.id!);
         }
 
         if(playlistToSync.href?.isNotEmpty ?? false) {
-          addedGiglist.appItems = await AppItem.mapTracksToSongs(playlistToSync.tracks!);
-          logger.i("${addedGiglist.appItems?.length ?? 0} songs were mapped from ${playlistToSync.name}");
-          wereSynchronized[addedGiglist] = await synchronizeItemlist(addedGiglist);
+          addedItemlist.appMediaItems = AppMediaItem.mapTracksToSongs(playlistToSync.tracks!);
+          logger.i("${addedItemlist.appMediaItems?.length ?? 0} songs were mapped from ${playlistToSync.name}");
+          wereSynchronized[addedItemlist] = await synchronizeItemlist(addedItemlist);
         }
 
       }

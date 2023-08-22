@@ -9,7 +9,7 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
-import 'app_item/app_item_controller.dart';
+import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
 import 'widgets/app_item_widgets.dart';
 
 class ItemlistItemsPage extends StatelessWidget {
@@ -18,9 +18,9 @@ class ItemlistItemsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<AppItemController>(
+    return GetBuilder<AppMediaItemController>(
       id: AppPageIdConstants.itemlistItem,
-      init: AppItemController(),
+      init: AppMediaItemController(),
       builder: (_) => Scaffold(
         backgroundColor: AppColor.getMain(),
         appBar: AppBarChild(title: _.itemlist.name.length > AppConstants.maxItemlistNameLength

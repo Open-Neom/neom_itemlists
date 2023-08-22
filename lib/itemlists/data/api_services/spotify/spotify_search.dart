@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:neom_commons/core/domain/model/app_item.dart';
+import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_itemlists/itemlists/utils/constants/app_spotify_constants.dart';
@@ -10,10 +11,10 @@ class SpotifySearch {
   final logger = AppUtilities.logger;
   final spotify = SpotifyApi(AppSpotifyConstants.getSpotifyCredentials());
 
-  Map<String, AppItem> songs = {};
+  Map<String, AppMediaItem> songs = {};
   Map<String, Itemlist> giglists = {};
 
-  Future<Map<String, AppItem>> searchSongs(String searchParam) async {
+  Future<Map<String, AppMediaItem>> searchSongs(String searchParam) async {
     logger.d("Searching for songs");
 
     try {
@@ -64,7 +65,7 @@ class SpotifySearch {
       for (var page in searchData) {
         for (var item in page.items!) {
           if (item is Track) {
-            AppItem song = AppItem.mapTrackToSong(item);
+            AppMediaItem song = AppMediaItem.mapTrackToSong(item);
             songs[song.id] = song;
           }
         }
@@ -110,16 +111,16 @@ class SpotifySearch {
     return artist;
   }
 
-  Future<List<AppItem>> loadSongsFromPlaylist(String playlistId) async {
+  Future<List<AppMediaItem>> loadSongsFromPlaylist(String playlistId) async {
     logger.d("Loading songs from playlist $playlistId");
-    List<AppItem> playlistSongs = [];
+    List<AppMediaItem> playlistSongs = [];
     Playlist playlist = Playlist();
 
     try {
       playlist = await spotify.playlists.get(playlistId);
 
       if(playlist.tracks != null) {
-        playlistSongs = await AppItem.mapTracksToSongs(playlist.tracks!);
+        playlistSongs = AppMediaItem.mapTracksToSongs(playlist.tracks!);
       }
     } catch (e) {
       logger.e(e.toString());

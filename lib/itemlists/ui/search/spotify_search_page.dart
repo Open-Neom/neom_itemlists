@@ -23,10 +23,7 @@ class SpotifySearchPage extends StatelessWidget {
           body: Container(
             decoration: AppTheme.appBoxDecoration,
             child: _.isLoading ? const Center(child: CircularProgressIndicator())
-            : Obx(()=>
-                  _.spotifySearchType == SpotifySearchType.song ?
-                  buildItemSearchList(context, _)
-                    : buildItemSearchList(context, _) //TODO Verify if needed
+                : Obx(()=> buildItemSearchList(context, _)
             )
           ),
         )

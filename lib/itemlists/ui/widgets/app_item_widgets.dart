@@ -4,13 +4,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
+import 'package:neom_commons/core/domain/model/app_media_item.dart';
+import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/app_media_source.dart';
+import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
+import 'package:neom_music_player/neom_player_invoke.dart';
+import 'package:neom_music_player/ui/widgets/copy_clipboard.dart';
+import 'package:neom_music_player/ui/widgets/download_button.dart';
+import 'package:neom_music_player/ui/widgets/image_card.dart';
+import 'package:neom_music_player/ui/widgets/like_button.dart';
+import 'package:neom_music_player/ui/widgets/song_tile_trailing_menu.dart';
+import 'package:neom_music_player/utils/constants/app_hive_constants.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-
-import 'package:neom_commons/core/domain/model/app_item.dart';
+import 'package:hive/hive.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/constants/app_assets.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
@@ -18,28 +28,27 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'package:neom_commons/core/utils/core_utilities.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/profile_type.dart';
-import '../app_item/app_item_controller.dart';
 import '../search/spotify_search_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-Widget buildItemList(BuildContext context, AppItemController _) {
+Widget buildItemList(BuildContext context, AppMediaItemController _) {
   return ListView.separated(
     separatorBuilder: (context, index) => const Divider(),
     itemCount: _.itemlistItems.length,
     itemBuilder: (context, index) {
-      AppItem appItem = _.itemlistItems.values.elementAt(index);
+      AppMediaItem appMediaItem = _.itemlistItems.values.elementAt(index);
       return ListTile(
             title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(appItem.name.isEmpty ? ""
-                    : appItem.name.length > AppConstants.maxAppItemNameLength
-                    ? "${appItem.name.substring(0,AppConstants.maxAppItemNameLength)}..."
-                    : appItem.name),
+                  Text(appMediaItem.name.isEmpty ? ""
+                    : appMediaItem.name.length > AppConstants.maxAppItemNameLength
+                    ? "${appMediaItem.name.substring(0,AppConstants.maxAppItemNameLength)}..."
+                    : appMediaItem.name),
                   const SizedBox(width:5),
                   (AppFlavour.appInUse == AppInUse.cyberneom || (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed)) ?
                     RatingBar(
-                    initialRating: appItem.state.toDouble(),
+                    initialRating: appMediaItem.state.toDouble(),
                     minRating: 1,
                     ignoreGestures: true,
                     direction: Axis.horizontal,
@@ -58,16 +67,16 @@ Widget buildItemList(BuildContext context, AppItemController _) {
                     ) : Container(),
                 ]
             ),
-            subtitle: (AppFlavour.appInUse == AppInUse.cyberneom && appItem.description.isNotEmpty) ?
-            Text(appItem.description, textAlign: TextAlign.justify,) :
-            Text(appItem.artist.isEmpty ? "" : appItem.artist.length > AppConstants.maxArtistNameLength
-                ? "${appItem.artist.substring(0,AppConstants.maxArtistNameLength)}..." : appItem.artist),
-            onTap: () => AppFlavour.appInUse == AppInUse.cyberneom || !_.isFixed ? _.getItemlistItemDetails(appItem) : {},
+            subtitle: (AppFlavour.appInUse == AppInUse.cyberneom && (appMediaItem.description?.isNotEmpty ?? false)) ?
+            Text(appMediaItem.description ?? '', textAlign: TextAlign.justify,) :
+            Text(appMediaItem.artist.isEmpty ? "" : appMediaItem.artist.length > AppConstants.maxArtistNameLength
+                ? "${appMediaItem.artist.substring(0,AppConstants.maxArtistNameLength)}..." : appMediaItem.artist),
+            onTap: () => AppFlavour.appInUse == AppInUse.cyberneom || !_.isFixed ? _.getItemlistItemDetails(appMediaItem) : {},
             leading: Hero(
               tag: CoreUtilities.getAppItemHeroTag(index),
               child: Image.network(
-                  appItem.albumImgUrl.isNotEmpty ? appItem.albumImgUrl
-                      : appItem.artistImgUrl.isNotEmpty ? appItem.artistImgUrl
+                  appMediaItem.imgUrl.isNotEmpty ? appMediaItem.imgUrl
+                      : appMediaItem.imgUrl.isNotEmpty ? appMediaItem.imgUrl
                       : AppFlavour.getNoImageUrl()
               ),
             ),
@@ -78,7 +87,7 @@ Widget buildItemList(BuildContext context, AppItemController _) {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               onPressed: () {
-                ChamberPreset preset = _.itemlist.chamberPresets!.firstWhere((element) => element.id == appItem.id);
+                ChamberPreset preset = _.itemlist.chamberPresets!.firstWhere((element) => element.id == appMediaItem.id);
                 Get.toNamed(AppRouteConstants.generator,  arguments: [preset.clone()]);
               }
           ),
@@ -148,7 +157,7 @@ Widget buildItemList(BuildContext context, AppItemController _) {
                     style: const TextStyle(fontSize: 15),
                   ),
                   onPressed: () => {
-                    _.updateItemlistItem(appItem)
+                    _.updateItemlistItem(appMediaItem)
                   },
                 ),
                 DialogButton(
@@ -157,7 +166,7 @@ Widget buildItemList(BuildContext context, AppItemController _) {
                     style: const TextStyle(fontSize: 15),
                   ),
                   onPressed: () async => {
-                    await _.removeItemFromList(appItem)
+                    await _.removeItemFromList(appMediaItem)
                   },
                 ),
               ]
@@ -170,18 +179,18 @@ Widget buildItemList(BuildContext context, AppItemController _) {
 Widget buildItemSearchList(BuildContext context, SpotifySearchController _) {
   return ListView.builder(
     padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
-    itemCount: _.appItems.length,
+    itemCount: _.appMediaItems.length,
     itemBuilder: (context, index) {
-      AppItem appItem = _.appItems.values.elementAt(index);
-      return ListTile(
+      AppMediaItem appMediaItem = _.appMediaItems.values.elementAt(index);
+      return true ? createCoolMediaItemTile(context, appMediaItem, _.searchParam) : ListTile(
         contentPadding: const EdgeInsets.all(10.0),
-        title: Text(appItem.name),
-        subtitle: Text(appItem.artist),
-        onTap: () => _.getAppItemDetails(appItem),
+        title: Text(appMediaItem.name),
+        subtitle: Text(appMediaItem.artist),
+        onTap: () => _.getAppMediaItemDetails(appMediaItem),
         leading: Hero(
           tag: CoreUtilities.getAppItemHeroTag(index),
-          child: Image.network(appItem.albumImgUrl.isNotEmpty
-              ? appItem.albumImgUrl : AppFlavour.getNoImageUrl(),
+          child: Image.network(appMediaItem.imgUrl.isNotEmpty
+              ? appMediaItem.imgUrl : AppFlavour.getNoImageUrl(),
               width: 56.0
           ),
         ),
@@ -190,12 +199,86 @@ Widget buildItemSearchList(BuildContext context, SpotifySearchController _) {
   );
 }
 
+ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem, String query, {String itemlistId = ''}) {
+  return ListTile(
+    contentPadding: const EdgeInsets.only(left: 15.0,),
+    title: Text(appMediaItem.name,
+      style: const TextStyle(
+        fontWeight: FontWeight.w500,
+      ),
+      overflow: TextOverflow.ellipsis,
+    ),
+    subtitle: Text(appMediaItem.artist,
+      overflow: TextOverflow.ellipsis,
+    ),
+    isThreeLine: false,
+    leading: imageCard(
+      borderRadius: false ? 50 : 7,
+      placeholderImage: AssetImage(AppAssets.musicPlayerCover),
+      imageUrl: appMediaItem.imgUrl
+    ),
+    trailing: Row(
+      mainAxisSize:
+      MainAxisSize.min,
+      children: [
+        LikeButton(
+          mediaItem: null,
+          data: appMediaItem.toJSON(),
+        ),
+        appMediaItem.mediaSource == AppMediaSource.internal ? DownloadButton(
+          mediaItem: appMediaItem,
+          icon: 'download',
+        ) : appMediaItem.mediaSource == AppMediaSource.spotify ?
+        IconButton(onPressed: () => CoreUtilities.launchURL(appMediaItem.permaUrl, openInApp: false), icon: Icon(FontAwesomeIcons.spotify))
+            : Container(),
+        SongTileTrailingMenu(
+          appMediaItem: appMediaItem,
+          itemlist: Itemlist(),
+        ),
+      ],
+    ),
+    onLongPress: () {
+      copyToClipboard(
+        context: context,
+        text: appMediaItem.name,
+      );
+    },
+    onTap: () {
+      query = appMediaItem.name.trim();
+      List searchQueries = Hive.box(AppHiveConstants.settings).get('search', defaultValue: [],) as List;
+      final idx = searchQueries.indexOf(query);
+      if (idx != -1) {
+        searchQueries.removeAt(idx);
+      }
+      searchQueries.insert(0, query);
+      if (searchQueries.length > 10) {
+        searchQueries = searchQueries
+            .sublist(0, 10);
+      }
+      Hive.box(AppHiveConstants.settings).put('search', searchQueries);
+
+      if(appMediaItem.mediaSource == AppMediaSource.internal) {
+        NeomPlayerInvoke.init(
+          appMediaItems: [appMediaItem],
+          index: 0,
+          isOffline: false,
+        );
+      } else {
+        Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem, itemlistId]);
+      }
+
+
+    },
+  );
+
+}
+
 Widget buildSpotifySongList(BuildContext context, SpotifySearchController _) {
   return ListView.separated(
     separatorBuilder: (context, index) => const Divider(),
-    itemCount: _.appItems.length,
+    itemCount: _.appMediaItems.length,
     itemBuilder: (context, index) {
-      AppItem song = _.appItems.values.elementAt(index);
+      AppMediaItem song = _.appMediaItems.values.elementAt(index);
       return ListTile(
         title: Text(song.name.isEmpty ? ""
             : song.name.length > AppConstants.maxAppItemNameLength
@@ -252,10 +335,9 @@ Widget buildSpotifySongList(BuildContext context, SpotifySearchController _) {
             ]),
         tileColor: _.addedItems.contains(song) ? AppColor.getMain() : Colors.transparent,
         onTap: () => _.handleItemlistItems(song, AppItemState.heardIt),
-        onLongPress: () => _.getAppItemDetails(song),
+        onLongPress: () => _.getAppMediaItemDetails(song),
         leading: Image.network(
-            song.albumImgUrl.isNotEmpty ? song.albumImgUrl
-                : song.artistImgUrl.isNotEmpty ? song.artistImgUrl
+            song.imgUrl.isNotEmpty ? song.imgUrl
                 : AppFlavour.getNoImageUrl()
         ),
       );

@@ -28,9 +28,9 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
             width: 50,
             child: itemlist.imgUrl.isNotEmpty
                 ? CachedNetworkImage(imageUrl: itemlist.imgUrl)
-                : (itemlist.appItems?.isNotEmpty ?? false)
-                ? (itemlist.appItems!.first.albumImgUrl.isNotEmpty
-                ? CachedNetworkImage(imageUrl: itemlist.appItems!.first.albumImgUrl)
+                : (itemlist.appMediaItems?.isNotEmpty ?? false)
+                ? (itemlist.appMediaItems!.first.imgUrl.isNotEmpty
+                ? CachedNetworkImage(imageUrl: itemlist.appMediaItems!.first.imgUrl)
                 : CachedNetworkImage(imageUrl: AppFlavour.getNoImageUrl()))
                 : CachedNetworkImage(imageUrl: AppFlavour.getAppLogoUrl())
         ),
@@ -39,16 +39,15 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
               Text(itemlist.name.length > AppConstants.maxItemlistNameLength
                   ? "${itemlist.name.substring(0,AppConstants.maxItemlistNameLength).capitalizeFirst!}..."
                   : itemlist.name.capitalizeFirst!),
-              itemlist.isFav
-                  ? const Icon(Icons.favorite, size: 10,)
-                  : Container()]),
-        subtitle: Text(itemlist.description.capitalizeFirst!),
+              ///DEPRECATE .isFav ? const Icon(Icons.favorite, size: 10,) : Container()
+            ]),
+        subtitle: itemlist.description.isNotEmpty ? Text(itemlist.description.capitalizeFirst!) : null,
         trailing: ActionChip(
           labelPadding: EdgeInsets.zero,
           backgroundColor: AppColor.main25,
           avatar: CircleAvatar(
             backgroundColor: AppColor.white80,
-            child: Text(((itemlist.appItems?.length ?? 0) + (itemlist.appReleaseItems?.length ?? 0)+ (itemlist.chamberPresets?.length ?? 0)).toString()),
+            child: Text(((itemlist.appMediaItems?.length ?? 0) + (itemlist.appReleaseItems?.length ?? 0)+ (itemlist.chamberPresets?.length ?? 0)).toString()),
           ),
           label: Icon(AppFlavour.getAppItemIcon(), color: AppColor.white80),
           onPressed: () async {
@@ -94,8 +93,11 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
               buttons: [
                 DialogButton(
                   color: AppColor.bondiBlue75,
-                  onPressed: () => {
-                    _.updateItemlist(itemlist.id, itemlist)
+                  onPressed: () async {
+                    // Navigator.of(context).pop();
+                    await _.updateItemlist(itemlist.id, itemlist);
+                    // Get.back();
+                    // Get.toNamed(AppRouteConstants.musicPlayerHome);
                   },
                   child: Text(
                     AppTranslationConstants.update.tr,
@@ -106,24 +108,28 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
                   color: AppColor.bondiBlue75,
                   child: Text(AppTranslationConstants.remove.tr),
                   onPressed: () async {
-                    if(itemlist.isFav) {
+                    if(_.itemlists.length == 1) {
                       AppUtilities.showAlert(context,
                           AppTranslationConstants.itemlistPrefs.tr,
                           AppTranslationConstants.cantRemoveMainItemlist.tr);
                     } else {
-                      Navigator.pop(context);
+                      // Navigator.of(context).pop();
                       await _.deleteItemlist(itemlist);
+                      // Get.back();
+                      // Get.toNamed(AppRouteConstants.musicPlayerHome);
                     }
                   },
                 ),
-                if(!itemlist.isFav) DialogButton(
-                  color: AppColor.bondiBlue75,
-                  onPressed: () => {
-                    _.setAsFavorite(itemlist)
-                  },
-                  child: Text(AppTranslationConstants.setFav.tr,
-                  ),
-                ),
+
+                ///VERIFY IF DEPRECATED
+                // if(!itemlist.isFav) DialogButton(
+                //   color: AppColor.bondiBlue75,
+                //   onPressed: () => {
+                //     _.setAsFavorite(itemlist)
+                //   },
+                //   child: Text(AppTranslationConstants.setFav.tr,
+                //   ),
+                // ),
               ]
           ).show();
         },
@@ -137,20 +143,20 @@ Widget buildSyncPlaylistList(BuildContext context, ItemlistController _) {
     separatorBuilder: (context, index) => const Divider(),
     itemCount: _.spotifyItemlists.length,
     itemBuilder: (context, index) {
-      Itemlist  spotifyGiglist = _.spotifyItemlists.values.elementAt(index);
+      Itemlist  spotifyItemlist = _.spotifyItemlists.values.elementAt(index);
       return ListTile(
-          title: Text((spotifyGiglist.name.isEmpty) ? ""
-              : spotifyGiglist.name.length > AppConstants.maxAppItemNameLength
-              ? "${spotifyGiglist.name.substring(0,AppConstants.maxAppItemNameLength)}..."
-              : spotifyGiglist.name),
+          title: Text((spotifyItemlist.name.isEmpty) ? ""
+              : spotifyItemlist.name.length > AppConstants.maxAppItemNameLength
+              ? "${spotifyItemlist.name.substring(0,AppConstants.maxAppItemNameLength)}..."
+              : spotifyItemlist.name),
           subtitle: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
-                  child: Text((spotifyGiglist.description.isEmpty) ? ""
-                      : spotifyGiglist.description.length > AppConstants.maxArtistNameLength
-                      ? "${spotifyGiglist.description.substring(0,AppConstants.maxArtistNameLength)}..."
-                      : spotifyGiglist.description),
+                  child: Text((spotifyItemlist.description.isEmpty) ? ""
+                      : spotifyItemlist.description.length > AppConstants.maxArtistNameLength
+                      ? "${spotifyItemlist.description.substring(0,AppConstants.maxArtistNameLength)}..."
+                      : spotifyItemlist.description),
                 ),
                 AppTheme.widthSpace5,
               ]),
@@ -161,11 +167,11 @@ Widget buildSyncPlaylistList(BuildContext context, ItemlistController _) {
                   backgroundColor: AppColor.main50,
                   avatar: CircleAvatar(
                     backgroundColor: AppColor.white80,
-                    child: Obx(()=>_.isLoading && _.currentItemlist.href == spotifyGiglist.href
+                    child: Obx(()=>_.isLoading && _.currentItemlist.href == spotifyItemlist.href
                         ? const Center(child: CircularProgressIndicator())
-                        : Text(("${(spotifyGiglist.appItems?.isEmpty ?? true)
-                        ? _.spotifyPlaylistSimples.where((element) => element.id == spotifyGiglist.id).first.tracksLink?.total
-                        : spotifyGiglist.appItems?.length ?? 0
+                        : Text(("${(spotifyItemlist.appMediaItems?.isEmpty ?? true)
+                        ? _.spotifyPlaylistSimples.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total
+                        : spotifyItemlist.appMediaItems?.length ?? 0
                     }")
                     ),
                     ),
@@ -175,16 +181,16 @@ Widget buildSyncPlaylistList(BuildContext context, ItemlistController _) {
                 ),
               ]
           ),
-          tileColor: _.addedItemlists.contains(spotifyGiglist) ? AppColor.getMain() : Colors.transparent,
+          tileColor: _.addedItemlists.contains(spotifyItemlist) ? AppColor.getMain() : Colors.transparent,
           onTap: () => {
-            _.handlePlaylistList(spotifyGiglist),
+            _.handlePlaylistList(spotifyItemlist),
           },
           onLongPress: () => {
-            _.gotoPlaylistSongs(spotifyGiglist)
+            _.gotoPlaylistSongs(spotifyItemlist)
           },
           leading: Image.network(
-            spotifyGiglist.imgUrl.isNotEmpty
-                ? spotifyGiglist.imgUrl
+            spotifyItemlist.imgUrl.isNotEmpty
+                ? spotifyItemlist.imgUrl
                 : AppFlavour.getNoImageUrl(),
             errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
               return Image.network(AppFlavour.getNoImageUrl());
@@ -206,7 +212,7 @@ Widget buildSyncPlaylistsButton(BuildContext context, ItemlistController _) {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         ),
         onPressed: () async {
-          if(!_.isButtonDisabled) await _.synchronizeGiglists();
+          if(!_.isButtonDisabled) await _.synchronizeItemlists();
         },
         child: Obx(()=>_.isLoading ? const Center(child: CircularProgressIndicator())
             : Text(AppTranslationConstants.synchronizePlaylists.tr,

@@ -1,16 +1,16 @@
 import 'dart:async';
-import 'package:neom_commons/core/domain/model/app_item.dart';
+import 'package:neom_commons/core/domain/model/app_media_item.dart';
 
 abstract class AppItemRepository {
 
-  Future<AppItem> retrieve(String itemId);
-  Future<Map<String, AppItem>> retrieveFromList(List<String> itemIds);
+  Future<AppMediaItem> retrieve(String itemId);
+  Future<Map<String, AppMediaItem>> retrieveFromList(List<String> itemIds);
 
   Future<bool> exists(String itemId);
-  Future<void> existsOrInsert(AppItem item);
+  Future<void> existsOrInsert(AppMediaItem item);
 
-  Future<void> insert(AppItem item);
-  Future<bool> remove(AppItem item);
+  Future<void> insert(AppMediaItem item);
+  Future<bool> remove(AppMediaItem item);
 
-  Future<bool> removeItemFromList(String profileId, String itemlistId, AppItem appItem);
+  Future<bool> removeItemFromList(String profileId, String itemlistId, AppMediaItem appItem);
 }

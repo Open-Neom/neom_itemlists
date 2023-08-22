@@ -1,13 +1,13 @@
 import 'dart:io';
 
 import 'package:animated_text_kit/animated_text_kit.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/auth/ui/login/login_controller.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'package:neom_commons/core/utils/app_color.dart';
@@ -24,6 +24,8 @@ class ItemlistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isRotated = MediaQuery.of(context).size.height < screenWidth;
     return WillPopScope(
       onWillPop: () async {
         return (await showDialog(
@@ -53,6 +55,48 @@ class ItemlistPage extends StatelessWidget {
         id: AppPageIdConstants.itemlist,
         init: ItemlistController(),
         builder: (_) => Scaffold(
+          backgroundColor: AppColor.main75,
+          appBar: AppFlavour.appInUse == AppInUse.gigmeout ? AppBar(
+            actions: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: IconButton(
+                  icon: const Icon(Icons.search),
+                  onPressed: () async {
+                    Get.toNamed(AppRouteConstants.itemSearch,
+                        arguments: [SpotifySearchType.song]
+                    );
+                  },
+                ),
+              ),
+            ],
+            title: Text(AppTranslationConstants.myItemlists.tr,
+              style: TextStyle(
+                fontSize: 18,
+                color: Theme.of(context).textTheme.bodyLarge!.color,
+              ),
+            ),
+            centerTitle: true,
+            backgroundColor: AppColor.main75,
+            elevation: 0,
+            automaticallyImplyLeading: false,
+            leading: isRotated ? null : Padding(
+              padding: EdgeInsets.zero,
+              child: Transform.rotate(
+                angle: 22 / 7 * 2,
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.horizontal_split_rounded,
+                  ),
+                  // color: Theme.of(context).iconTheme.color,
+                  onPressed: () {
+                    Scaffold.of(context).openDrawer();
+                  },
+                  tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
+                ),
+              ),
+            ),
+          ) : null,
           body: Container(
             decoration: AppTheme.appBoxDecoration,
             child: _.isLoading ? const Center(child: CircularProgressIndicator())
@@ -114,8 +158,10 @@ class ItemlistPage extends StatelessWidget {
                             height: 50,
                             color: AppColor.bondiBlue75,
                             onPressed: () async {
+                              // Navigator.of(context).pop();
                               await _.createItemlist();
-                              Navigator.pop(context);
+                              Get.back();
+                              // Get.toNamed(AppRouteConstants.musicPlayerHome);
                             },
                             child: Text(
                               AppTranslationConstants.add.tr,
@@ -132,7 +178,7 @@ class ItemlistPage extends StatelessWidget {
             )
           ),
           floatingActionButton: _.isLoading ? Container() : Container(
-            margin: EdgeInsets.only(bottom: 100),
+            margin: EdgeInsets.only(bottom: 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -154,7 +200,7 @@ class ItemlistPage extends StatelessWidget {
                             FlickerAnimatedText(
                                 AppFlavour.appInUse == AppInUse.gigmeout ?
                                 AppTranslationConstants.synchronizeSpotifyPlaylists.tr
-                                : "${AppTranslationConstants.suggestedReading.tr}  "),
+                                : AppTranslationConstants.suggestedReading.tr),
                           ],
                           onTap: () {
                             AppFlavour.appInUse == AppInUse.gigmeout
@@ -165,6 +211,7 @@ class ItemlistPage extends StatelessWidget {
                         ),
                       ),
                     ) : Container(),
+                    SizedBox(width: 5,),
                     FloatingActionButton(
                       heroTag: AppPageIdConstants.spotifySync,
                       elevation: AppTheme.elevationFAB,

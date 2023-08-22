@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:neom_commons/core/data/firestore/constants/app_firestore_collection_constants.dart';
 import 'package:neom_commons/core/data/firestore/constants/app_firestore_constants.dart';
-import 'package:neom_commons/core/domain/model/app_item.dart';
+import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
@@ -13,11 +13,11 @@ import 'package:neom_commons/core/domain/repository/itemlist_repository.dart';
 class BandItemlistFirestore implements ItemlistRepository {
 
   var logger = AppUtilities.logger;
-  final appItemReference = FirebaseFirestore.instance.collection(AppFirestoreCollectionConstants.appItems);
+  final appMediaItemReference = FirebaseFirestore.instance.collection(AppFirestoreCollectionConstants.appMediaItems);
   final bandReference = FirebaseFirestore.instance.collectionGroup(AppFirestoreCollectionConstants.bands);
 
   @override
-  Future<bool> addAppItem(String bandId, AppItem item, String itemlistId) async {
+  Future<bool> addAppMediaItem(String bandId, AppMediaItem item, String itemlistId) async {
     logger.i("Adding item for Band $bandId");
     logger.d("Adding item to itemlist $itemlistId");
     bool addedItem = false;
@@ -31,7 +31,7 @@ class BandItemlistFirestore implements ItemlistRepository {
            await document.reference.collection(AppFirestoreCollectionConstants.itemlists)
             .doc(itemlistId)
             .update({
-              AppFirestoreConstants.appItems: FieldValue.arrayUnion([item.toJSON()])
+              AppFirestoreConstants.appMediaItems: FieldValue.arrayUnion([item.toJSON()])
             });
 
            addedItem = true;
@@ -48,7 +48,7 @@ class BandItemlistFirestore implements ItemlistRepository {
 
 
   @override
-  Future<bool> removeItem(String bandId, AppItem appItem, String itemlistId) async {
+  Future<bool> removeItem(String bandId, AppMediaItem appMediaItem, String itemlistId) async {
     logger.d("Removing item from itemlist $itemlistId");
 
     try {
@@ -60,7 +60,7 @@ class BandItemlistFirestore implements ItemlistRepository {
                 .collection(AppFirestoreCollectionConstants.itemlists)
                 .doc(itemlistId)
                 .update({
-                  AppFirestoreConstants.appItems: FieldValue.arrayRemove([appItem.toJSON()])
+                  AppFirestoreConstants.appMediaItems: FieldValue.arrayRemove([appMediaItem.toJSON()])
                 });
           }
         }
@@ -190,62 +190,62 @@ class BandItemlistFirestore implements ItemlistRepository {
     return false;
   }
 
+  // @override
+  // Future<bool> setAsFavorite(String bandId, Itemlist itemlist) async {
+  //   logger.d("Updating to favorite Itemlist for user $bandId");
+  //
+  //   try {
+  //     await bandReference.get()
+  //         .then((querySnapshot) async {
+  //       for (var document in querySnapshot.docs) {
+  //         if(document.id == bandId) {
+  //           await document.reference.collection(
+  //               AppFirestoreCollectionConstants.itemlists)
+  //               .doc(itemlist.id).update({AppFirestoreConstants.isFav: true});
+  //         }
+  //       }
+  //     });
+  //
+  //     logger.d("Itemlist ${itemlist.id} was set as favorite");
+  //     return true;
+  //   } catch (e) {
+  //     logger.e(e.toString());
+  //   }
+  //
+  //   logger.d("Itemlist ${itemlist.id} was not updated");
+  //   return false;
+  // }
+
+
+  // @override
+  // Future<bool> unsetOfFavorite(String bandId, Itemlist itemlist) async {
+  //   logger.d("Updating to unFavorite Itemlist for user $bandId");
+  //   itemlist.isFav = false;
+  //
+  //   try {
+  //     await bandReference.get()
+  //         .then((querySnapshot) async {
+  //       for (var document in querySnapshot.docs) {
+  //         if(document.id == bandId) {
+  //           await document.reference.collection(
+  //               AppFirestoreCollectionConstants.itemlists)
+  //               .doc(itemlist.id).update({AppFirestoreConstants.isFav: false});
+  //         }
+  //       }
+  //     });
+  //
+  //     logger.d("Itemlist ${itemlist.id} was unset of favorite");
+  //     return true;
+  //   } catch (e) {
+  //     logger.e(e.toString());
+  //   }
+  //
+  //   logger.d("Itemlist ${itemlist.id} was not updated");
+  //   return false;
+  // }
+
   @override
-  Future<bool> setAsFavorite(String bandId, Itemlist itemlist) async {
-    logger.d("Updating to favorite Itemlist for user $bandId");
-
-    try {
-      await bandReference.get()
-          .then((querySnapshot) async {
-        for (var document in querySnapshot.docs) {
-          if(document.id == bandId) {
-            await document.reference.collection(
-                AppFirestoreCollectionConstants.itemlists)
-                .doc(itemlist.id).update({AppFirestoreConstants.isFav: true});
-          }
-        }
-      });
-
-      logger.d("Itemlist ${itemlist.id} was set as favorite");
-      return true;
-    } catch (e) {
-      logger.e(e.toString());
-    }
-
-    logger.d("Itemlist ${itemlist.id} was not updated");
-    return false;
-  }
-
-
-  @override
-  Future<bool> unsetOfFavorite(String bandId, Itemlist itemlist) async {
-    logger.d("Updating to unFavorite Itemlist for user $bandId");
-    itemlist.isFav = false;
-
-    try {
-      await bandReference.get()
-          .then((querySnapshot) async {
-        for (var document in querySnapshot.docs) {
-          if(document.id == bandId) {
-            await document.reference.collection(
-                AppFirestoreCollectionConstants.itemlists)
-                .doc(itemlist.id).update({AppFirestoreConstants.isFav: false});
-          }
-        }
-      });
-
-      logger.d("Itemlist ${itemlist.id} was unset of favorite");
-      return true;
-    } catch (e) {
-      logger.e(e.toString());
-    }
-
-    logger.d("Itemlist ${itemlist.id} was not updated");
-    return false;
-  }
-
-  @override
-  Future<bool> updateItem(String profileId, String itemlistId, AppItem appItem) async {
+  Future<bool> updateItem(String profileId, String itemlistId, AppMediaItem appMediaItem) async {
     logger.d("Updating ItemlistItem for profile $profileId");
 
     try {
@@ -256,18 +256,18 @@ class BandItemlistFirestore implements ItemlistRepository {
           if(document.id == profileId) {
             await document.reference.collection(AppFirestoreCollectionConstants.itemlists)
                 .doc(itemlistId).update({
-              AppFirestoreConstants.appItems: FieldValue.arrayUnion([appItem.toJSON()])
+              AppFirestoreConstants.appMediaItems: FieldValue.arrayUnion([appMediaItem.toJSON()])
             });
           }}
       });
 
-      logger.d("ItemlistItem ${appItem.name} was updated to ${appItem.state}");
+      logger.d("ItemlistItem ${appMediaItem.name} was updated to ${appMediaItem.state}");
       return true;
     } catch (e) {
       logger.e(e.toString());
     }
 
-    logger.d("ItemlistItem ${appItem.name} was not updated");
+    logger.d("ItemlistItem ${appMediaItem.name} was not updated");
     return false;
   }
 
@@ -298,6 +298,12 @@ class BandItemlistFirestore implements ItemlistRepository {
   @override
   Future<bool> updatePreset(String profileId, String chamberId, ChamberPreset preset) {
     // TODO: implement updatePreset
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<Itemlist>> fetchAll({bool onlyPublic = false, bool excludeMyFavorites = true, int minItems = 0}) {
+    // TODO: implement fetchAll
     throw UnimplementedError();
   }
 
