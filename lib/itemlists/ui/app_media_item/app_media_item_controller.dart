@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/api_services/push_notification/firebase_messaging_calls.dart';
@@ -249,7 +250,10 @@ class AppMediaItemController extends GetxController implements AppItemService {
         }
         break;
       case AppInUse.gigmeout:
-        Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
+        PageRouteBuilder(
+          pageBuilder: (_, __, ___) => MediaPlayerPage(appMediaItem: appMediaItem), opaque: false,
+        );
+        // Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
         break;
       case AppInUse.emxi:
         Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);

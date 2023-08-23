@@ -12,7 +12,6 @@ import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_media_source.dart';
 import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
-import 'package:neom_music_player/neom_player_invoke.dart';
 import 'package:neom_music_player/ui/player/media_player_page.dart';
 import 'package:neom_music_player/ui/widgets/copy_clipboard.dart';
 import 'package:neom_music_player/ui/widgets/download_button.dart';
@@ -183,19 +182,7 @@ Widget buildItemSearchList(BuildContext context, SpotifySearchController _) {
     itemCount: _.appMediaItems.length,
     itemBuilder: (context, index) {
       AppMediaItem appMediaItem = _.appMediaItems.values.elementAt(index);
-      return true ? createCoolMediaItemTile(context, appMediaItem, _.searchParam) : ListTile(
-        contentPadding: const EdgeInsets.all(10.0),
-        title: Text(appMediaItem.name),
-        subtitle: Text(appMediaItem.artist),
-        onTap: () => _.getAppMediaItemDetails(appMediaItem),
-        leading: Hero(
-          tag: CoreUtilities.getAppItemHeroTag(index),
-          child: Image.network(appMediaItem.imgUrl.isNotEmpty
-              ? appMediaItem.imgUrl : AppFlavour.getNoImageUrl(),
-              width: 56.0
-          ),
-        ),
-      );
+      return createCoolMediaItemTile(context, appMediaItem, _.searchParam);
     },
   );
 }
@@ -212,7 +199,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
     ),
     isThreeLine: false,
     leading: imageCard(
-      borderRadius: false ? 50 : 7,
+      borderRadius: 7, //50
       placeholderImage: AssetImage(AppAssets.musicPlayerCover),
       imageUrl: appMediaItem.imgUrl
     ),

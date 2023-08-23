@@ -521,7 +521,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       }
 
       if(spotifyPlaylist.href?.isNotEmpty ?? false) {
-        itemlist.appMediaItems = await AppMediaItem.mapTracksToSongs(spotifyPlaylist.tracks!);
+        itemlist.appMediaItems = AppMediaItem.mapTracksToSongs(spotifyPlaylist.tracks!);
         logger.d("${itemlist.appMediaItems?.length ?? 0} songs were mapped from ${spotifyPlaylist.name}");
       }
     } catch (e) {
