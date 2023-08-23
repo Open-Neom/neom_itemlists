@@ -125,7 +125,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                           children: [
                             const Icon(Icons.add, color: Colors.grey, size: 25),
                             _.existsInItemlist ? Text(AppTranslationConstants.removeFromItemlist.tr)
-                                : Text(AppTranslationConstants.addToYourItemlist.tr)],
+                                : Text(AppTranslationConstants.releaseItem.tr)],
                         ),
                       onPressed: () async => {
                         if (_.existsInItemlist) {

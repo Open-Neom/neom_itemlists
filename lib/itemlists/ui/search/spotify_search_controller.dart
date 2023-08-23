@@ -6,7 +6,6 @@ import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart
 import 'package:neom_commons/core/data/firestore/band_firestore.dart';
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
 import 'package:neom_commons/core/data/firestore/public_itemlist_firestore.dart';
-import 'package:neom_commons/core/domain/model/app_item.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/app_release_item.dart';
@@ -25,9 +24,8 @@ import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_search.dart';
 import 'package:neom_itemlists/itemlists/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_itemlists/itemlists/data/firestore/band_itemlist_firestore.dart';
-import 'package:neom_music_player/neom_player_invoke.dart';
+import 'package:neom_music_player/ui/player/media_player_page.dart';
 import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
-import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 import '../../domain/use_cases/spotify_search_service.dart';
 
 
@@ -49,9 +47,9 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
   bool get isButtonDisabled => _isButtonDisabled.value;
   set isButtonDisabled(bool isButtonDisabled) => _isButtonDisabled.value = isButtonDisabled;
 
-  final RxMap<String, AppMediaItem> _appItems = <String, AppMediaItem>{}.obs;
-  Map<String, AppMediaItem> get appMediaItems => _appItems;
-  set appMediaItems(Map<String, AppMediaItem> appMediaItems) => _appItems.value = appMediaItems;
+  final RxMap<String, AppMediaItem> _appMediaItems = <String, AppMediaItem>{}.obs;
+  Map<String, AppMediaItem> get appMediaItems => _appMediaItems;
+  set appMediaItems(Map<String, AppMediaItem> appMediaItems) => _appMediaItems.value = appMediaItems;
 
   final RxMap<String, Itemlist> _itemlists = <String, Itemlist>{}.obs;
   Map<String, Itemlist> get itemlists => _itemlists;
@@ -227,11 +225,15 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
   @override
   void getAppMediaItemDetails(AppMediaItem appMediaItem) {
     logger.d("Sending appMediaItem with title ${appMediaItem.name} to item controller");
-    NeomPlayerInvoke.init(
-      appMediaItems: [appMediaItem],
-      index: 0, isOffline: false,
+    PageRouteBuilder(
+      pageBuilder: (_, __, ___) => MediaPlayerPage(appMediaItem: appMediaItem), opaque: false,
     );
-    Get.back();
+    //
+    // NeomPlayerInvoke.init(
+    //   appMediaItems: [appMediaItem],
+    //   index: 0, isOffline: false,
+    // );
+    // Get.back();
     // Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem, itemlist.id]);
 
   }
@@ -349,7 +351,7 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
             if(await ProfileFirestore().addAppMediaItem(_profile.id, appMediaItem.id)) {
               if (userController.profile.itemlists!.isNotEmpty) {
                 logger.d("Adding item to global itemlist from userController");
-                userController.profile.appMediaItems!.add(appMediaItem.id);
+                userController.profile.favoriteItems!.add(appMediaItem.id);
               }
             }
           }

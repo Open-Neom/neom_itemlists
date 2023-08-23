@@ -23,7 +23,6 @@ import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_api_c
 import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_search.dart';
 import 'package:neom_itemlists/itemlists/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
-import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 import 'package:spotify/spotify.dart' as spotify;
 
 class ItemlistController extends GetxController implements ItemlistService {
@@ -235,10 +234,10 @@ class ItemlistController extends GetxController implements ItemlistService {
         if(itemlist.appMediaItems?.isNotEmpty ?? false) {
           for(var appItem in itemlist.appMediaItems ?? []) {
             if(await ProfileFirestore().removeAppMediaItem(profile.id, appItem.id)) {
-              if (userController.profile.appMediaItems != null &&
-                  userController.profile.appMediaItems!.isNotEmpty) {
+              if (userController.profile.favoriteItems != null &&
+                  userController.profile.favoriteItems!.isNotEmpty) {
                 logger.d("Removing item from global items for profile from userController");
-                userController.profile.appMediaItems!.remove(appItem.id);
+                userController.profile.favoriteItems!.remove(appItem.id);
               }
             }
           }
@@ -409,7 +408,7 @@ class ItemlistController extends GetxController implements ItemlistService {
             if(await ProfileFirestore().addAppMediaItem(profile.id, appItem.id)) {
               if (userController.profile.itemlists!.isNotEmpty) {
                 logger.d("Adding item to global itemlist from userController");
-                userController.profile.appMediaItems!.add(appItem.id);
+                userController.profile.favoriteItems!.add(appItem.id);
               }
             }
 
@@ -448,7 +447,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     String spotifyToken = await SpotifyApiCalls.getSpotifyToken();
 
     if(spotifyToken.isNotEmpty) {
-      logger.i("Spotify access token is: $spotifyToken");
+      logger.v("Spotify access token is: $spotifyToken");
       userController.user!.spotifyToken = spotifyToken;
       await UserFirestore().updateSpotifyToken(userController.user!.id, spotifyToken);
     }

@@ -13,6 +13,7 @@ import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_media_source.dart';
 import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
 import 'package:neom_music_player/neom_player_invoke.dart';
+import 'package:neom_music_player/ui/player/media_player_page.dart';
 import 'package:neom_music_player/ui/widgets/copy_clipboard.dart';
 import 'package:neom_music_player/ui/widgets/download_button.dart';
 import 'package:neom_music_player/ui/widgets/image_card.dart';
@@ -203,9 +204,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
   return ListTile(
     contentPadding: const EdgeInsets.only(left: 15.0,),
     title: Text(appMediaItem.name,
-      style: const TextStyle(
-        fontWeight: FontWeight.w500,
-      ),
+      style: const TextStyle(fontWeight: FontWeight.w500,),
       overflow: TextOverflow.ellipsis,
     ),
     subtitle: Text(appMediaItem.artist,
@@ -218,11 +217,9 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       imageUrl: appMediaItem.imgUrl
     ),
     trailing: Row(
-      mainAxisSize:
-      MainAxisSize.min,
+      mainAxisSize: MainAxisSize.min,
       children: [
-        LikeButton(
-          mediaItem: null,
+        LikeButton(mediaItem: null,
           data: appMediaItem.toJSON(),
         ),
         appMediaItem.mediaSource == AppMediaSource.internal ? DownloadButton(
@@ -257,20 +254,9 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       }
       Hive.box(AppHiveConstants.settings).put('search', searchQueries);
 
-      if(appMediaItem.mediaSource == AppMediaSource.internal) {
-        NeomPlayerInvoke.init(
-          appMediaItems: [appMediaItem],
-          index: 0,
-          isOffline: false,
-        );
-      } else {
-        Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem, itemlistId]);
-      }
-
-
+      Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
     },
   );
-
 }
 
 Widget buildSpotifySongList(BuildContext context, SpotifySearchController _) {
@@ -336,9 +322,7 @@ Widget buildSpotifySongList(BuildContext context, SpotifySearchController _) {
         tileColor: _.addedItems.contains(song) ? AppColor.getMain() : Colors.transparent,
         onTap: () => _.handleItemlistItems(song, AppItemState.heardIt),
         onLongPress: () => _.getAppMediaItemDetails(song),
-        leading: Image.network(
-            song.imgUrl.isNotEmpty ? song.imgUrl
-                : AppFlavour.getNoImageUrl()
+        leading: Image.network(song.imgUrl.isNotEmpty ? song.imgUrl : AppFlavour.getNoImageUrl()
         ),
       );
     },

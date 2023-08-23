@@ -22,7 +22,7 @@ class SpotifyApiCalls {
       );
     }
 
-    AppUtilities.logger.i("Spotify Token Retrieved $spotifyToken");
+    AppUtilities.logger.v("Spotify Token Retrieved $spotifyToken");
     return spotifyToken;
   }
 

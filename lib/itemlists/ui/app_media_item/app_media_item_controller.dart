@@ -15,9 +15,9 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
-import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_commons/core/utils/enums/push_notification_type.dart';
 import 'package:neom_itemlists/itemlists/data/firestore/band_itemlist_firestore.dart';
+import 'package:neom_music_player/ui/player/media_player_page.dart';
 import '../../domain/use_cases/app_item_service.dart';
 
 class AppMediaItemController extends GetxController implements AppItemService {
@@ -140,7 +140,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
 
       if(itemlistOwner == ItemlistOwner.profile) {
         if(await PublicItemlistFirestore().addAppMediaItem(appMediaItem, itemlistId)){
-          if(await ProfileFirestore().addAppMediaItem(profileId, appMediaItem.id)){
+          if(await ProfileFirestore().addAppMediaItem(profileId, appMediaItem.id)) {
             if (userController.profile.itemlists!.isNotEmpty) {
               logger.d("Adding item to global itemlist from userController");
               userController.profile.itemlists![itemlistId]!.appMediaItems!.add(appMediaItem);
@@ -239,18 +239,21 @@ class AppMediaItemController extends GetxController implements AppItemService {
 
   @override
   Future<void> getItemlistItemDetails(AppMediaItem appMediaItem) async {
-    logger.d("");
-    if(AppFlavour.appInUse == AppInUse.cyberneom) {
-      ChamberPreset chamberPreset = itemlist.chamberPresets?.firstWhere((element) => element.name == appMediaItem.name) ?? ChamberPreset();
-      if(chamberPreset.name.isNotEmpty) {
-        Get.toNamed(AppFlavour.getItemDetailsRoute(),
-            arguments: [chamberPreset.clone()]
-        );
-      }
-    } else {
-      Get.toNamed(AppFlavour.getItemDetailsRoute(),
-          arguments: [appMediaItem]
-      );
+    logger.d("getItemlistItemDetails ${appMediaItem.name}");
+    switch(AppFlavour.appInUse) {
+      case AppInUse.cyberneom:
+        ChamberPreset chamberPreset = itemlist.chamberPresets?.firstWhere((element) => element.name == appMediaItem.name) ?? ChamberPreset();
+        if(chamberPreset.name.isNotEmpty) {
+          Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [chamberPreset.clone()]
+          );
+        }
+        break;
+      case AppInUse.gigmeout:
+        Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
+        break;
+      case AppInUse.emxi:
+        Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
+        break;
     }
 
     update([AppPageIdConstants.itemlistItem]);

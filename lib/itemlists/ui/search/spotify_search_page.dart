@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import '../widgets/app_item_widgets.dart';
 import 'appbar_spotify_search.dart';
 import 'spotify_search_controller.dart';
