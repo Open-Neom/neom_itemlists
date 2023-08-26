@@ -293,8 +293,6 @@ class AppMediaItemDetailsController extends GetxController {
     update([AppPageIdConstants.appItemDetails]);
   }
 
-
-  //TODO Push Notification (GigPRofile added a item)
   bool itemAlreadyInList() {
     logger.d("Verifying if item already exists in itemlists");
     bool itemAlreadyInList = false;

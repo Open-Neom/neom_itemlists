@@ -4,8 +4,8 @@ import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/api_services/google_books/google_books_api.dart';
 import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/band_firestore.dart';
+import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
-import 'package:neom_commons/core/data/firestore/public_itemlist_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/app_release_item.dart';
@@ -21,15 +21,16 @@ import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
+import 'package:neom_events/events/ui/event_details_controller.dart';
 import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_search.dart';
 import 'package:neom_itemlists/itemlists/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_itemlists/itemlists/data/firestore/band_itemlist_firestore.dart';
+import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
 import 'package:neom_music_player/ui/player/media_player_page.dart';
 import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
-import '../../domain/use_cases/spotify_search_service.dart';
+import '../../domain/use_cases/app_media_item_search_search_service.dart';
 
-
-class SpotifySearchController extends GetxController implements AppItemSearchService   {
+class AppMediaItemSearchController extends GetxController implements AppMediaItemSearchService   {
 
   var logger = AppUtilities.logger;
   final userController = Get.find<UserController>();
@@ -66,20 +67,37 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
   String get searchParam => _searchParam.value;
   set searchParam(String searchParam) => _searchParam.value = searchParam;
 
-  AppProfile _profile = AppProfile();
-  Band _band = Band();
+  AppProfile profile = AppProfile();
+  AppMediaItem appMediaItem = AppMediaItem();
+  Band band = Band();
   Itemlist itemlist = Itemlist();
   ItemlistOwner itemlistOwner = ItemlistOwner.profile;
 
   Map<String, AppReleaseItem> items = {};
+
+  final RxString _itemlistId = "".obs;
+  String get itemlistId => _itemlistId.value;
+  set itemlistId(String itemlistId) => _itemlistId.value = itemlistId;
+
+  final RxInt _appItemState = 0.obs;
+  int get appItemState => _appItemState.value;
+  set appItemState(int appItemState) => _appItemState.value = appItemState;
+
+  final RxBool _existsInItemlist = false.obs;
+  bool get existsInItemlist => _existsInItemlist.value;
+  set existsInItemlist(bool existsInItemlist) => _existsInItemlist.value = existsInItemlist;
+
+  final RxBool _wasAdded = false.obs;
+  bool get wasAdded => _wasAdded.value;
+  set wasAdded(bool wasAdded) => _wasAdded.value = wasAdded;
 
   @override
   void onInit() async {
     super.onInit();
     try {
 
-      _profile = userController.profile;
-      _band = userController.band;
+      profile = userController.profile;
+      band = userController.band;
       itemlistOwner = userController.itemlistOwner;
 
       if(Get.arguments != null) {
@@ -326,10 +344,10 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
 
       String itemlistId = "";
       if(itemlistOwner == ItemlistOwner.profile) {
-        itemlist.ownerId = _profile.id;
-        itemlistId = await PublicItemlistFirestore().insert(itemlist);
+        itemlist.ownerId = profile.id;
+        itemlistId = await ItemlistFirestore().insert(itemlist);
       } else if(itemlistOwner == ItemlistOwner.band) {
-        itemlist.ownerId = _band.id;
+        itemlist.ownerId = band.id;
         itemlistId = await BandItemlistFirestore().insert(itemlist);
       }
 
@@ -343,33 +361,25 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
           userController.profile.itemlists![itemlist.id] = itemlist;
 
           for (var appMediaItem in itemlist.appMediaItems ?? []) {
-
-            if(!await AppMediaItemFirestore().exists(appMediaItem.id)) {
-              await AppMediaItemFirestore().insert(appMediaItem);
-            }
-
-            if(await ProfileFirestore().addAppMediaItem(_profile.id, appMediaItem.id)) {
+            if(await ProfileFirestore().addFavoriteItem(profile.id, appMediaItem.id)) {
               if (userController.profile.itemlists!.isNotEmpty) {
                 logger.d("Adding item to global itemlist from userController");
                 userController.profile.favoriteItems!.add(appMediaItem.id);
               }
             }
+            AppMediaItemFirestore().existsOrInsert(appMediaItem);
           }
 
         } else if(itemlistOwner == ItemlistOwner.band) {
           userController.band.itemlists![itemlist.id] = itemlist;
           for (var appMediaItem in itemlist.appMediaItems ?? []) {
-
-            if(!await AppMediaItemFirestore().exists(appMediaItem.id)) {
-              await AppMediaItemFirestore().insert(appMediaItem);
-            }
-
-            if(await BandFirestore().addAppMediaItem(_band.id, appMediaItem.id)){
+            if(await BandFirestore().addAppMediaItem(band.id, appMediaItem.id)){
               if (userController.band.itemlists!.isNotEmpty) {
                 logger.d("Adding item to global itemlist from band");
                 userController.band.appMediaItems!.add(appMediaItem.id);
               }
             }
+            AppMediaItemFirestore().existsOrInsert(appMediaItem);
           }
 
         }
@@ -389,6 +399,114 @@ class SpotifySearchController extends GetxController implements AppItemSearchSer
     update();
 
   }
+
+
+
+
+
+
+
+  void setAppItemState(AppItemState newState){
+    logger.d("Setting new appItemState $newState");
+    appItemState = newState.value;
+    update([AppPageIdConstants.appItemDetails]);
+  }
+
+  void setSelectedItemlist(String selectedItemlist){
+    logger.d("Setting selectedItemlist $selectedItemlist");
+    itemlistId  = selectedItemlist;
+    existsInItemlist = itemAlreadyInList();
+    update([AppPageIdConstants.appItemDetails]);
+  }
+
+
+  Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0}) async {
+
+    if(!isButtonDisabled) {
+
+      isButtonDisabled = true;
+      isLoading = true;
+      update([AppPageIdConstants.appItemDetails]);
+
+      logger.i("AppMediaItem ${appMediaItem.name} would be added as $appItemState for Itemlist $itemlistId");
+
+      if(fanItemState > 0) appItemState = fanItemState;
+      if(itemlistId.isEmpty) itemlistId = itemlists.values.first.id;
+
+      AppMediaItemController appMediaItemController;
+
+      try {
+        appMediaItemController = Get.find<AppMediaItemController>();
+      } catch (e) {
+        appMediaItemController = Get.put(AppMediaItemController());
+      }
+
+      try {
+        if(!await AppMediaItemFirestore().exists(appMediaItem.id)) {
+          await AppMediaItemFirestore().insert(appMediaItem);
+        }
+
+        if(!existsInItemlist) {
+          appMediaItem.state = appItemState;
+
+          if(await appMediaItemController.addItemToItemlist(appMediaItem, itemlistId)){
+            logger.d("Setting existsInItemlist and wasAdded true");
+            existsInItemlist = true;
+            wasAdded = true;
+          }
+        }
+
+
+      } catch (e) {
+        logger.d(e.toString());
+      }
+
+      update([AppPageIdConstants.itemlistItem,
+        AppPageIdConstants.itemlist,
+        AppPageIdConstants.appItemDetails,
+        AppPageIdConstants.profile]);
+
+      try {
+        if(itemlistOwner == ItemlistOwner.profile) {
+          if(Get.find<EventDetailsController>().initialized) {
+            Get.find<EventDetailsController>().addToMatchedItems(appMediaItem);
+            Navigator.of(context).popUntil(ModalRoute.withName(AppRouteConstants.eventDetails));
+          } else {
+            Get.offAllNamed(AppRouteConstants.home);
+            Get.toNamed(AppRouteConstants.listItems);
+          }
+        } else {
+          Get.offAllNamed(AppRouteConstants.home);
+          Get.toNamed(AppRouteConstants.bandsRoom);
+          Get.toNamed(AppRouteConstants.bandLists);
+        }
+
+      } catch (e) {
+        Get.offAllNamed(AppRouteConstants.home);
+        Get.toNamed(AppRouteConstants.listItems);
+      }
+    }
+
+  }
+
+  bool itemAlreadyInList() {
+    logger.d("Verifying if item already exists in itemlists");
+    bool itemAlreadyInList = false;
+
+    itemlists.forEach((key, iList) {
+      for (var item in iList.appMediaItems!) {
+        if (item.id == appMediaItem.id) {
+          itemAlreadyInList = true;
+          appMediaItem.state = item.state;
+          _itemlistId.value = iList.id;
+        }
+      }
+    });
+
+    logger.d("Item already exists in itemlists: $itemAlreadyInList");
+    return itemAlreadyInList;
+  }
+
 
 
 }

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/auth/ui/login/login_controller.dart';
 import 'package:neom_commons/core/app_flavour.dart';
+import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -151,6 +152,16 @@ class ItemlistPage extends StatelessWidget {
                                 onTap: ()=> _.setPrivacyOption(),
                               ),
                             ),),
+
+                            Obx(() => _.errorMsg.isNotEmpty ? Column(
+                              children: [
+                                SizedBox(height: 10),
+                                Container(
+                                  alignment: Alignment.center,
+                                  child: Text(_.errorMsg.tr, style: TextStyle(fontSize: 10, color: AppColor.red)),
+                                ),
+                              ],) : Container()
+                            ),
                           ],
                         ),
                         buttons: [

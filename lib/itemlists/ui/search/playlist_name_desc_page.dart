@@ -9,14 +9,14 @@ import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/constants/app_hero_tag_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'spotify_search_controller.dart';
+import 'app_media_item_search_controller.dart';
 
 class PlaylistNameDescPage extends StatelessWidget {
   const PlaylistNameDescPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<SpotifySearchController>(
+    return GetBuilder<AppMediaItemSearchController>(
       id: AppPageIdConstants.playlistNameDesc,
       builder: (_) {
          return Scaffold(

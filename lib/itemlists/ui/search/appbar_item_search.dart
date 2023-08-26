@@ -5,13 +5,13 @@ import 'package:get/get.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'spotify_search_controller.dart';
+import 'app_media_item_search_controller.dart';
 
 
 class AppBarSpotifySearch extends StatelessWidget implements PreferredSizeWidget {
 
-  final SpotifySearchController spotifySearchController;
-  const AppBarSpotifySearch(this.spotifySearchController, {Key? key}) : super(key: key);
+  final AppMediaItemSearchController itemSearchController;
+  const AppBarSpotifySearch(this.itemSearchController, {Key? key}) : super(key: key);
   
   @override
   Size get preferredSize => AppTheme.appBarHeight;
@@ -20,9 +20,9 @@ class AppBarSpotifySearch extends StatelessWidget implements PreferredSizeWidget
   Widget build(BuildContext context) {
     return AppBar(
       title: TextField(
-        controller: spotifySearchController.searchParamController,
+        controller: itemSearchController.searchParamController,
         maxLines: 1,
-        onChanged: (param) async => {await spotifySearchController.setSearchParam(param.trim())},
+        onChanged: (param) async => {await itemSearchController.setSearchParam(param.trim())},
         decoration: InputDecoration(
           suffixIcon: const Icon(CupertinoIcons.search),
           contentPadding: const EdgeInsets.all(10),

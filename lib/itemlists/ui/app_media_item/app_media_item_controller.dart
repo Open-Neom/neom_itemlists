@@ -3,9 +3,9 @@ import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/api_services/push_notification/firebase_messaging_calls.dart';
 import 'package:neom_commons/core/data/firestore/band_firestore.dart';
+import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
-import 'package:neom_commons/core/data/firestore/public_itemlist_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/band.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
@@ -107,14 +107,14 @@ class AppMediaItemController extends GetxController implements AppItemService {
       logger.d("updating itemlistItem ${updatedItem.toString()}");
       try {
 
-        if (await PublicItemlistFirestore().updateItem(itemlist.id, updatedItem)) {
+        if (await ItemlistFirestore().updateItem(itemlist.id, updatedItem)) {
           itemlistItems.update(updatedItem.id, (itemlistItem) => itemlistItem);
           userController.profile.itemlists![itemlist.id]!
               .appMediaItems!.add(updatedItem);
           updatedItem.state = _prevItemState;
           userController.profile.itemlists![itemlist.id]!
               .appMediaItems!.remove(updatedItem);
-          if(await PublicItemlistFirestore().removeItem(updatedItem, itemlist.id)){
+          if(await ItemlistFirestore().removeItem(updatedItem, itemlist.id)){
             logger.d("ItemlistItem was updated and old version deleted.");
           } else {
             logger.d("ItemlistItem was updated but old version remains.");
@@ -140,8 +140,8 @@ class AppMediaItemController extends GetxController implements AppItemService {
     try {
 
       if(itemlistOwner == ItemlistOwner.profile) {
-        if(await PublicItemlistFirestore().addAppMediaItem(appMediaItem, itemlistId)){
-          if(await ProfileFirestore().addAppMediaItem(profileId, appMediaItem.id)) {
+        if(await ItemlistFirestore().addAppMediaItem(appMediaItem, itemlistId)){
+          if(await ProfileFirestore().addFavoriteItem(profileId, appMediaItem.id)) {
             if (userController.profile.itemlists!.isNotEmpty) {
               logger.d("Adding item to global itemlist from userController");
               userController.profile.itemlists![itemlistId]!.appMediaItems!.add(appMediaItem);
@@ -189,13 +189,13 @@ class AppMediaItemController extends GetxController implements AppItemService {
 
     try {
       if(itemlistOwner == ItemlistOwner.profile) {
-        if(await PublicItemlistFirestore().removeItem(appMediaItem, itemlist.id)) {
+        if(await ItemlistFirestore().removeItem(appMediaItem, itemlist.id)) {
           logger.d("");
-          if(await ProfileFirestore().removeAppMediaItem(profileId, appMediaItem.id)) {
+          if(await ProfileFirestore().removeFavoriteItem(profileId, appMediaItem.id)) {
             if (userController.profile.itemlists != null &&
                 userController.profile.itemlists!.isNotEmpty) {
               logger.d("Removing item from global itemlist from userController");
-              userController.profile.itemlists = await PublicItemlistFirestore().fetchAll(profileId: userController.profile.id);
+              userController.profile.itemlists = await ItemlistFirestore().fetchAll(profileId: userController.profile.id);
               itemlistItems.remove(appMediaItem.id);
             }
           }
@@ -250,10 +250,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
         }
         break;
       case AppInUse.gigmeout:
-        PageRouteBuilder(
-          pageBuilder: (_, __, ___) => MediaPlayerPage(appMediaItem: appMediaItem), opaque: false,
-        );
-        // Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
+        Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
         break;
       case AppInUse.emxi:
         Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);

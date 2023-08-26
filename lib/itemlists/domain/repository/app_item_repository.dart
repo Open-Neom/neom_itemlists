@@ -5,7 +5,7 @@ abstract class AppItemRepository {
 
   Future<AppMediaItem> retrieve(String itemId);
   Future<Map<String, AppMediaItem>> retrieveFromList(List<String> itemIds);
-
+  Future<Map<String, AppMediaItem>> fetchAll();
   Future<bool> exists(String itemId);
   Future<void> existsOrInsert(AppMediaItem item);
 

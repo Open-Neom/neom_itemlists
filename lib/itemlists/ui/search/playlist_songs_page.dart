@@ -11,14 +11,14 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:neom_itemlists/itemlists/ui/widgets/app_item_widgets.dart';
-import 'spotify_search_controller.dart';
+import 'app_media_item_search_controller.dart';
 
 class PlaylistItemsPage extends StatelessWidget {
   const PlaylistItemsPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<SpotifySearchController>(
+    return GetBuilder<AppMediaItemSearchController>(
       id: AppPageIdConstants.playlistSong,
       builder: (_) => Scaffold(
         appBar: AppBarChild(title: _.itemlist.name.length > AppConstants.maxItemlistNameLength

@@ -7,6 +7,7 @@ import 'package:neom_commons/core/data/firestore/constants/app_firestore_collect
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
+import 'package:neom_commons/core/utils/enums/app_media_source.dart';
 import '../../domain/repository/app_item_repository.dart';
 
 class AppMediaItemFirestore implements AppItemRepository {
@@ -33,6 +34,29 @@ class AppMediaItemFirestore implements AppItemRepository {
       rethrow;
     }
     return appMediaItem;
+  }
+
+  @override
+  Future<Map<String, AppMediaItem>> fetchAll() async {
+    logger.d("Getting appMediaItems from list");
+
+    Map<String, AppMediaItem> appMediaItems = {};
+
+    try {
+      QuerySnapshot querySnapshot = await appMediaItemReference.get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        logger.d("QuerySnapshot is not empty");
+        for (var documentSnapshot in querySnapshot.docs) {
+          AppMediaItem appMediaItem = AppMediaItem.fromJSON(documentSnapshot.data());
+          appMediaItem.id = documentSnapshot.id;
+          appMediaItems[appMediaItem.id] = appMediaItem;
+        }
+      }
+    } catch (e) {
+      logger.d(e);
+    }
+    return appMediaItems;
   }
 
   @override
@@ -83,6 +107,18 @@ class AppMediaItemFirestore implements AppItemRepository {
   Future<void> insert(AppMediaItem appMediaItem) async {
     logger.d("Adding appMediaItem to database collection");
     try {
+      if((!appMediaItem.url.contains("gig-me-out") || !appMediaItem.url.contains("firebasestorage.googleapis.com"))
+          && appMediaItem.mediaSource == AppMediaSource.internal) {
+
+        if(appMediaItem.url.contains("spotify") || appMediaItem.url.contains("p.scdn.co")) {
+          appMediaItem.mediaSource = AppMediaSource.spotify;
+        } else if(appMediaItem.url.contains("youtube")) {
+          appMediaItem.mediaSource = AppMediaSource.spotify;
+        } else {
+          appMediaItem.mediaSource = AppMediaSource.other;
+        }
+    }
+
       await appMediaItemReference.doc(appMediaItem.id).set(appMediaItem.toJSON());
       logger.d("AppMediaItem inserted into Firestore");
     } catch (e) {
@@ -143,7 +179,6 @@ class AppMediaItemFirestore implements AppItemRepository {
       appMediaItemReference.doc(appMediaItem.id).get().then((doc) {
         if (doc.exists) {
           logger.d("AppMediaItem found");
-          return true;
         } else {
           logger.d("AppMediaItem not found. Inserting");
           insert(appMediaItem);

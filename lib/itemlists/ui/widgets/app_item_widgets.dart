@@ -28,7 +28,7 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'package:neom_commons/core/utils/core_utilities.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/profile_type.dart';
-import '../search/spotify_search_controller.dart';
+import '../search/app_media_item_search_controller.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 Widget buildItemList(BuildContext context, AppMediaItemController _) {
@@ -87,8 +87,18 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               onPressed: () {
-                ChamberPreset preset = _.itemlist.chamberPresets!.firstWhere((element) => element.id == appMediaItem.id);
-                Get.toNamed(AppRouteConstants.generator,  arguments: [preset.clone()]);
+                switch(AppFlavour.appInUse) {
+                  case AppInUse.cyberneom:
+                    ChamberPreset preset = _.itemlist.chamberPresets!.firstWhere((element) => element.id == appMediaItem.id);
+                    Get.toNamed(AppRouteConstants.generator,  arguments: [preset.clone()]);
+                    break;
+                  case AppInUse.gigmeout:
+                    Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
+                    break;
+                  case AppInUse.emxi:
+                    Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
+                    break;
+                }
               }
           ),
           onLongPress: () => AppFlavour.appInUse != AppInUse.cyberneom || !_.isFixed ? Alert(
@@ -176,18 +186,8 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
   );
 }
 
-Widget buildItemSearchList(BuildContext context, SpotifySearchController _) {
-  return ListView.builder(
-    padding: const EdgeInsets.fromLTRB(0.0, 8.0, 0.0, 8.0),
-    itemCount: _.appMediaItems.length,
-    itemBuilder: (context, index) {
-      AppMediaItem appMediaItem = _.appMediaItems.values.elementAt(index);
-      return createCoolMediaItemTile(context, appMediaItem, _.searchParam);
-    },
-  );
-}
-
-ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem, String query, {String itemlistId = ''}) {
+ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
+    {Itemlist? itemlist, String query = '', AppMediaItemSearchController? searchController}) {
   return ListTile(
     contentPadding: const EdgeInsets.only(left: 15.0,),
     title: Text(appMediaItem.name,
@@ -206,25 +206,23 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
     trailing: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        LikeButton(mediaItem: null,
-          data: appMediaItem.toJSON(),
-        ),
+        LikeButton(appMediaItem: appMediaItem,),
         appMediaItem.mediaSource == AppMediaSource.internal ? DownloadButton(
-          mediaItem: appMediaItem,
-          icon: 'download',
+          mediaItem: appMediaItem, icon: 'download',
         ) : appMediaItem.mediaSource == AppMediaSource.spotify ?
         IconButton(onPressed: () => CoreUtilities.launchURL(appMediaItem.permaUrl, openInApp: false), icon: Icon(FontAwesomeIcons.spotify))
             : Container(),
         SongTileTrailingMenu(
           appMediaItem: appMediaItem,
-          itemlist: Itemlist(),
+          itemlist: itemlist,
+          searchController: searchController,
         ),
       ],
     ),
     onLongPress: () {
       copyToClipboard(
         context: context,
-        text: appMediaItem.name,
+        text: appMediaItem.permaUrl,
       );
     },
     onTap: () {
@@ -246,7 +244,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
   );
 }
 
-Widget buildSpotifySongList(BuildContext context, SpotifySearchController _) {
+Widget buildSpotifySongList(BuildContext context, AppMediaItemSearchController _) {
   return ListView.separated(
     separatorBuilder: (context, index) => const Divider(),
     itemCount: _.appMediaItems.length,
