@@ -23,6 +23,7 @@ import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_api_c
 import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_search.dart';
 import 'package:neom_itemlists/itemlists/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
+import 'package:neom_itemlists/itemlists/ui/sync/spotify_playlist_page.dart';
 import 'package:spotify/spotify.dart' as spotify;
 
 class ItemlistController extends GetxController implements ItemlistService {
@@ -478,7 +479,9 @@ class ItemlistController extends GetxController implements ItemlistService {
           }
         }
 
-        Get.toNamed(AppRouteConstants.spotifyPlaylists);
+        Get.to(() => SpotifyPlaylistsPage(), transition: Transition.rightToLeft);
+        ///DEPRECATED
+        // Get.toNamed(AppRouteConstants.spotifyPlaylists);
       }
     } catch(e) {
       logger.e(e.toString());

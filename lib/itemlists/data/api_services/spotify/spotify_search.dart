@@ -65,7 +65,12 @@ class SpotifySearch {
         for (var item in page.items!) {
           if (item is Track) {
             AppMediaItem song = AppMediaItem.mapTrackToSong(item);
-            songs[song.id] = song;
+            if(song.url.isNotEmpty) {
+              songs[song.id] = song;
+            } else {
+              AppUtilities.logger.d("Media ${song.name} was found with no url so it was no added to songs list");
+            }
+
           }
         }
       }

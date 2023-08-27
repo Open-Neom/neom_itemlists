@@ -246,6 +246,8 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
     PageRouteBuilder(
       pageBuilder: (_, __, ___) => MediaPlayerPage(appMediaItem: appMediaItem), opaque: false,
     );
+
+    ///DEPRECATED
     //
     // NeomPlayerInvoke.init(
     //   appMediaItems: [appMediaItem],
@@ -399,12 +401,6 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
     update();
 
   }
-
-
-
-
-
-
 
   void setAppItemState(AppItemState newState){
     logger.d("Setting new appItemState $newState");

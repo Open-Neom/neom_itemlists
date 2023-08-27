@@ -49,7 +49,11 @@ class AppMediaItemFirestore implements AppItemRepository {
         logger.d("QuerySnapshot is not empty");
         for (var documentSnapshot in querySnapshot.docs) {
           AppMediaItem appMediaItem = AppMediaItem.fromJSON(documentSnapshot.data());
+          if(appMediaItem.name.toLowerCase() == 'no se vaya a confundir - en vivo') {
+            AppUtilities.logger.i("Add ${appMediaItem.name} Debuggin next");
+          }
           appMediaItem.id = documentSnapshot.id;
+          AppUtilities.logger.i("Add ${appMediaItem.name} to fetchAll list");
           appMediaItems[appMediaItem.id] = appMediaItem;
         }
       }
