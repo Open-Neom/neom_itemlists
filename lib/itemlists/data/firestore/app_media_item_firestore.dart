@@ -53,7 +53,7 @@ class AppMediaItemFirestore implements AppItemRepository {
             AppUtilities.logger.i("Add ${appMediaItem.name} Debuggin next");
           }
           appMediaItem.id = documentSnapshot.id;
-          AppUtilities.logger.i("Add ${appMediaItem.name} to fetchAll list");
+          AppUtilities.logger.v("Add ${appMediaItem.name} to fetchAll list");
           appMediaItems[appMediaItem.id] = appMediaItem;
         }
       }
@@ -182,7 +182,7 @@ class AppMediaItemFirestore implements AppItemRepository {
     try {
       appMediaItemReference.doc(appMediaItem.id).get().then((doc) {
         if (doc.exists) {
-          logger.d("AppMediaItem found");
+          logger.v("AppMediaItem found");
         } else {
           logger.d("AppMediaItem not found. Inserting");
           insert(appMediaItem);

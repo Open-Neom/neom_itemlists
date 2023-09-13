@@ -1,17 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/app_flavour.dart';
-import 'package:neom_commons/core/utils/app_theme.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-import 'package:neom_commons/core/domain/model/item_list.dart';
-import 'package:neom_commons/core/utils/app_color.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import '../itemlist_controller.dart';
 
 Widget buildItemlistList(BuildContext context, ItemlistController _) {
