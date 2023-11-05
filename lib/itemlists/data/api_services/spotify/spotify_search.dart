@@ -14,7 +14,7 @@ class SpotifySearch {
   Map<String, Itemlist> giglists = {};
 
   Future<Map<String, AppMediaItem>> searchSongs(String searchParam) async {
-    logger.d("Searching for songs");
+    logger.t("Searching for songs");
 
     try {
       var searchData = await spotify.search
@@ -26,8 +26,7 @@ class SpotifySearch {
             return err;
           });
 
-      logger.i("Retrieving songs from Spotify");
-      loadSongsFromSpotify(searchData);
+      await loadSongsFromSpotify(searchData);
 
     } catch (e) {
       logger.e(e.toString());
@@ -59,7 +58,7 @@ class SpotifySearch {
 
 
   Future<void> loadSongsFromSpotify(List<Page<dynamic>> searchData) async {
-
+    logger.t("Retrieving songs from Spotify");
     try {
       for (var page in searchData) {
         for (var item in page.items!) {
@@ -68,7 +67,7 @@ class SpotifySearch {
             if(song.url.isNotEmpty) {
               songs[song.id] = song;
             } else {
-              AppUtilities.logger.d("Media ${song.name} was found with no url so it was no added to songs list");
+              AppUtilities.logger.t("Media ${song.name} was found with no url so it was no added to songs list");
             }
 
           }

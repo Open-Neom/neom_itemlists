@@ -73,7 +73,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
         logger.i("ItemlistItemController Init ready loco with no itemlist");
       }
 
-      if(AppFlavour.appInUse == AppInUse.cyberneom) {
+      if(AppFlavour.appInUse == AppInUse.c) {
         isFixed = true;
       }
     } catch (e) {
@@ -241,17 +241,17 @@ class AppMediaItemController extends GetxController implements AppItemService {
   Future<void> getItemlistItemDetails(AppMediaItem appMediaItem) async {
     logger.d("getItemlistItemDetails ${appMediaItem.name}");
     switch(AppFlavour.appInUse) {
-      case AppInUse.cyberneom:
+      case AppInUse.c:
         ChamberPreset chamberPreset = itemlist.chamberPresets?.firstWhere((element) => element.name == appMediaItem.name) ?? ChamberPreset();
         if(chamberPreset.name.isNotEmpty) {
           Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [chamberPreset.clone()]
           );
         }
         break;
-      case AppInUse.gigmeout:
+      case AppInUse.g:
         Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
         break;
-      case AppInUse.emxi:
+      case AppInUse.e:
         Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
         break;
     }

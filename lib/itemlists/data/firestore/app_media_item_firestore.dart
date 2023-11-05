@@ -53,7 +53,7 @@ class AppMediaItemFirestore implements AppItemRepository {
             AppUtilities.logger.i("Add ${appMediaItem.name} Debuggin next");
           }
           appMediaItem.id = documentSnapshot.id;
-          AppUtilities.logger.v("Add ${appMediaItem.name} to fetchAll list");
+          AppUtilities.logger.t("Add ${appMediaItem.name} to fetchAll list");
           appMediaItems[appMediaItem.id] = appMediaItem;
         }
       }
@@ -65,7 +65,7 @@ class AppMediaItemFirestore implements AppItemRepository {
 
   @override
   Future<Map<String, AppMediaItem>> retrieveFromList(List<String> appMediaItemIds) async {
-    logger.d("Getting appMediaItems from list");
+    logger.t("Getting ${appMediaItemIds.length} appMediaItems from firestore");
 
     Map<String, AppMediaItem> appMediaItems = {};
 
@@ -73,10 +73,9 @@ class AppMediaItemFirestore implements AppItemRepository {
       QuerySnapshot querySnapshot = await appMediaItemReference.get();
 
       if (querySnapshot.docs.isNotEmpty) {
-        logger.d("QuerySnapshot is not empty");
         for (var documentSnapshot in querySnapshot.docs) {
           if(appMediaItemIds.contains(documentSnapshot.id)){
-            AppMediaItem appMediaItemm = AppMediaItem.fromJSON(documentSnapshot.data().toString());
+            AppMediaItem appMediaItemm = AppMediaItem.fromJSON(documentSnapshot.data());
             logger.d("AppMediaItem ${appMediaItemm.name} was retrieved with details");
             appMediaItems[documentSnapshot.id] = appMediaItemm;
           }
@@ -109,7 +108,7 @@ class AppMediaItemFirestore implements AppItemRepository {
 
   @override
   Future<void> insert(AppMediaItem appMediaItem) async {
-    logger.d("Adding appMediaItem to database collection");
+    logger.t("Adding appMediaItem to database collection");
     try {
       if((!appMediaItem.url.contains("gig-me-out") || !appMediaItem.url.contains("firebasestorage.googleapis.com"))
           && appMediaItem.mediaSource == AppMediaSource.internal) {
@@ -177,14 +176,14 @@ class AppMediaItemFirestore implements AppItemRepository {
 
   @override
   Future<void> existsOrInsert(AppMediaItem appMediaItem) async {
-    logger.d("Getting appMediaItem ${appMediaItem.id}");
+    logger.t("existsOrInsert appMediaItem ${appMediaItem.id}");
 
     try {
       appMediaItemReference.doc(appMediaItem.id).get().then((doc) {
         if (doc.exists) {
-          logger.v("AppMediaItem found");
+          logger.t("AppMediaItem found");
         } else {
-          logger.d("AppMediaItem not found. Inserting");
+          logger.d("AppMediaItem ${appMediaItem.id}. ${appMediaItem.name} not found. Inserting");
           insert(appMediaItem);
         }
       });

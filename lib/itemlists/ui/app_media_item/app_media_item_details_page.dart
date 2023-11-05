@@ -106,7 +106,10 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                             if(_.appMediaItem.url.isNotEmpty) {
                               _.isPlaying ? await _.pausePreview() : await _.playPreview();
                             } else {
-                              AppUtilities.showSnackBar(AppTranslationConstants.noAvailablePreviewUrl, AppTranslationConstants.noAvailablePreviewUrlMsg);
+                              AppUtilities.showSnackBar(
+                                  title: AppTranslationConstants.noAvailablePreviewUrl,
+                                  message: AppTranslationConstants.noAvailablePreviewUrlMsg
+                              );
                             }
                           }
                         ),

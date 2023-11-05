@@ -110,7 +110,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   void onReady() async {
     super.onReady();
     try {
-      if(AppFlavour.appInUse == AppInUse.gigmeout && !Platform.isIOS) {
+      if(AppFlavour.appInUse == AppInUse.g && !Platform.isIOS) {
         await getSpotifyToken();
         if (userController.user!.spotifyToken.isNotEmpty
             && userController.profile.lastSpotifySync < DateTime
@@ -181,7 +181,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         if(newItemlistId.isNotEmpty){
           itemlists[newItemlistId] = newItemlist;
-          logger.v("Itemlists $itemlists");
+          logger.t("Itemlists $itemlists");
           clearNewItemlist();
         } else {
           logger.d("Something happens trying to insert itemlist");
@@ -332,7 +332,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   Future<void> gotoItemlistItems(Itemlist itemlist) async {
 
-    if(AppFlavour.appInUse == AppInUse.cyberneom) {
+    if(AppFlavour.appInUse == AppInUse.c) {
       await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
     } else {
       AppMediaItemController appItemController;
@@ -455,7 +455,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     String spotifyToken = await SpotifyApiCalls.getSpotifyToken();
 
     if(spotifyToken.isNotEmpty) {
-      logger.v("Spotify access token is: $spotifyToken");
+      logger.t("Spotify access token is: $spotifyToken");
       userController.user!.spotifyToken = spotifyToken;
       await UserFirestore().updateSpotifyToken(userController.user!.id, spotifyToken);
     }

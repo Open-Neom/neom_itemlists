@@ -67,7 +67,7 @@ class PlaylistNameDescPage extends StatelessWidget {
                       children: [
                         const Icon(Icons.image, size: 20,),
                         AppTheme.widthSpace5,
-                        Text(_.postUploadController.imageFile.path.isEmpty
+                        Text(_.postUploadController.mediaFile.value.path.isEmpty
                             ? AppTranslationConstants.addItemlistImg.tr
                             : AppTranslationConstants.changeImage.tr,
                           style: const TextStyle(color: Colors.white70,),
@@ -77,11 +77,11 @@ class PlaylistNameDescPage extends StatelessWidget {
                     onTap: () => _.addItemlistImage()
                   ),
                   AppTheme.heightSpace20,
-                  _.postUploadController.imageFile.path.isEmpty ? Container():
+                  _.postUploadController.mediaFile.value.path.isEmpty ? Container():
                   Stack(
                     alignment: Alignment.bottomRight,
                     children: [
-                      Image.file(File(_.postUploadController.imageFile.path),height: 175, width: 175,),
+                      Image.file(File(_.postUploadController.mediaFile.value.path),height: 175, width: 175,),
                       FloatingActionButton(
                         heroTag: AppHeroTagConstants.clearImg,
                         backgroundColor: Theme.of(context).primaryColorLight,

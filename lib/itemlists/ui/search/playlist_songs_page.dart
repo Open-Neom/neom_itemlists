@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 
 import 'package:neom_commons/core/ui/widgets/appbar_child.dart';
+import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
@@ -24,9 +25,10 @@ class PlaylistItemsPage extends StatelessWidget {
         appBar: AppBarChild(title: _.itemlist.name.length > AppConstants.maxItemlistNameLength
             ? "${_.itemlist.name.substring(0,AppConstants.maxItemlistNameLength)}..."
             : _.itemlist.name),
+        backgroundColor: AppColor.main50,
         body: Container(
           decoration: AppTheme.appBoxDecoration,
-          child: AppFlavour.appInUse == AppInUse.gigmeout
+          child: AppFlavour.appInUse == AppInUse.g
               ? Obx(()=> buildSpotifySongList(context, _))
               : Container(),
         ),

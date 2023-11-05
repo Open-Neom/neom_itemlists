@@ -57,7 +57,7 @@ class ItemlistPage extends StatelessWidget {
         init: ItemlistController(),
         builder: (_) => Scaffold(
           backgroundColor: AppColor.main75,
-          appBar: AppFlavour.appInUse == AppInUse.gigmeout ? AppBar(
+          appBar: AppFlavour.appInUse == AppInUse.g ? AppBar(
             actions: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8.0),
@@ -69,7 +69,10 @@ class ItemlistPage extends StatelessWidget {
                           arguments: [SpotifySearchType.song]
                       );
                     } else {
-                      AppUtilities.showSnackBar(AppTranslationConstants.noItemlistsMsg, AppTranslationConstants.noItemlistsMsg2);
+                      AppUtilities.showSnackBar(
+                          title: AppTranslationConstants.noItemlistsMsg,
+                          message: AppTranslationConstants.noItemlistsMsg2
+                      );
                     }
                   },
                 ),
@@ -200,12 +203,12 @@ class ItemlistPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                AppFlavour.appInUse != AppInUse.cyberneom
-                    && (AppFlavour.appInUse == AppInUse.emxi || (Platform.isAndroid || kDebugMode)) ?
+                AppFlavour.appInUse != AppInUse.c
+                    && (AppFlavour.appInUse == AppInUse.e || (Platform.isAndroid || kDebugMode)) ?
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    AppFlavour.appInUse == AppInUse.emxi || _.outOfSync
+                    AppFlavour.appInUse == AppInUse.e || _.outOfSync
                         ? SizedBox(
                       child: DefaultTextStyle(
                         style: const TextStyle(
@@ -215,12 +218,12 @@ class ItemlistPage extends StatelessWidget {
                           repeatForever: true,
                           animatedTexts: [
                             FlickerAnimatedText(
-                                AppFlavour.appInUse == AppInUse.gigmeout ?
+                                AppFlavour.appInUse == AppInUse.g ?
                                 AppTranslationConstants.synchronizeSpotifyPlaylists.tr
                                 : AppTranslationConstants.suggestedReading.tr),
                           ],
                           onTap: () {
-                            AppFlavour.appInUse == AppInUse.gigmeout
+                            AppFlavour.appInUse == AppInUse.g
                                 ? _.synchronizeSpotifyPlaylists()
                                 : Get.toNamed(AppRouteConstants.PDFViewer,
                                 arguments: [Get.find<LoginController>().appInfo.suggestedUrl, 0, 150]);
@@ -234,7 +237,7 @@ class ItemlistPage extends StatelessWidget {
                       elevation: AppTheme.elevationFAB,
                       child: Icon(AppFlavour.getSyncIcon()),
                       onPressed: () => {
-                        AppFlavour.appInUse == AppInUse.gigmeout
+                        AppFlavour.appInUse == AppInUse.g
                         ? _.synchronizeSpotifyPlaylists()
                         : Get.toNamed(AppRouteConstants.PDFViewer,
                         arguments: [Get.find<LoginController>().appInfo.suggestedUrl, true, 0, 250])

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/api_services/google_books/google_books_api.dart';
 import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
@@ -161,7 +162,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
   @override
   Future<void> searchAppMediaItem() async {
-    logger.i(searchParam);
+    logger.d(searchParam);
     clear();
     try {
       switch(_spotifySearchType) {
@@ -178,12 +179,12 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
           });
 
           switch(AppFlavour.appInUse){
-            case AppInUse.gigmeout:
+            case AppInUse.g:
               Map<String, AppMediaItem> spotifySongs = await SpotifySearch().searchSongs(searchParam);
 
               appMediaItems.addAll(spotifySongs);
               break;
-            case AppInUse.emxi:
+            case AppInUse.e:
 
               List<GoogleBook> googleBooks = await GoogleBooksApi.searchBooks(searchParam);
               for (var googleBook in googleBooks) {
@@ -191,7 +192,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
                 appMediaItems[book.id] = book;
               }
               break;
-            case AppInUse.cyberneom:
+            case AppInUse.c:
               break;
           }
 
@@ -314,7 +315,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
   void clearItemlistImage() async {
     logger.d("");
     try {
-      postUploadController.clearImage();
+      postUploadController.clearMedia();
     } catch (e) {
       logger.e(e.toString());
     }
@@ -337,7 +338,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
 
     try {
-      if(postUploadController.imageFile.path.isNotEmpty) {
+      if(postUploadController.mediaFile.value.path.isNotEmpty) {
         String itemlistImgUrl = await postUploadController.handleUploadImage(UploadImageType.itemlist);
         if(itemlistImgUrl.isNotEmpty) {
           itemlist.imgUrl = itemlistImgUrl;
@@ -417,41 +418,38 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
 
   Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0}) async {
+    logger.t("addItemlistItem ${appMediaItem.id}");
 
-    if(!isButtonDisabled) {
-
+    if(existsInItemlist) {
+      AppUtilities.showSnackBar(message: "${appMediaItem.name} ya está en tu playlist ${itemlist.name}");
+    } else if(!isButtonDisabled) {
       isButtonDisabled = true;
       isLoading = true;
       update([AppPageIdConstants.appItemDetails]);
-
       logger.i("AppMediaItem ${appMediaItem.name} would be added as $appItemState for Itemlist $itemlistId");
 
-      if(fanItemState > 0) appItemState = fanItemState;
-      if(itemlistId.isEmpty) itemlistId = itemlists.values.first.id;
-
-      AppMediaItemController appMediaItemController;
-
       try {
-        appMediaItemController = Get.find<AppMediaItemController>();
-      } catch (e) {
-        appMediaItemController = Get.put(AppMediaItemController());
-      }
 
-      try {
-        if(!await AppMediaItemFirestore().exists(appMediaItem.id)) {
-          await AppMediaItemFirestore().insert(appMediaItem);
+        if(fanItemState > 0) appItemState = fanItemState;
+        if(itemlistId.isEmpty) itemlistId = itemlists.values.first.id;
+
+        AppMediaItemController appMediaItemController;
+        if (Get.isRegistered<AppMediaItemController>()) {
+          appMediaItemController = Get.find<AppMediaItemController>();
+        } else {
+          appMediaItemController = Get.put(AppMediaItemController());
         }
+
+        AppMediaItemFirestore().existsOrInsert(appMediaItem);
 
         if(!existsInItemlist) {
           appMediaItem.state = appItemState;
-
           if(await appMediaItemController.addItemToItemlist(appMediaItem, itemlistId)){
             logger.d("Setting existsInItemlist and wasAdded true");
             existsInItemlist = true;
             wasAdded = true;
           }
         }
-
 
       } catch (e) {
         logger.d(e.toString());
@@ -464,9 +462,9 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
       try {
         if(itemlistOwner == ItemlistOwner.profile) {
-          if(Get.find<EventDetailsController>().initialized) {
+          if(Get.isRegistered<EventDetailsController>()) {
             Get.find<EventDetailsController>().addToMatchedItems(appMediaItem);
-            Navigator.of(context).popUntil(ModalRoute.withName(AppRouteConstants.eventDetails));
+            Navigator.pop(context);
           } else {
             Get.offAllNamed(AppRouteConstants.home);
             Get.toNamed(AppRouteConstants.listItems);

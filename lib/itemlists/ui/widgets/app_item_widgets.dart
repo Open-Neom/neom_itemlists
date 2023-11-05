@@ -13,7 +13,6 @@ import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_media_source.dart';
 import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
 import 'package:neom_music_player/ui/player/media_player_page.dart';
-import 'package:neom_music_player/ui/widgets/copy_clipboard.dart';
 import 'package:neom_music_player/ui/widgets/download_button.dart';
 import 'package:neom_music_player/ui/widgets/image_card.dart';
 import 'package:neom_music_player/ui/widgets/like_button.dart';
@@ -46,7 +45,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                     ? "${appMediaItem.name.substring(0,AppConstants.maxAppItemNameLength)}..."
                     : appMediaItem.name),
                   const SizedBox(width:5),
-                  (AppFlavour.appInUse == AppInUse.cyberneom || (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed)) ?
+                  (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed)) ?
                     RatingBar(
                     initialRating: appMediaItem.state.toDouble(),
                     minRating: 1,
@@ -67,11 +66,11 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                     ) : Container(),
                 ]
             ),
-            subtitle: (AppFlavour.appInUse == AppInUse.cyberneom && (appMediaItem.description?.isNotEmpty ?? false)) ?
+            subtitle: (AppFlavour.appInUse == AppInUse.c && (appMediaItem.description?.isNotEmpty ?? false)) ?
             Text(appMediaItem.description ?? '', textAlign: TextAlign.justify,) :
             Text(appMediaItem.artist.isEmpty ? "" : appMediaItem.artist.length > AppConstants.maxArtistNameLength
                 ? "${appMediaItem.artist.substring(0,AppConstants.maxArtistNameLength)}..." : appMediaItem.artist),
-            onTap: () => AppFlavour.appInUse == AppInUse.cyberneom || !_.isFixed ? _.getItemlistItemDetails(appMediaItem) : {},
+            onTap: () => AppFlavour.appInUse == AppInUse.c || !_.isFixed ? _.getItemlistItemDetails(appMediaItem) : {},
             leading: Hero(
               tag: CoreUtilities.getAppItemHeroTag(index),
               child: Image.network(
@@ -88,20 +87,20 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
               constraints: const BoxConstraints(),
               onPressed: () {
                 switch(AppFlavour.appInUse) {
-                  case AppInUse.cyberneom:
+                  case AppInUse.c:
                     ChamberPreset preset = _.itemlist.chamberPresets!.firstWhere((element) => element.id == appMediaItem.id);
                     Get.toNamed(AppRouteConstants.generator,  arguments: [preset.clone()]);
                     break;
-                  case AppInUse.gigmeout:
+                  case AppInUse.g:
                     Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
                     break;
-                  case AppInUse.emxi:
+                  case AppInUse.e:
                     Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
                     break;
                 }
               }
           ),
-          onLongPress: () => AppFlavour.appInUse != AppInUse.cyberneom || !_.isFixed ? Alert(
+          onLongPress: () => AppFlavour.appInUse != AppInUse.c || !_.isFixed ? Alert(
               context: context,
               title: AppTranslationConstants.appItemPrefs.tr,
               style: AlertStyle(
@@ -220,7 +219,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       ],
     ),
     onLongPress: () {
-      copyToClipboard(
+      CoreUtilities.copyToClipboard(
         context: context,
         text: appMediaItem.permaUrl,
       );

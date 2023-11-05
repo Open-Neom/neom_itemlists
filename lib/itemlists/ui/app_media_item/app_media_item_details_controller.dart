@@ -59,7 +59,8 @@ class AppMediaItemDetailsController extends GetxController {
   bool get isButtonDisabled => _isButtonDisabled.value;
   set isButtonDisabled(bool isButtonDisabled) => _isButtonDisabled.value = isButtonDisabled;
 
-  final AudioPlayer audioPlayer = AudioPlayer(playerId: AppInUse.gigmeout.value);
+  ///VerifY IF NEEDED with music player
+  final AudioPlayer audioPlayer = AudioPlayer(playerId: AppFlavour.getAppName());
 
   AppReleaseItem releasedItem = AppReleaseItem();
   String releasedItemId = "";
@@ -143,7 +144,7 @@ class AppMediaItemDetailsController extends GetxController {
 
       if(itemlists.isEmpty) {
         Get.offAllNamed(AppRouteConstants.home);
-        AppUtilities.showSnackBar(AppTranslationConstants.noItemlistsMsg, AppTranslationConstants.noItemlistsMsg2);
+        AppUtilities.showSnackBar(title: AppTranslationConstants.noItemlistsMsg, message: AppTranslationConstants.noItemlistsMsg2);
       }
     } catch(e) {
       logger.e(e.toString());

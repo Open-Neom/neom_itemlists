@@ -28,11 +28,11 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
         title: Row(
             children: <Widget>[
               Text(itemlist.name.length > AppConstants.maxItemlistNameLength
-                  ? "${itemlist.name.substring(0,AppConstants.maxItemlistNameLength).capitalizeFirst!}..."
-                  : itemlist.name.capitalizeFirst!),
+                  ? "${itemlist.name.substring(0,AppConstants.maxItemlistNameLength).capitalizeFirst}..."
+                  : itemlist.name.capitalizeFirst),
               ///DEPRECATE .isFav ? const Icon(Icons.favorite, size: 10,) : Container()
             ]),
-        subtitle: itemlist.description.isNotEmpty ? Text(itemlist.description.capitalizeFirst!) : null,
+        subtitle: itemlist.description.isNotEmpty ? Text(itemlist.description.capitalizeFirst) : null,
         trailing: ActionChip(
           labelPadding: EdgeInsets.zero,
           backgroundColor: AppColor.main25,
@@ -44,7 +44,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           onPressed: () async {
             // await _.gotoItemlistItems(itemlist);
 
-            if(AppFlavour.appInUse == AppInUse.cyberneom) {
+            if(AppFlavour.appInUse == AppInUse.c) {
               await _.gotoItemlistItems(itemlist);
             } else {
               Get.toNamed(AppRouteConstants.itemSearch,
@@ -103,8 +103,8 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
                   onPressed: () async {
                     if(_.itemlists.length == 1) {
                       AppUtilities.showAlert(context,
-                          AppTranslationConstants.itemlistPrefs.tr,
-                          AppTranslationConstants.cantRemoveMainItemlist.tr);
+                          title: AppTranslationConstants.itemlistPrefs.tr,
+                          message: AppTranslationConstants.cantRemoveMainItemlist.tr);
                     } else {
                       // Navigator.of(context).pop();
                       await _.deleteItemlist(itemlist);

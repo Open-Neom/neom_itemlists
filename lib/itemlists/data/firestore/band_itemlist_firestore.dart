@@ -8,9 +8,8 @@ import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/domain/repository/itemlist_repository.dart';
 
-class BandItemlistFirestore implements ItemlistRepository {
+class BandItemlistFirestore {//implements ItemlistRepository {
 
   var logger = AppUtilities.logger;
   final appMediaItemReference = FirebaseFirestore.instance.collection(AppFirestoreCollectionConstants.appMediaItems);

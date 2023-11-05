@@ -40,7 +40,6 @@ class SpotifyPlaylistsPage extends StatelessWidget {
                       center: Text("${AppTranslationConstants.adding.tr} "
                           "${_.itemNumber} ${AppTranslationConstants.outOf.tr} "
                           "${_.totalItemsToSynch}"
-                        //" (${((_.songNumber/_.totalSongToSynch) * 100).truncate()}%)"
                       ),
                       progressColor: AppColor.bondiBlue,
                     )
