@@ -11,7 +11,7 @@ import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
-import 'package:neom_itemlists/itemlists/ui/widgets/app_item_widgets.dart';
+import '../widgets/app_item_widgets.dart';
 import 'app_media_item_search_controller.dart';
 
 class PlaylistItemsPage extends StatelessWidget {

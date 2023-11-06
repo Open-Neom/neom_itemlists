@@ -9,7 +9,7 @@ import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_release_item.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:neom_events/events/ui/event_details_controller.dart';
-import 'package:neom_itemlists/itemlists/data/firestore/app_media_item_firestore.dart';
+import '../../data/firestore/app_media_item_firestore.dart';
 import 'app_media_item_controller.dart';
 
 

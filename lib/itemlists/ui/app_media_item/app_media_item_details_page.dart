@@ -2,8 +2,6 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
-
 import 'package:neom_commons/core/ui/widgets/appbar_child.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
@@ -16,6 +14,8 @@ import 'package:neom_commons/core/utils/constants/message_translation_constants.
 import 'package:neom_commons/core/utils/core_utilities.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/profile_type.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
 import 'app_media_item_details_controller.dart';
 
 class AppMediaItemDetailsPage extends StatelessWidget {

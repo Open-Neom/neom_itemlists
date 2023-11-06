@@ -6,17 +6,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/auth/ui/login/login_controller.dart';
 import 'package:neom_commons/core/app_flavour.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/enums/app_in_use.dart';
-import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
-
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
+import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
+
 import 'itemlist_controller.dart';
 import 'widgets/itemlist_widgets.dart';
 
@@ -25,8 +25,6 @@ class ItemlistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
-    final bool isRotated = MediaQuery.of(context).size.height < screenWidth;
     return WillPopScope(
       onWillPop: () async {
         return (await showDialog(
@@ -88,7 +86,7 @@ class ItemlistPage extends StatelessWidget {
             backgroundColor: AppColor.main75,
             elevation: 0,
             automaticallyImplyLeading: false,
-            leading: isRotated ? null : Padding(
+            leading: Padding(
               padding: EdgeInsets.zero,
               child: Transform.rotate(
                 angle: 22 / 7 * 2,
@@ -143,7 +141,7 @@ class ItemlistPage extends StatelessWidget {
                                 labelText: AppTranslationConstants.description.tr,
                               ),
                             ),
-                            SizedBox(height: 10), // Add some spacing for the segmented control
+                            const SizedBox(height: 10), // Add some spacing for the segmented control
                             Obx(() => Container(
                               alignment: Alignment.center,
                               child: GestureDetector(
@@ -155,7 +153,7 @@ class ItemlistPage extends StatelessWidget {
                                         _.setPrivacyOption();
                                       },
                                     ),
-                                    Text(AppTranslationConstants.publicList.tr, style: TextStyle(fontSize: 15)),
+                                    Text(AppTranslationConstants.publicList.tr, style: const TextStyle(fontSize: 15)),
                                   ],
                                 ),
                                 onTap: ()=> _.setPrivacyOption(),
@@ -164,10 +162,10 @@ class ItemlistPage extends StatelessWidget {
 
                             Obx(() => _.errorMsg.isNotEmpty ? Column(
                               children: [
-                                SizedBox(height: 10),
+                                const SizedBox(height: 10),
                                 Container(
                                   alignment: Alignment.center,
-                                  child: Text(_.errorMsg.tr, style: TextStyle(fontSize: 10, color: AppColor.red)),
+                                  child: Text(_.errorMsg.tr, style: const TextStyle(fontSize: 10, color: AppColor.red)),
                                 ),
                               ],) : Container()
                             ),
@@ -198,7 +196,7 @@ class ItemlistPage extends StatelessWidget {
             )
           ),
           floatingActionButton: _.isLoading ? Container() : Container(
-            margin: EdgeInsets.only(bottom: 0),
+            margin: const EdgeInsets.only(bottom: 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -231,7 +229,7 @@ class ItemlistPage extends StatelessWidget {
                         ),
                       ),
                     ) : Container(),
-                    SizedBox(width: 5,),
+                    const SizedBox(width: 5,),
                     FloatingActionButton(
                       heroTag: AppPageIdConstants.spotifySync,
                       elevation: AppTheme.elevationFAB,

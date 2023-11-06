@@ -2,33 +2,35 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
+import 'package:neom_commons/core/utils/constants/app_assets.dart';
+import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
+import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/core/utils/core_utilities.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/app_media_source.dart';
-import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
+import 'package:neom_commons/core/utils/enums/profile_type.dart';
 import 'package:neom_music_player/ui/player/media_player_page.dart';
 import 'package:neom_music_player/ui/widgets/download_button.dart';
+import 'package:neom_music_player/ui/widgets/go_spotify_button.dart';
 import 'package:neom_music_player/ui/widgets/image_card.dart';
 import 'package:neom_music_player/ui/widgets/like_button.dart';
 import 'package:neom_music_player/ui/widgets/song_tile_trailing_menu.dart';
 import 'package:neom_music_player/utils/constants/app_hive_constants.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
-import 'package:hive/hive.dart';
-import 'package:neom_commons/core/utils/app_color.dart';
-import 'package:neom_commons/core/utils/constants/app_assets.dart';
-import 'package:neom_commons/core/utils/constants/app_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/core_utilities.dart';
-import 'package:neom_commons/core/utils/enums/app_item_state.dart';
-import 'package:neom_commons/core/utils/enums/profile_type.dart';
+
+import '../app_media_item/app_media_item_controller.dart';
 import '../search/app_media_item_search_controller.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 Widget buildItemList(BuildContext context, AppMediaItemController _) {
   return ListView.separated(
@@ -186,7 +188,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
 }
 
 ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
-    {Itemlist? itemlist, String query = '', AppMediaItemSearchController? searchController}) {
+    {Itemlist? itemlist, String query = '', AppMediaItemSearchController? searchController, bool downloadAllowed = false}) {
   return ListTile(
     contentPadding: const EdgeInsets.only(left: 15.0,),
     title: Text(appMediaItem.name,
@@ -199,18 +201,18 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
     isThreeLine: false,
     leading: imageCard(
       borderRadius: 7, //50
-      placeholderImage: AssetImage(AppAssets.musicPlayerCover),
+      placeholderImage: const AssetImage(AppAssets.musicPlayerCover),
       imageUrl: appMediaItem.imgUrl
     ),
     trailing: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         LikeButton(appMediaItem: appMediaItem,),
-        appMediaItem.mediaSource == AppMediaSource.internal ? DownloadButton(
+        appMediaItem.mediaSource != AppMediaSource.internal
+            ? downloadAllowed ? DownloadButton(
           mediaItem: appMediaItem, icon: 'download',
-        ) : appMediaItem.mediaSource == AppMediaSource.spotify ?
-        IconButton(onPressed: () => CoreUtilities.launchURL(appMediaItem.permaUrl, openInApp: false), icon: Icon(FontAwesomeIcons.spotify))
-            : Container(),
+        ) : Container()
+            : GoSpotifyButton(appMediaItem: appMediaItem, size: 22),
         SongTileTrailingMenu(
           appMediaItem: appMediaItem,
           itemlist: itemlist,

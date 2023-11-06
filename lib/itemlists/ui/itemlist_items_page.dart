@@ -9,7 +9,7 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
-import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
+import 'app_media_item/app_media_item_controller.dart';
 import 'widgets/app_item_widgets.dart';
 
 class ItemlistItemsPage extends StatelessWidget {

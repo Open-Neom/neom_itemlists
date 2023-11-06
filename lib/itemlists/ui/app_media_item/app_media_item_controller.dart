@@ -3,12 +3,11 @@ import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/api_services/push_notification/firebase_messaging_calls.dart';
 import 'package:neom_commons/core/data/firestore/band_firestore.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
-
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
+import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/band.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
-import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
@@ -16,8 +15,9 @@ import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
 import 'package:neom_commons/core/utils/enums/push_notification_type.dart';
-import 'package:neom_itemlists/itemlists/data/firestore/band_itemlist_firestore.dart';
 import 'package:neom_music_player/ui/player/media_player_page.dart';
+
+import '../../data/firestore/band_itemlist_firestore.dart';
 import '../../domain/use_cases/app_item_service.dart';
 
 class AppMediaItemController extends GetxController implements AppItemService {

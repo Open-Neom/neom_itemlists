@@ -21,7 +21,7 @@ class PlaylistNameDescPage extends StatelessWidget {
       builder: (_) {
          return Scaffold(
            backgroundColor: AppColor.main50,
-           body: _.isLoading ? const Center(child: CircularProgressIndicator()) : SingleChildScrollView(
+           body: _.isLoading.value ? const Center(child: CircularProgressIndicator()) : SingleChildScrollView(
             child: Container(
              height: MediaQuery.of(context).size.height,
               decoration: AppTheme.appBoxDecoration,
@@ -102,7 +102,7 @@ class PlaylistNameDescPage extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
                       ),
                       onPressed: () async => {
-                        if(!_.isButtonDisabled) {
+                        if(!_.isButtonDisabled.value) {
                           await _.createItemlist(),
                         }
                       },

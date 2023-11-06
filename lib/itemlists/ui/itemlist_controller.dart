@@ -4,14 +4,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
-
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
 import 'package:neom_commons/core/data/firestore/user_firestore.dart';
+import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/use_cases/itemlist_service.dart';
-import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
@@ -19,12 +18,13 @@ import 'package:neom_commons/core/utils/constants/message_translation_constants.
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
-import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_api_calls.dart';
-import 'package:neom_itemlists/itemlists/data/api_services/spotify/spotify_search.dart';
-import 'package:neom_itemlists/itemlists/data/firestore/app_media_item_firestore.dart';
-import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_controller.dart';
-import 'package:neom_itemlists/itemlists/ui/sync/spotify_playlist_page.dart';
 import 'package:spotify/spotify.dart' as spotify;
+
+import '../data/api_services/spotify/spotify_api_calls.dart';
+import '../data/api_services/spotify/spotify_search.dart';
+import '../data/firestore/app_media_item_firestore.dart';
+import 'app_media_item/app_media_item_controller.dart';
+import 'sync/spotify_playlist_page.dart';
 
 class ItemlistController extends GetxController implements ItemlistService {
 
@@ -479,7 +479,7 @@ class ItemlistController extends GetxController implements ItemlistService {
           }
         }
 
-        Get.to(() => SpotifyPlaylistsPage(), transition: Transition.rightToLeft);
+        Get.to(() => const SpotifyPlaylistsPage(), transition: Transition.rightToLeft);
         ///DEPRECATED
         // Get.toNamed(AppRouteConstants.spotifyPlaylists);
       }

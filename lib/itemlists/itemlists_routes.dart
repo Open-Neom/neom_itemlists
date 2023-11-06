@@ -1,13 +1,13 @@
 import 'package:get/get.dart';
-
 import 'package:neom_commons/core/ui/static/splash_page.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
-import 'package:neom_itemlists/itemlists/ui/app_media_item/app_media_item_details_page.dart';
+import 'ui/app_media_item/app_media_item_details_page.dart';
+
 import 'ui/itemlist_items_page.dart';
 import 'ui/itemlist_page.dart';
+import 'ui/search/app_media_item_search_page.dart';
 import 'ui/search/playlist_name_desc_page.dart';
 import 'ui/search/playlist_songs_page.dart';
-import 'ui/search/app_media_item_search_page.dart';
 
 class ItemlistsRoutes {
 

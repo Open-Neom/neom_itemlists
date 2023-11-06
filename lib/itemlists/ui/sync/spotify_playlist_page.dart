@@ -5,9 +5,10 @@ import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_itemlists/itemlists/ui/itemlist_controller.dart';
-import 'package:neom_itemlists/itemlists/ui/widgets/itemlist_widgets.dart';
 import 'package:percent_indicator/linear_percent_indicator.dart';
+
+import '../itemlist_controller.dart';
+import '../widgets/itemlist_widgets.dart';
 
 class SpotifyPlaylistsPage extends StatelessWidget {
   const SpotifyPlaylistsPage({Key? key}) : super(key: key);
