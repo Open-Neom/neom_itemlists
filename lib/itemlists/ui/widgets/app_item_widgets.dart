@@ -209,9 +209,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       children: [
         LikeButton(appMediaItem: appMediaItem,),
         appMediaItem.mediaSource != AppMediaSource.internal
-            ? downloadAllowed ? DownloadButton(
-          mediaItem: appMediaItem, icon: 'download',
-        ) : Container()
+            ? downloadAllowed ? DownloadButton(mediaItem: appMediaItem,) : Container()
             : GoSpotifyButton(appMediaItem: appMediaItem, size: 22),
         SongTileTrailingMenu(
           appMediaItem: appMediaItem,
