@@ -94,7 +94,8 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                     Get.toNamed(AppRouteConstants.generator,  arguments: [preset.clone()]);
                     break;
                   case AppInUse.g:
-                    Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
+                    ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
+                    Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
                     break;
                   case AppInUse.e:
                     Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
@@ -200,7 +201,6 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
     ),
     isThreeLine: false,
     leading: imageCard(
-      borderRadius: 7, //50
       placeholderImage: const AssetImage(AppAssets.musicPlayerCover),
       imageUrl: appMediaItem.imgUrl
     ),
@@ -208,9 +208,12 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       mainAxisSize: MainAxisSize.min,
       children: [
         LikeButton(appMediaItem: appMediaItem,),
-        appMediaItem.mediaSource != AppMediaSource.internal
-            ? downloadAllowed ? DownloadButton(mediaItem: appMediaItem,) : Container()
-            : GoSpotifyButton(appMediaItem: appMediaItem, size: 22),
+        // appMediaItem.mediaSource != AppMediaSource.internal
+        //     ? downloadAllowed ? DownloadButton(mediaItem: appMediaItem,) : Container()
+        //     : GoSpotifyButton(appMediaItem: appMediaItem, size: 22),
+        appMediaItem.mediaSource == AppMediaSource.internal
+            ? (downloadAllowed ? DownloadButton(mediaItem: appMediaItem,) : Container())
+            : (appMediaItem.mediaSource == AppMediaSource.spotify ? GoSpotifyButton(appMediaItem: appMediaItem, size: 22) : Container()),
         SongTileTrailingMenu(
           appMediaItem: appMediaItem,
           itemlist: itemlist,
@@ -219,10 +222,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       ],
     ),
     onLongPress: () {
-      CoreUtilities.copyToClipboard(
-        context: context,
-        text: appMediaItem.permaUrl,
-      );
+      CoreUtilities.copyToClipboard(context: context, text: appMediaItem.permaUrl,);
     },
     onTap: () {
       query = appMediaItem.name.trim();
@@ -238,7 +238,8 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       }
       Hive.box(AppHiveConstants.settings).put('search', searchQueries);
 
-      Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
+      ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
+      Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
     },
   );
 }

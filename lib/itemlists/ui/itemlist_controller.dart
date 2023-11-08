@@ -111,7 +111,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     super.onReady();
     try {
       if(AppFlavour.appInUse == AppInUse.g && !Platform.isIOS) {
-        await getSpotifyToken();
+        getSpotifyToken();
         if (userController.user!.spotifyToken.isNotEmpty
             && userController.profile.lastSpotifySync < DateTime
                 .now().subtract(const Duration(days: 30))
@@ -125,10 +125,9 @@ class ItemlistController extends GetxController implements ItemlistService {
       }
     } catch (e) {
       logger.e(e.toString());
-      Get.snackbar(
-          MessageTranslationConstants.spotifySynchronization.tr,
-          e.toString(),
-          snackPosition: SnackPosition.bottom,
+      AppUtilities.showSnackBar(
+        title: MessageTranslationConstants.spotifySynchronization.tr,
+        message: e.toString(),
       );
       spotifyAvailable = false;
     }
@@ -459,6 +458,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       userController.user!.spotifyToken = spotifyToken;
       await UserFirestore().updateSpotifyToken(userController.user!.id, spotifyToken);
     }
+    update([AppPageIdConstants.itemlist]);
   }
 
   Future<void> synchronizeSpotifyPlaylists() async {

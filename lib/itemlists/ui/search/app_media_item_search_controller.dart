@@ -16,6 +16,7 @@ import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
+import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
@@ -224,12 +225,13 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
   void getAppMediaItemDetails(AppMediaItem appMediaItem) {
     AppUtilities.logger.d("Sending appMediaItem with title ${appMediaItem.name} to item controller");
 
-    PageRouteBuilder(
-      pageBuilder: (_, __, ___) => MediaPlayerPage(appMediaItem: appMediaItem), opaque: false,
-    );
+    ///DEPRECATED - VERIFY IF CORRECT
+    // PageRouteBuilder(
+    //   pageBuilder: (_, __, ___) => MediaPlayerPage(appMediaItem: appMediaItem), opaque: false,
+    // );
+    Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
 
     ///DEPRECATED
-    //
     // NeomPlayerInvoke.init(
     //   appMediaItems: [appMediaItem],
     //   index: 0, isOffline: false,
@@ -397,7 +399,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
     AppUtilities.logger.t("addItemlistItem ${appMediaItem.id}");
 
     if(existsInItemlist.value) {
-      AppUtilities.showSnackBar(message: "${appMediaItem.name} ya está en tu playlist ${itemlist.name}");
+      AppUtilities.showSnackBar(message: '"${appMediaItem.name}" ${AppTranslationConstants.isAlreadyInPlaylist.tr} ${itemlist.name}');
     } else if(!isButtonDisabled.value) {
       isButtonDisabled.value = true;
       isLoading.value = true;

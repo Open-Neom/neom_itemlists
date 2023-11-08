@@ -11,6 +11,7 @@ import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
@@ -249,7 +250,8 @@ class AppMediaItemController extends GetxController implements AppItemService {
         }
         break;
       case AppInUse.g:
-        Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
+        ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
+        Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
         break;
       case AppInUse.e:
         Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
