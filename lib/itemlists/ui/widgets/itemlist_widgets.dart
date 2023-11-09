@@ -56,16 +56,17 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
         onTap: () async {
           await _.gotoItemlistItems(itemlist);
         },
-        onLongPress: () {
-          Alert(
+        onLongPress: () async {
+          (await showDialog(
               context: context,
-              title: AppTranslationConstants.itemlistName.tr,
-              style: AlertStyle(
-                  backgroundColor: AppColor.main50,
-                  titleStyle: const TextStyle(color: Colors.white)
-              ),
-              content: Obx(()=> _.isLoading ? const Center(child: CircularProgressIndicator())
-              : Column(
+              builder: (ctx) => AlertDialog(
+            backgroundColor: AppColor.main75,
+            title: Text(AppTranslationConstants.itemlistName.tr,),
+            content: SizedBox(
+              height: AppTheme.fullHeight(context)*0.25,
+              child: Obx(()=> _.isLoading ? const Center(child: CircularProgressIndicator())
+                : Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     TextField(
                       controller: _.newItemlistNameController,
@@ -76,55 +77,118 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
                     ),
                     TextField(
                       controller: _.newItemlistDescController,
+                      minLines: 2,
+                      maxLines: 5,
                       decoration: InputDecoration(
                         labelText: '${AppTranslationConstants.changeDesc.tr}: ',
                         hintText: itemlist.description,
                       ),
                     ),
-                  ]),
+                  ],
+                ),
               ),
-              buttons: [
-                DialogButton(
-                  color: AppColor.bondiBlue75,
-                  onPressed: () async {
-                    // Navigator.of(context).pop();
-                    await _.updateItemlist(itemlist.id, itemlist);
-                    // Get.back();
-                    // Get.toNamed(AppRouteConstants.musicPlayerHome);
-                  },
-                  child: Text(
-                    AppTranslationConstants.update.tr,
-                    style: const TextStyle(fontSize: 12),
-                  ),
+            ),
+            actions: <Widget>[
+              DialogButton(
+                color: AppColor.bondiBlue75,
+                onPressed: () async {
+                  await _.updateItemlist(itemlist.id, itemlist);
+                  Navigator.pop(ctx);
+                },
+                child: Text(AppTranslationConstants.update.tr,
+                  style: const TextStyle(fontSize: 14),
                 ),
-                DialogButton(
-                  color: AppColor.bondiBlue75,
-                  child: Text(AppTranslationConstants.remove.tr),
-                  onPressed: () async {
-                    if(_.itemlists.length == 1) {
-                      AppUtilities.showAlert(context,
-                          title: AppTranslationConstants.itemlistPrefs.tr,
-                          message: AppTranslationConstants.cantRemoveMainItemlist.tr);
-                    } else {
-                      // Navigator.of(context).pop();
-                      await _.deleteItemlist(itemlist);
-                      // Get.back();
-                      // Get.toNamed(AppRouteConstants.musicPlayerHome);
-                    }
-                  },
+              ),
+              DialogButton(
+                color: AppColor.bondiBlue75,
+                child: Text(AppTranslationConstants.remove.tr,
+                  style: const TextStyle(fontSize: 14),
                 ),
+                onPressed: () async {
+                  if(_.itemlists.length == 1) {
+                    AppUtilities.showAlert(context,
+                        title: AppTranslationConstants.itemlistPrefs.tr,
+                        message: AppTranslationConstants.cantRemoveMainItemlist.tr);
+                  } else {
+                    await _.deleteItemlist(itemlist);
+                    Navigator.pop(ctx);
+                  }
+                },
+              ),
+            ],
+          ),
+          )) ?? false;
 
-                ///VERIFY IF DEPRECATED
-                // if(!itemlist.isFav) DialogButton(
-                //   color: AppColor.bondiBlue75,
-                //   onPressed: () => {
-                //     _.setAsFavorite(itemlist)
-                //   },
-                //   child: Text(AppTranslationConstants.setFav.tr,
-                //   ),
-                // ),
-              ]
-          ).show();
+          // Alert(
+          //     context: context,
+          //     title: AppTranslationConstants.itemlistName.tr,
+          //     style: AlertStyle(
+          //         backgroundColor: AppColor.main50,
+          //         titleStyle: const TextStyle(color: Colors.white)
+          //     ),
+          //     content: Obx(()=> _.isLoading ? const Center(child: CircularProgressIndicator())
+          //     : Column(
+          //         children: <Widget>[
+          //           TextField(
+          //             controller: _.newItemlistNameController,
+          //             decoration: InputDecoration(
+          //               labelText: '${AppTranslationConstants.changeName.tr}: ',
+          //               hintText: itemlist.name,
+          //             ),
+          //           ),
+          //           TextField(
+          //             controller: _.newItemlistDescController,
+          //             decoration: InputDecoration(
+          //               labelText: '${AppTranslationConstants.changeDesc.tr}: ',
+          //               hintText: itemlist.description,
+          //             ),
+          //           ),
+          //         ]),
+          //     ),
+          //     buttons: [
+          //       DialogButton(
+          //         color: AppColor.bondiBlue75,
+          //         onPressed: () async {
+          //           // Navigator.of(context).pop();
+          //           await _.updateItemlist(itemlist.id, itemlist);
+          //           // Get.back();
+          //           // Get.toNamed(AppRouteConstants.musicPlayerHome);
+          //         },
+          //         child: Text(
+          //           AppTranslationConstants.update.tr,
+          //           style: const TextStyle(fontSize: 12),
+          //         ),
+          //       ),
+          //       DialogButton(
+          //         color: AppColor.bondiBlue75,
+          //         child: Text(AppTranslationConstants.remove.tr),
+          //         onPressed: () async {
+          //           if(_.itemlists.length == 1) {
+          //             AppUtilities.showAlert(context,
+          //                 title: AppTranslationConstants.itemlistPrefs.tr,
+          //                 message: AppTranslationConstants.cantRemoveMainItemlist.tr);
+          //           } else {
+          //             // Navigator.of(context).pop();
+          //             await _.deleteItemlist(itemlist);
+          //             AppUtilities.showAlert(context,
+          //                 title: AppTranslationConstants.itemlistPrefs.tr,
+          //                 message: AppTranslationConstants.itemlistRemoved.tr);
+          //             // Get.back();
+          //             // Get.toNamed(AppRouteConstants.musicPlayerHome);
+          //           }
+          //         },
+          //       ),
+          //       ///VERIFY IF DEPRECATED
+          //       // if(!itemlist.isFav) DialogButton(
+          //       //   color: AppColor.bondiBlue75,
+          //       //   onPressed: () => {
+          //       //     _.setAsFavorite(itemlist)
+          //       //   },
+          //       //   child: Text(AppTranslationConstants.setFav.tr,
+          //       //   ),
+          //       // ),
+          //     ]
+          // ).show();
         },
       );
     },

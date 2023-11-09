@@ -120,73 +120,145 @@ class ItemlistPage extends StatelessWidget {
                     ),
                   ),
                   onTap: () async {
-                    Alert(
-                        context: context,
-                        style: AlertStyle(backgroundColor: AppColor.main50, titleStyle: const TextStyle(color: Colors.white)),
-                        title: AppTranslationConstants.addNewItemlist.tr,
-                        content: Column(
-                          children: <Widget>[
-                            //TODO Change lines colors to white.
-                            TextField(
-                              controller: _.newItemlistNameController,
-                              decoration: InputDecoration(
-                                labelText: AppTranslationConstants.itemlistName.tr,
-                              ),
-                            ),
-                            TextField(
-                              controller: _.newItemlistDescController,
-                              minLines: 2,
-                              maxLines: 5,
-                              decoration: InputDecoration(
-                                labelText: AppTranslationConstants.description.tr,
-                              ),
-                            ),
-                            const SizedBox(height: 10), // Add some spacing for the segmented control
-                            Obx(() => Container(
-                              alignment: Alignment.center,
-                              child: GestureDetector(
-                                child: Row(
-                                  children: <Widget>[
-                                    Checkbox(
-                                      value: _.isPublicNewItemlist,
-                                      onChanged: (bool? newValue) {
-                                        _.setPrivacyOption();
-                                      },
-                                    ),
-                                    Text(AppTranslationConstants.publicList.tr, style: const TextStyle(fontSize: 15)),
-                                  ],
+                    (await showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                        backgroundColor: AppColor.main75,
+                        title: Text(AppTranslationConstants.addNewItemlist.tr,),
+                        content: Obx(() => SizedBox(
+                          height: AppTheme.fullHeight(context)*0.3,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: <Widget>[
+                              //TODO Change lines colors to white.
+                              TextField(
+                                controller: _.newItemlistNameController,
+                                decoration: InputDecoration(
+                                  labelText: AppTranslationConstants.itemlistName.tr,
                                 ),
-                                onTap: ()=> _.setPrivacyOption(),
                               ),
-                            ),),
-
-                            Obx(() => _.errorMsg.isNotEmpty ? Column(
-                              children: [
-                                const SizedBox(height: 10),
-                                Container(
-                                  alignment: Alignment.center,
-                                  child: Text(_.errorMsg.tr, style: const TextStyle(fontSize: 10, color: AppColor.red)),
+                              TextField(
+                                controller: _.newItemlistDescController,
+                                minLines: 2,
+                                maxLines: 5,
+                                decoration: InputDecoration(
+                                  labelText: AppTranslationConstants.description.tr,
                                 ),
-                              ],) : Container()
-                            ),
-                          ],
-                        ),
-                        buttons: [
+                              ),
+                              AppTheme.heightSpace10,
+                              Container(
+                                alignment: Alignment.center,
+                                child: GestureDetector(
+                                  child: Row(
+                                    children: <Widget>[
+                                      Checkbox(
+                                        value: _.isPublicNewItemlist,
+                                        onChanged: (bool? newValue) => _.setPrivacyOption(),
+                                      ),
+                                      Text(AppTranslationConstants.publicList.tr, style: const TextStyle(fontSize: 15)),
+                                    ],
+                                  ),
+                                  onTap: () => _.setPrivacyOption(),
+                                ),
+                              ),
+                              _.errorMsg.isNotEmpty ? Column(
+                                children: [
+                                  Container(
+                                    alignment: Alignment.center,
+                                    child: Text(_.errorMsg.tr, style: const TextStyle(fontSize: 12, color: AppColor.red)),
+                                  ),
+                                ],) : Container()
+                            ],
+                          ),
+                        ),),
+                        actions: <Widget>[
                           DialogButton(
                             height: 50,
                             color: AppColor.bondiBlue75,
                             onPressed: () async {
-                              // Navigator.of(context).pop();
                               await _.createItemlist();
-                              Get.back();
-                              // Get.toNamed(AppRouteConstants.musicPlayerHome);
+                              if(_.errorMsg.isEmpty) Navigator.pop(ctx);
                             },
                             child: Text(
                               AppTranslationConstants.add.tr,
+                              style: const TextStyle(fontSize: 14),
                             ),
                           ),
-                        ]
-                    ).show();
+                        ],
+                      ),
+                    )) ?? false;
+
+                    ///DEPRECATED
+                    // Alert(
+                    //     context: context,
+                    //     style: AlertStyle(backgroundColor: AppColor.main50, titleStyle: const TextStyle(color: Colors.white)),
+                    //     title: AppTranslationConstants.addNewItemlist.tr,
+                    //     content: Column(
+                    //       children: <Widget>[
+                    //         //TODO Change lines colors to white.
+                    //         TextField(
+                    //           controller: _.newItemlistNameController,
+                    //           decoration: InputDecoration(
+                    //             labelText: AppTranslationConstants.itemlistName.tr,
+                    //           ),
+                    //         ),
+                    //         TextField(
+                    //           controller: _.newItemlistDescController,
+                    //           minLines: 2,
+                    //           maxLines: 5,
+                    //           decoration: InputDecoration(
+                    //             labelText: AppTranslationConstants.description.tr,
+                    //           ),
+                    //         ),
+                    //         const SizedBox(height: 10), // Add some spacing for the segmented control
+                    //         Obx(() => Container(
+                    //           alignment: Alignment.center,
+                    //           child: GestureDetector(
+                    //             child: Row(
+                    //               children: <Widget>[
+                    //                 Checkbox(
+                    //                   value: _.isPublicNewItemlist,
+                    //                   onChanged: (bool? newValue) {
+                    //                     _.setPrivacyOption();
+                    //                   },
+                    //                 ),
+                    //                 Text(AppTranslationConstants.publicList.tr, style: const TextStyle(fontSize: 15)),
+                    //               ],
+                    //             ),
+                    //             onTap: ()=> _.setPrivacyOption(),
+                    //           ),
+                    //         ),),
+                    //
+                    //         Obx(() => _.errorMsg.isNotEmpty ? Column(
+                    //           children: [
+                    //             const SizedBox(height: 10),
+                    //             Container(
+                    //               alignment: Alignment.center,
+                    //               child: Text(_.errorMsg.tr, style: const TextStyle(fontSize: 10, color: AppColor.red)),
+                    //             ),
+                    //           ],) : Container()
+                    //         ),
+                    //       ],
+                    //     ),
+                    //     buttons: [
+                    //       DialogButton(
+                    //         height: 50,
+                    //         color: AppColor.bondiBlue75,
+                    //         onPressed: () async {
+                    //           Navigator.pop(context);
+                    //           // await _.createItemlist();
+                    //           // AppUtilities.showAlert(context,
+                    //           //     title: AppTranslationConstants.itemlistPrefs.tr,
+                    //           //     message: AppTranslationConstants.itemlistCreated.tr);
+                    //           // Get.back();
+                    //           // Get.toNamed(AppRouteConstants.musicPlayerHome);
+                    //         },
+                    //         child: Text(
+                    //           AppTranslationConstants.add.tr,
+                    //         ),
+                    //       ),
+                    //     ]
+                    // ).show();
                   },
                 ),
                 Expanded(

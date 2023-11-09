@@ -114,7 +114,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
           updatedItem.state = _prevItemState;
           userController.profile.itemlists![itemlist.id]!
               .appMediaItems!.remove(updatedItem);
-          if(await ItemlistFirestore().removeItem(updatedItem, itemlist.id)){
+          if(await ItemlistFirestore().deleteItem(updatedItem, itemlist.id)){
             logger.d("ItemlistItem was updated and old version deleted.");
           } else {
             logger.d("ItemlistItem was updated but old version remains.");
@@ -189,7 +189,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
 
     try {
       if(itemlistOwner == ItemlistOwner.profile) {
-        if(await ItemlistFirestore().removeItem(appMediaItem, itemlist.id)) {
+        if(await ItemlistFirestore().deleteItem(appMediaItem, itemlist.id)) {
           logger.d("");
           if(await ProfileFirestore().removeFavoriteItem(profileId, appMediaItem.id)) {
             if (userController.profile.itemlists != null &&

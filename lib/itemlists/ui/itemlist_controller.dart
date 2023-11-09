@@ -14,6 +14,7 @@ import 'package:neom_commons/core/domain/use_cases/itemlist_service.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
+import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
@@ -182,6 +183,10 @@ class ItemlistController extends GetxController implements ItemlistService {
           itemlists[newItemlistId] = newItemlist;
           logger.t("Itemlists $itemlists");
           clearNewItemlist();
+          AppUtilities.showSnackBar(
+              title: AppTranslationConstants.itemlistPrefs.tr,
+              message: AppTranslationConstants.itemlistCreated.tr
+          );
         } else {
           logger.d("Something happens trying to insert itemlist");
         }
@@ -190,10 +195,11 @@ class ItemlistController extends GetxController implements ItemlistService {
         errorMsg = newItemlistNameController.text.isEmpty ? MessageTranslationConstants.pleaseAddName
             : MessageTranslationConstants.pleaseAddDescription;
 
-        Get.snackbar(
-            MessageTranslationConstants.addNewItemlist.tr,
-            MessageTranslationConstants.pleaseFillItemlistInfo.tr,
-            snackPosition: SnackPosition.bottom);      }
+        AppUtilities.showSnackBar(
+          title: MessageTranslationConstants.addNewItemlist.tr,
+          message: MessageTranslationConstants.pleaseFillItemlistInfo.tr,
+        );
+      }
     } catch (e) {
       logger.e(e.toString());
     }
@@ -210,15 +216,13 @@ class ItemlistController extends GetxController implements ItemlistService {
     try {
       if(newItemlistNameController.text.isNotEmpty) {
         await Get.toNamed(AppRouteConstants.playlistSearch,
-            arguments: [
-              SpotifySearchType.playlist,
-              newItemlistNameController.text]
+            arguments: [SpotifySearchType.playlist, newItemlistNameController.text]
         );
       } else {
-        Get.snackbar(
-            MessageTranslationConstants.searchPlaylist.tr,
-            MessageTranslationConstants.missingPlaylistName.tr,
-            snackPosition: SnackPosition.bottom);
+        AppUtilities.showSnackBar(
+          title: MessageTranslationConstants.searchPlaylist.tr,
+          message: MessageTranslationConstants.missingPlaylistName.tr,
+        );
       }
     } catch (e) {
       logger.e(e.toString());
@@ -236,23 +240,41 @@ class ItemlistController extends GetxController implements ItemlistService {
       isLoading = true;
       update([AppPageIdConstants.itemlist]);
 
-      if(await ItemlistFirestore().remove(itemlist.id)) {
+      if(await ItemlistFirestore().delete(itemlist.id)) {
         logger.d("Itemlist ${itemlist.id} removed");
 
         if(itemlist.appMediaItems?.isNotEmpty ?? false) {
-          for(var appItem in itemlist.appMediaItems ?? []) {
-            if(await ProfileFirestore().removeFavoriteItem(profile.id, appItem.id)) {
-              if (userController.profile.favoriteItems != null &&
-                  userController.profile.favoriteItems!.isNotEmpty) {
-                logger.d("Removing item from global items for profile from userController");
-                userController.profile.favoriteItems!.remove(appItem.id);
+          List<String> appMediaItemsIds = itemlist.appMediaItems!.map((e) => e.id).toList();
+
+          if(await ProfileFirestore().removeFavoriteItems(profile.id, appMediaItemsIds)) {
+            for (var itemId in appMediaItemsIds) {
+              if (userController.profile.favoriteItems != null && userController.profile.favoriteItems!.isNotEmpty) {
+                logger.d("Removing item from global state items for profile from userController");
+                userController.profile.favoriteItems!.remove(itemId);
               }
             }
           }
-        }
 
+          // for(var appItem in itemlist.appMediaItems ?? []) {
+          //   if(await ProfileFirestore().removeFavoriteItem(profile.id, appItem.id)) {
+          //     if (userController.profile.favoriteItems != null &&
+          //         userController.profile.favoriteItems!.isNotEmpty) {
+          //       logger.d("Removing item from global state items for profile from userController");
+          //       userController.profile.favoriteItems!.remove(appItem.id);
+          //     }
+          //   }
+          // }
+        }
         itemlists.remove(itemlist.id);
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.itemlistPrefs.tr,
+            message: AppTranslationConstants.itemlistRemoved.tr
+        );
       } else {
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.itemlistPrefs.tr,
+            message: AppTranslationConstants.itemlistRemovedErrorMsg.tr
+        );
         logger.e("Something happens trying to remove itemlist");
       }
     } catch (e) {
@@ -299,8 +321,11 @@ class ItemlistController extends GetxController implements ItemlistService {
     try {
       isLoading = true;
       update([AppPageIdConstants.itemlist]);
+      String newName = newItemlistNameController.text;
+      String newDesc = newItemlistDescController.text;
 
-      if(newItemlistNameController.text.isNotEmpty || newItemlistDescController.text.isNotEmpty) {
+      if((newName.isNotEmpty && newName.toLowerCase() != itemlist.name.toLowerCase())
+          || (newDesc.isNotEmpty && newDesc.toLowerCase() != itemlist.description.toLowerCase())) {
 
         if(newItemlistNameController.text.isNotEmpty) {
           itemlist.name = newItemlistNameController.text;
@@ -314,17 +339,33 @@ class ItemlistController extends GetxController implements ItemlistService {
           logger.d("Itemlist $itemlistId updated");
           _itemlists[itemlist.id] = itemlist;
           clearNewItemlist();
+          AppUtilities.showSnackBar(
+              title: AppTranslationConstants.itemlistPrefs.tr,
+              message: AppTranslationConstants.itemlistUpdated.tr
+          );
         } else {
           logger.i("Something happens trying to update itemlist");
+          AppUtilities.showSnackBar(
+              title: AppTranslationConstants.itemlistPrefs.tr,
+              message: AppTranslationConstants.itemlistUpdatedErrorMsg.tr
+          );
         }
+      } else {
+        AppUtilities.showSnackBar(
+            title: AppTranslationConstants.itemlistPrefs.tr,
+            message: AppTranslationConstants.itemlistUpdateSameInfo.tr
+        );
       }
     } catch (e) {
       logger.e(e.toString());
+      AppUtilities.showSnackBar(
+          title: AppTranslationConstants.itemlistPrefs.tr,
+          message: AppTranslationConstants.itemlistUpdatedErrorMsg.tr
+      );
     }
 
 
     isLoading = false;
-    Get.back();
     update([AppPageIdConstants.itemlist]);
   }
 
@@ -592,7 +633,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   }
 
   Future<void> setPrivacyOption() async {
-    logger.d("");
+    logger.t('setPrivacyOption for Playlist');
     isPublicNewItemlist = !isPublicNewItemlist;
     logger.d("New Itemlist would be ${isPublicNewItemlist ? 'Public':'Private'}");
     update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
