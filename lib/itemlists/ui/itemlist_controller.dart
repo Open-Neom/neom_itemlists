@@ -9,6 +9,7 @@ import 'package:neom_commons/core/data/firestore/user_firestore.dart';
 import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
+import 'package:neom_commons/core/domain/model/band.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/use_cases/itemlist_service.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
@@ -17,7 +18,7 @@ import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
-import 'package:neom_commons/core/utils/enums/itemlist_owner.dart';
+import 'package:neom_commons/core/utils/enums/owner_type.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:spotify/spotify.dart' as spotify;
 
@@ -34,50 +35,28 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   Itemlist currentItemlist = Itemlist();
 
-  final RxMap<String, Itemlist> _itemlists = <String, Itemlist>{}.obs;
-  Map<String, Itemlist> get itemlists => _itemlists;
-  set itemlists(Map<String, Itemlist> itemlists) => _itemlists.value = itemlists;
-
-  final RxMap<String, Itemlist> _spotifyItemlists = <String, Itemlist>{}.obs;
-  Map<String, Itemlist> get spotifyItemlists => _spotifyItemlists;
-  set spotifyItemlists(Map<String, Itemlist> spotifyItemlists) => _spotifyItemlists.value = spotifyItemlists;
-
-  final RxList<spotify.Playlist> _spotifyPlaylists = <spotify.Playlist>[].obs;
-  List<spotify.Playlist> get spotifyPlaylists => _spotifyPlaylists;
-  set spotifyPlaylists(List<spotify.Playlist> spotifyPlaylists) => _spotifyPlaylists.value = spotifyPlaylists;
-
-  final RxList<spotify.PlaylistSimple> _spotifyPlaylistSimples = <spotify.PlaylistSimple>[].obs;
-  List<spotify.PlaylistSimple> get spotifyPlaylistSimples => _spotifyPlaylistSimples;
-  set spotifyPlaylistSimples(List<spotify.PlaylistSimple> spotifyPlaylistSimples) => _spotifyPlaylistSimples.value = spotifyPlaylistSimples;
-
-  final RxList<Itemlist> _addedItemlists = <Itemlist>[].obs;
-  List<Itemlist> get addedItemlists => _addedItemlists;
-  set addedItemlists(List<Itemlist> addedItemlists) => _addedItemlists.value = addedItemlists;
-
-  ///DEPRECATE
-  // Itemlist _favItemlist = Itemlist();
-  AppProfile profile = AppProfile();
-
-  final RxBool _isLoading = true.obs;
-  bool get isLoading => _isLoading.value;
-  set isLoading(bool isLoading) => _isLoading.value = isLoading;
-
-  final RxBool _isButtonDisabled = false.obs;
-  bool get isButtonDisabled => _isButtonDisabled.value;
-  set isButtonDisabled(bool isButtonDisabled) => _isButtonDisabled.value = isButtonDisabled;
-
-  ItemlistOwner itemlistOwner = ItemlistOwner.profile;
-
   TextEditingController newItemlistNameController = TextEditingController();
   TextEditingController newItemlistDescController = TextEditingController();
 
-  final RxBool _isPublicNewItemlist = true.obs;
-  bool get isPublicNewItemlist => _isPublicNewItemlist.value;
-  set isPublicNewItemlist(bool isPublicNewItemlist) => _isPublicNewItemlist.value = isPublicNewItemlist;
+  final RxMap<String, Itemlist> itemlists = <String, Itemlist>{}.obs;
+  final RxList<Itemlist> addedItemlists = <Itemlist>[].obs;
+  final RxMap<String, Itemlist> spotifyItemlists = <String, Itemlist>{}.obs;
+  final RxList<spotify.Playlist> spotifyPlaylists = <spotify.Playlist>[].obs;
+  final RxList<spotify.PlaylistSimple> spotifyPlaylistSimples = <spotify.PlaylistSimple>[].obs;
 
-  final RxString _errorMsg = "".obs;
-  String get errorMsg => _errorMsg.value;
-  set errorMsg(String errorMsg) => _errorMsg.value = errorMsg;
+  ///DEPRECATED
+  // Itemlist _favItemlist = Itemlist();
+  AppProfile profile = AppProfile();
+  Band? band;
+  String ownerId = '';
+  String ownerName = '';
+  OwnerType ownerType = OwnerType.profile;
+
+  final RxBool isLoading = true.obs;
+  final RxBool isButtonDisabled = false.obs;
+
+  final RxBool isPublicNewItemlist = true.obs;
+  final RxString errorMsg = "".obs;
 
   bool outOfSync = false;
   bool spotifyAvailable = true;
@@ -92,14 +71,33 @@ class ItemlistController extends GetxController implements ItemlistService {
     logger.d("");
 
     try {
+      userController.itemlistOwner = OwnerType.profile;
       profile = userController.profile;
-      userController.itemlistOwner = ItemlistOwner.profile;
-      if(profile.itemlists!.isNotEmpty) {
-        logger.d("Itemlists loaded from userController");
-        itemlists = profile.itemlists!;
-      } else {
-        logger.d("Itemlists loaded from Firestore");
-        itemlists = await ItemlistFirestore().fetchAll(profileId: profile.id);
+      ownerId = profile.id;
+      ownerName = profile.name;
+
+      if(Get.arguments != null) {
+        if(Get.arguments.isNotEmpty && Get.arguments[0] is Band) {
+          band = Get.arguments[0];
+        }
+
+        if(band != null) {
+          ownerId = band!.id;
+          ownerName = band!.name;
+          ownerType = OwnerType.band;
+          userController.itemlistOwner = OwnerType.band;
+        }
+      }
+
+      logger.t('Itemlists being loaded from ${ownerType.name}');
+      if(ownerType == OwnerType.profile) {
+        itemlists.value = profile.itemlists ?? {};
+      } else if(ownerType == OwnerType.band){
+        itemlists.value = band?.itemlists ?? {};
+      }
+
+      if(itemlists.isEmpty) {
+        itemlists.value = await ItemlistFirestore().fetchAll(ownerId: ownerId, ownerType: ownerType);
       }
     } catch (e) {
       logger.e(e.toString());
@@ -132,13 +130,13 @@ class ItemlistController extends GetxController implements ItemlistService {
       );
       spotifyAvailable = false;
     }
-    isLoading = false;
+    isLoading.value = false;
     update([AppPageIdConstants.itemlist]);
   }
 
 
   void clear() {
-    itemlists = <String, Itemlist>{};
+    itemlists.value = <String, Itemlist>{};
     currentItemlist = Itemlist();
   }
 
@@ -154,9 +152,9 @@ class ItemlistController extends GetxController implements ItemlistService {
     logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
 
     try {
-      errorMsg = '';
-      if((isPublicNewItemlist && newItemlistNameController.text.isNotEmpty && newItemlistDescController.text.isNotEmpty)
-          || (!isPublicNewItemlist && newItemlistNameController.text.isNotEmpty)) {
+      errorMsg.value = '';
+      if((isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty && newItemlistDescController.text.isNotEmpty)
+          || (!isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty)) {
         Itemlist newItemlist = Itemlist.createBasic(newItemlistNameController.text, newItemlistDescController.text);
         newItemlist.ownerId = profile.id;
         String newItemlistId = "";
@@ -164,11 +162,11 @@ class ItemlistController extends GetxController implements ItemlistService {
           newItemlist.position = profile.position!;
         }
 
-        newItemlist.public = isPublicNewItemlist;
+        newItemlist.public = isPublicNewItemlist.value;
         newItemlistId = await ItemlistFirestore().insert(newItemlist);
 
         ///DEPRECATED
-        // if(isPublicNewItemlist) {
+        // if(isPublicNewItemlist.value) {
         //   logger.i("Inserting Public Itemlist to Public collection");
         //   newItemlistId = await ItemlistFirestore().insert(newItemlist);
         // } else {
@@ -192,7 +190,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         }
       } else {
         logger.d(MessageTranslationConstants.pleaseFillItemlistInfo.tr);
-        errorMsg = newItemlistNameController.text.isEmpty ? MessageTranslationConstants.pleaseAddName
+        errorMsg.value = newItemlistNameController.text.isEmpty ? MessageTranslationConstants.pleaseAddName
             : MessageTranslationConstants.pleaseAddDescription;
 
         AppUtilities.showSnackBar(
@@ -237,7 +235,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     logger.d("Removing for $itemlist");
 
     try {
-      isLoading = true;
+      isLoading.value = true;
       update([AppPageIdConstants.itemlist]);
 
       if(await ItemlistFirestore().delete(itemlist.id)) {
@@ -281,7 +279,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       logger.e(e.toString());
     }
 
-    isLoading = false;
+    isLoading.value = false;
     update([AppPageIdConstants.itemlist]);
   }
 
@@ -319,7 +317,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     logger.d("Updating to $itemlist");
 
     try {
-      isLoading = true;
+      isLoading.value = true;
       update([AppPageIdConstants.itemlist]);
       String newName = newItemlistNameController.text;
       String newDesc = newItemlistDescController.text;
@@ -337,7 +335,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         if(await ItemlistFirestore().update(itemlist)){
           logger.d("Itemlist $itemlistId updated");
-          _itemlists[itemlist.id] = itemlist;
+          itemlists[itemlist.id] = itemlist;
           clearNewItemlist();
           AppUtilities.showSnackBar(
               title: AppTranslationConstants.itemlistPrefs.tr,
@@ -365,7 +363,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     }
 
 
-    isLoading = false;
+    isLoading.value = false;
     update([AppPageIdConstants.itemlist]);
   }
 
@@ -393,8 +391,8 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   Future<bool> synchronizeItemlist(Itemlist itemlist) async {
     logger.i("Synchronizing Itemlist ${itemlist.name}");
-    isButtonDisabled = true;
-    isLoading = true;
+    isButtonDisabled.value = true;
+    isLoading.value = true;
     bool wasSync = false;
     try {
 
@@ -428,43 +426,35 @@ class ItemlistController extends GetxController implements ItemlistService {
       }
 
       if(itemlistId.isEmpty) {
-        if(itemlistOwner == ItemlistOwner.profile) {
-          itemlist.ownerId = profile.id;
-          itemlistId = await ItemlistFirestore().insert(itemlist);
-        } else if(itemlistOwner == ItemlistOwner.band) {
-          //TODO Add sync for band itemlist
-          //itemlistId = await BandItemlistFirestore().insert(_gigBand.id, itemlist);
-        }
+        itemlist.ownerId = ownerId;
+        itemlist.ownerType = ownerType;
+        itemlist.ownerName = ownerName;
 
+        itemlistId = await ItemlistFirestore().insert(itemlist);
         logger.i("Itemlist inserted with id $itemlistId");
       }
 
       if(itemlistId.isNotEmpty && (itemlist.appMediaItems?.isNotEmpty ?? false)) {
         itemlist.id = itemlistId;
 
-        if(itemlistOwner == ItemlistOwner.profile) {
+        if(ownerType == OwnerType.profile) {
           userController.profile.itemlists![itemlist.id] = itemlist;
           currentItemlist = itemlist;
 
           for (AppMediaItem appItem in itemlist.appMediaItems ?? []) {
-
             itemName.value = appItem.name;
             itemNumber++;
             update([AppPageIdConstants.itemlist, AppPageIdConstants.playlistSong]);
 
             AppMediaItemFirestore().existsOrInsert(appItem);
-
             if(await ProfileFirestore().addFavoriteItem(profile.id, appItem.id)) {
               if (userController.profile.itemlists!.isNotEmpty) {
                 logger.d("Adding item to global itemlist from userController");
                 userController.profile.favoriteItems!.add(appItem.id);
               }
             }
-
-
           }
-
-        } else if(itemlistOwner == ItemlistOwner.band) {
+        } else if(ownerType == OwnerType.band) {
           userController.band.itemlists![itemlist.id] = itemlist;
           for (var appItem in itemlist.appMediaItems ?? []) {
             AppMediaItemFirestore().existsOrInsert(appItem);
@@ -481,7 +471,7 @@ class ItemlistController extends GetxController implements ItemlistService {
             duration: const Duration(seconds: 1)
         );
       }
-      isButtonDisabled = false;
+      isButtonDisabled.value = false;
     } catch (e) {
       logger.e(e.toString());
     }
@@ -505,16 +495,16 @@ class ItemlistController extends GetxController implements ItemlistService {
   Future<void> synchronizeSpotifyPlaylists() async {
     logger.i("Getting Spotify Information with token: ${userController.user!.spotifyToken}");
 
-    isLoading = true;
+    isLoading.value = true;
     update([AppPageIdConstants.itemlist]);
 
     spotify.User spotifyUser = await SpotifyApiCalls.getUserProfile(spotifyToken: userController.user!.spotifyToken);
 
     try {
       if(spotifyUser.id?.isNotEmpty ?? false) {
-        spotifyPlaylistSimples =  await SpotifyApiCalls.getUserPlaylistSimples(spotifyToken: userController.user!.spotifyToken, userId: spotifyUser.id!);
+        spotifyPlaylistSimples.value =  await SpotifyApiCalls.getUserPlaylistSimples(spotifyToken: userController.user!.spotifyToken, userId: spotifyUser.id!);
 
-        for (var playlist in spotifyPlaylistSimples) {
+        for (var playlist in spotifyPlaylistSimples.value) {
           if(playlist.id?.isNotEmpty ?? false) {
             spotifyItemlists[playlist.id!] = Itemlist.mapPlaylistSimpleToItemlist(playlist);
           }
@@ -528,7 +518,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       logger.e(e.toString());
     }
 
-    isLoading = false;
+    isLoading.value = false;
     update([AppPageIdConstants.itemlist]);
   }
 
@@ -538,11 +528,11 @@ class ItemlistController extends GetxController implements ItemlistService {
       if (addedItemlists.contains(spotifyItemlist)) {
         logger.d("Removing gigList ${spotifyItemlist.name}");
         addedItemlists.remove(spotifyItemlist);
-        totalItemsToSynch -= spotifyPlaylistSimples.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
+        totalItemsToSynch -= spotifyPlaylistSimples.value.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
       } else {
         logger.d("Adding giglist with name ${spotifyItemlist.name}");
         addedItemlists.add(spotifyItemlist);
-        totalItemsToSynch += spotifyPlaylistSimples.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
+        totalItemsToSynch += spotifyPlaylistSimples.value.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
       }
     } catch (e) {
       logger.e(e.toString());
@@ -565,7 +555,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     spotify.Playlist spotifyPlaylist = spotify.Playlist();
 
     try {
-      spotify.PlaylistSimple playlistSimple = spotifyPlaylistSimples.where((element) => element.href == itemlist.href).first;
+      spotify.PlaylistSimple playlistSimple = spotifyPlaylistSimples.value.where((element) => element.href == itemlist.href).first;
 
       if(playlistSimple.id?.isNotEmpty ?? false) {
         spotifyPlaylist = await SpotifyApiCalls.getPlaylist(spotifyToken: userController.user!.spotifyToken, playlistId: playlistSimple.id!);
@@ -588,14 +578,14 @@ class ItemlistController extends GetxController implements ItemlistService {
     logger.i("Synchronizing ${addedItemlists.length} Giglists from Spotify Playlists");
 
     Map<Itemlist, bool> wereSynchronized = {};
-    isLoading = true;
-    isButtonDisabled = true;
+    isLoading.value = true;
+    isButtonDisabled.value = true;
     update([AppPageIdConstants.itemlist]);
 
     try {
       spotify.Playlist playlistToSync = spotify.Playlist();
       for (var addedItemlist in addedItemlists) {
-        spotify.PlaylistSimple playlistSimple = spotifyPlaylistSimples.where((element) => element.href == addedItemlist.href).first;
+        spotify.PlaylistSimple playlistSimple = spotifyPlaylistSimples.value.where((element) => element.href == addedItemlist.href).first;
 
         if(playlistSimple.id?.isNotEmpty ?? false) {
           playlistToSync = await SpotifyApiCalls.getPlaylist(spotifyToken: userController.user!.spotifyToken, playlistId: playlistSimple.id!);
@@ -627,15 +617,15 @@ class ItemlistController extends GetxController implements ItemlistService {
       }
     });
 
-    isLoading = false;
-    isButtonDisabled = false;
+    isLoading.value = false;
+    isButtonDisabled.value = false;
     update();
   }
 
   Future<void> setPrivacyOption() async {
     logger.t('setPrivacyOption for Playlist');
-    isPublicNewItemlist = !isPublicNewItemlist;
-    logger.d("New Itemlist would be ${isPublicNewItemlist ? 'Public':'Private'}");
+    isPublicNewItemlist.value = !isPublicNewItemlist.value;
+    logger.d("New Itemlist would be ${isPublicNewItemlist.value ? 'Public':'Private'}");
     update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
   }
 

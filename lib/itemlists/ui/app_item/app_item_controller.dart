@@ -37,15 +37,15 @@
 //   set itemlistItems(Map<String, AppItem> itemlistItems) => _itemlistItems.value  = itemlistItems;
 //
 //   final RxBool _isLoading = true.obs;
-//   bool get isLoading => _isLoading.value;
-//   set isLoading(bool isLoading) => _isLoading.value = isLoading;
+//   bool get isLoading.value => _isLoading.value;
+//   set isLoading.value(bool isLoading.value) => _isLoading.value = isLoading.value;
 //
 //   bool isFixed = false;
 //
 //   String profileId = "";
 //   Band band = Band();
 //   int _prevItemState = 0;
-//   ItemlistOwner itemlistOwner = ItemlistOwner.profile;
+//   OwnerType itemlistOwner = OwnerType.profile;
 //
 //
 //   @override
@@ -87,7 +87,7 @@
 //   void onReady() {
 //     super.onReady();
 //     logger.d("");
-//     isLoading = false;
+//     isLoading.value = false;
 //     update([AppPageIdConstants.itemlistItem]);
 //   }
 //
@@ -137,7 +137,7 @@
 //
 //     try {
 //
-//       if(itemlistOwner == ItemlistOwner.profile) {
+//       if(itemlistOwner == OwnerType.profile) {
 //         if(await ItemlistFirestore().addAppItem(profileId, appItem, itemlistId)){
 //           if(await ProfileFirestore().addAppItem(profileId, appItem.id)){
 //             if (userController.profile.itemlists!.isNotEmpty) {
@@ -159,7 +159,7 @@
 //             return true;
 //           }
 //         }
-//       } else if(itemlistOwner == ItemlistOwner.band) {
+//       } else if(itemlistOwner == OwnerType.band) {
 //         if(await BandItemlistFirestore().addAppItem(band.id, appItem, itemlistId)){
 //           if(await BandFirestore().addAppItem(band.id, appItem.id)) {
 //             if (userController.band.itemlists!.isNotEmpty) {
@@ -186,7 +186,7 @@
 //     logger.d("removing itemlistItem ${appItem.toString()}");
 //
 //     try {
-//       if(itemlistOwner == ItemlistOwner.profile) {
+//       if(itemlistOwner == OwnerType.profile) {
 //         if(await ItemlistFirestore().removeItem(profileId, appItem, itemlist.id)) {
 //           logger.d("");
 //           if(await ProfileFirestore().removeAppItem(profileId, appItem.id)) {
@@ -201,7 +201,7 @@
 //           logger.d("ItemlistItem not removed");
 //           return false;
 //         }
-//       } else if(itemlistOwner == ItemlistOwner.band) {
+//       } else if(itemlistOwner == OwnerType.band) {
 //         if(await BandItemlistFirestore().removeItem(band.id, appItem, itemlist.id)){
 //           logger.d("");
 //           if(await BandFirestore().removeItem(band.id, appItem.id)) {

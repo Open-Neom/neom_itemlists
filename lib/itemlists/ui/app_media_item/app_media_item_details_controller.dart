@@ -20,44 +20,19 @@ class AppMediaItemDetailsController extends GetxController {
 
   AppProfile profile = AppProfile();
   Band band = Band();
-  ItemlistOwner itemlistOwner = ItemlistOwner.profile;
+  OwnerType itemlistOwner = OwnerType.profile;
   AppMediaItem appMediaItem = AppMediaItem();
 
-  final RxString _itemlistId = "".obs;
-  String get itemlistId => _itemlistId.value;
-  set itemlistId(String itemlistId) => _itemlistId.value = itemlistId;
+  final RxString itemlistId = "".obs;
+  final RxString durationMinutes = "".obs;
+  final RxInt appItemState = 0.obs;
+  final RxMap<String, Itemlist> itemlists = <String, Itemlist>{}.obs;
 
-  final RxString _durationMinutes = "".obs;
-  String get durationMinutes => _durationMinutes.value;
-  set durationMinutes(String durationMinutes) => _durationMinutes.value = durationMinutes;
-
-  final RxInt _appItemState = 0.obs;
-  int get appItemState => _appItemState.value;
-  set appItemState(int appItemState) => _appItemState.value = appItemState;
-
-  final RxBool _isPlaying = false.obs;
-  bool get isPlaying => _isPlaying.value;
-  set isPlaying(bool isPlaying) => _isPlaying.value = isPlaying;
-
-  final RxBool _wasAdded = false.obs;
-  bool get wasAdded => _wasAdded.value;
-  set wasAdded(bool wasAdded) => _wasAdded.value = wasAdded;
-
-  final RxBool _existsInItemlist = false.obs;
-  bool get existsInItemlist => _existsInItemlist.value;
-  set existsInItemlist(bool existsInItemlist) => _existsInItemlist.value = existsInItemlist;
-
-  final RxMap<String, Itemlist> _itemlists = <String, Itemlist>{}.obs;
-  Map<String, Itemlist> get itemlists => _itemlists;
-  set itemlists(Map<String, Itemlist> itemlists) => _itemlists.value = itemlists;
-
-  final RxBool _isLoading = true.obs;
-  bool get isLoading => _isLoading.value;
-  set isLoading(bool isLoading) => _isLoading.value = isLoading;
-
-  final RxBool _isButtonDisabled = false.obs;
-  bool get isButtonDisabled => _isButtonDisabled.value;
-  set isButtonDisabled(bool isButtonDisabled) => _isButtonDisabled.value = isButtonDisabled;
+  final RxBool isLoading = true.obs;
+  final RxBool isButtonDisabled = false.obs;
+  final RxBool existsInItemlist = false.obs;
+  final RxBool isPlaying = false.obs;
+  final RxBool wasAdded = false.obs;
 
   ///VerifY IF NEEDED with music player
   final AudioPlayer audioPlayer = AudioPlayer(playerId: AppFlavour.getAppName());
@@ -84,9 +59,9 @@ class AppMediaItemDetailsController extends GetxController {
       audioPlayer.setReleaseMode(ReleaseMode.stop);
       audioPlayer.stop();
       audioPlayer.release();
-      if(itemlistOwner == ItemlistOwner.profile) {
+      if(itemlistOwner == OwnerType.profile) {
         itemlists.assignAll(profile.itemlists ?? {});
-      } else if(itemlistOwner == ItemlistOwner.band) {
+      } else if(itemlistOwner == OwnerType.band) {
         itemlists.assignAll(band.itemlists ?? {});
       }
 
@@ -100,15 +75,15 @@ class AppMediaItemDetailsController extends GetxController {
           releasedItemId = Get.arguments[0];
         }
 
-        existsInItemlist = itemAlreadyInList();
+        existsInItemlist.value = itemAlreadyInList();
 
         if (arguments.length > 1) { //to save in previously selected itemlist
-          itemlistId =  arguments.elementAt(1);
+          itemlistId.value =  arguments.elementAt(1);
         }
       }
 
       if(itemlists.isNotEmpty && itemlists.isNotEmpty && itemlistId.isEmpty) {
-        itemlistId = itemlists.values.first.id;
+        itemlistId.value = itemlists.values.first.id;
       }
 
     } catch (e) {
@@ -150,7 +125,7 @@ class AppMediaItemDetailsController extends GetxController {
       logger.e(e.toString());
     }
 
-    isLoading = false;
+    isLoading.value = false;
     update([AppPageIdConstants.appItemDetails]);
   }
 
@@ -160,24 +135,24 @@ class AppMediaItemDetailsController extends GetxController {
     clear();
     audioPlayer.stop();
     audioPlayer.release();
-    isPlaying = false;
+    isPlaying.value = false;
   }
 
   void clear() {
     appMediaItem = AppMediaItem();
-    itemlistId = "";
+    itemlistId.value = "";
   }
 
   void setAppItemState(AppItemState newState){
     logger.d("Setting new appItemState $newState");
-    appItemState = newState.value;
+    appItemState.value = newState.value;
     update([AppPageIdConstants.appItemDetails]);
   }
 
   void setSelectedItemlist(String selectedItemlist){
     logger.d("Setting selectedItemlist $selectedItemlist");
-    itemlistId  = selectedItemlist;
-    existsInItemlist = itemAlreadyInList();
+    itemlistId.value  = selectedItemlist;
+    existsInItemlist.value = itemAlreadyInList();
     update([AppPageIdConstants.appItemDetails]);
   }
 
@@ -186,7 +161,7 @@ class AppMediaItemDetailsController extends GetxController {
 
     try {
       appMediaItem = await AppMediaItemFirestore().retrieve(itemId);
-      durationMinutes = AppUtilities.getDurationInMinutes(appMediaItem.duration);
+      durationMinutes.value = AppUtilities.getDurationInMinutes(appMediaItem.duration);
     } catch (e) {
       logger.d(e.toString());
     }
@@ -196,19 +171,19 @@ class AppMediaItemDetailsController extends GetxController {
 
   Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0}) async {
 
-    if(!isButtonDisabled) {
+    if(!isButtonDisabled.value) {
 
-      isButtonDisabled = true;
-      isLoading = true;
+      isButtonDisabled.value = true;
+      isLoading.value = true;
       update([AppPageIdConstants.appItemDetails]);
 
       logger.i("AppMediaItem ${appMediaItem.name} would be added as $appItemState for Itemlist $itemlistId");
 
-      if(fanItemState > 0) appItemState = fanItemState;
-      if(itemlistId.isEmpty) itemlistId = itemlists.values.first.id;
+      if(fanItemState > 0) appItemState.value = fanItemState;
+      if(itemlistId.isEmpty) itemlistId.value = itemlists.values.first.id;
 
       await audioPlayer.stop();
-      isPlaying = false;
+      isPlaying.value = false;
 
       AppMediaItemController appMediaItemController;
 
@@ -223,13 +198,13 @@ class AppMediaItemDetailsController extends GetxController {
           await AppMediaItemFirestore().insert(appMediaItem);
         }
 
-        if(!existsInItemlist) {
-          appMediaItem.state = appItemState;
+        if(!existsInItemlist.value) {
+          appMediaItem.state = appItemState.value;
 
-          if(await appMediaItemController.addItemToItemlist(appMediaItem, itemlistId)){
+          if(await appMediaItemController.addItemToItemlist(appMediaItem, itemlistId.value)){
             logger.d("Setting existsInItemlist and wasAdded true");
-            existsInItemlist = true;
-            wasAdded = true;
+            existsInItemlist.value = true;
+            wasAdded.value = true;
           }
         }
 
@@ -244,7 +219,7 @@ class AppMediaItemDetailsController extends GetxController {
         AppPageIdConstants.profile]);
 
       try {
-        if(itemlistOwner == ItemlistOwner.profile) {
+        if(itemlistOwner == OwnerType.profile) {
           if(Get.find<EventDetailsController>().initialized) {
             Get.find<EventDetailsController>().addToMatchedItems(appMediaItem);
             Navigator.of(context).popUntil(ModalRoute.withName(AppRouteConstants.eventDetails));
@@ -270,7 +245,7 @@ class AppMediaItemDetailsController extends GetxController {
     logger.d("removing Item ${appMediaItem.toString()} from itemlist");
 
     await audioPlayer.stop();
-    isPlaying = false;
+    isPlaying.value = false;
 
     AppMediaItemController appMediaItemController;
     try {
@@ -303,7 +278,7 @@ class AppMediaItemDetailsController extends GetxController {
         if (item.id == appMediaItem.id) {
           itemAlreadyInList = true;
           appMediaItem.state = item.state;
-          _itemlistId.value = iList.id;
+          itemlistId.value = iList.id;
         }
       }
     });
@@ -319,13 +294,13 @@ class AppMediaItemDetailsController extends GetxController {
     try {
       audioPlayer.onDurationChanged.listen((duration) {
         AppUtilities.logger.i(duration);
-        durationMinutes = AppUtilities.getDurationInMinutes(duration.inMilliseconds);
+        durationMinutes.value = AppUtilities.getDurationInMinutes(duration.inMilliseconds);
       });
 
       await audioPlayer.play(UrlSource(appMediaItem.url));
 
 
-      isPlaying = true;
+      isPlaying.value = true;
     } catch(e) {
       logger.e(e.toString());
     }
@@ -336,7 +311,7 @@ class AppMediaItemDetailsController extends GetxController {
   Future<void> pausePreview() async {
     try {
       await audioPlayer.pause();
-      isPlaying = false;
+      isPlaying.value = false;
     } catch(e) {
       logger.e(e.toString());
     }
@@ -351,7 +326,7 @@ class AppMediaItemDetailsController extends GetxController {
     try {
       await audioPlayer.stop();
       await audioPlayer.release();
-      isPlaying = false;
+      isPlaying.value = false;
     } catch(e) {
       logger.e(e.toString());
     }

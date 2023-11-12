@@ -105,7 +105,7 @@ class ItemlistPage extends StatelessWidget {
           ) : null,
           body: Container(
             decoration: AppTheme.appBoxDecoration,
-            child: _.isLoading ? const Center(child: CircularProgressIndicator())
+            child: _.isLoading.value ? const Center(child: CircularProgressIndicator())
             : Column(
               children: [
                 ListTile(
@@ -152,7 +152,7 @@ class ItemlistPage extends StatelessWidget {
                                   child: Row(
                                     children: <Widget>[
                                       Checkbox(
-                                        value: _.isPublicNewItemlist,
+                                        value: _.isPublicNewItemlist.value,
                                         onChanged: (bool? newValue) => _.setPrivacyOption(),
                                       ),
                                       Text(AppTranslationConstants.publicList.tr, style: const TextStyle(fontSize: 15)),
@@ -165,7 +165,7 @@ class ItemlistPage extends StatelessWidget {
                                 children: [
                                   Container(
                                     alignment: Alignment.center,
-                                    child: Text(_.errorMsg.tr, style: const TextStyle(fontSize: 12, color: AppColor.red)),
+                                    child: Text(_.errorMsg.value.tr, style: const TextStyle(fontSize: 12, color: AppColor.red)),
                                   ),
                                 ],) : Container()
                             ],
@@ -177,7 +177,7 @@ class ItemlistPage extends StatelessWidget {
                             color: AppColor.bondiBlue75,
                             onPressed: () async {
                               await _.createItemlist();
-                              if(_.errorMsg.isEmpty) Navigator.pop(ctx);
+                              if(_.errorMsg.value.isEmpty) Navigator.pop(ctx);
                             },
                             child: Text(
                               AppTranslationConstants.add.tr,
@@ -217,7 +217,7 @@ class ItemlistPage extends StatelessWidget {
                     //             child: Row(
                     //               children: <Widget>[
                     //                 Checkbox(
-                    //                   value: _.isPublicNewItemlist,
+                    //                   value: _.isPublicNewItemlist.value,
                     //                   onChanged: (bool? newValue) {
                     //                     _.setPrivacyOption();
                     //                   },
@@ -267,7 +267,7 @@ class ItemlistPage extends StatelessWidget {
               ],
             )
           ),
-          floatingActionButton: _.isLoading ? Container() : Container(
+          floatingActionButton: _.isLoading.value ? Container() : Container(
             margin: const EdgeInsets.only(bottom: 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,

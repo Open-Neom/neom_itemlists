@@ -38,7 +38,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 30),
           height: AppTheme.fullHeight(context),
           decoration: AppTheme.appBoxDecoration,
-          child: _.isLoading ? const Center(child: CircularProgressIndicator())
+          child: _.isLoading.value ? const Center(child: CircularProgressIndicator())
             : Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
@@ -86,7 +86,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                   fontSize: 12,
                                   color: Color.fromRGBO(250, 250, 250, 0.46))),
                             ),
-                            Text(_.durationMinutes,
+                            Text(_.durationMinutes.value,
                               style: AppTheme.textStyle.merge(
                                 const TextStyle(
                                   fontSize: 12,
@@ -99,12 +99,12 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                         AppTheme.heightSpace10,
                         GestureDetector(
                           child: Icon(
-                            _.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                            _.isPlaying.value ? Icons.pause_circle_filled : Icons.play_circle_filled,
                             size: 100,
                           ),
                           onTap: () async {
                             if(_.appMediaItem.url.isNotEmpty) {
-                              _.isPlaying ? await _.pausePreview() : await _.playPreview();
+                              _.isPlaying.value ? await _.pausePreview() : await _.playPreview();
                             } else {
                               AppUtilities.showSnackBar(
                                   title: AppTranslationConstants.noAvailablePreviewUrl,
@@ -127,11 +127,11 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                         child: Row(
                           children: [
                             const Icon(Icons.add, color: Colors.grey, size: 25),
-                            _.existsInItemlist ? Text(AppTranslationConstants.removeFromItemlist.tr)
+                            _.existsInItemlist.value ? Text(AppTranslationConstants.removeFromItemlist.tr)
                                 : Text(AppTranslationConstants.releaseItem.tr)],
                         ),
                       onPressed: () async => {
-                        if (_.existsInItemlist) {
+                        if (_.existsInItemlist.value) {
                           await _.removeItem()
                         } else {
                           _.itemlists.isNotEmpty ? Alert(
@@ -180,7 +180,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                     onChanged: (String? newState) {
                                       _.setAppItemState(EnumToString.fromString(AppItemState.values, newState!) ?? AppItemState.noState);
                                     },
-                                    value: CoreUtilities.getItemState(_.appItemState).name,
+                                    value: CoreUtilities.getItemState(_.appItemState.value).name,
                                     alignment: Alignment.center,
                                     icon: const Icon(Icons.arrow_downward),
                                     iconSize: 20,
@@ -208,7 +208,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                   onChanged: (String? selectedItemlist) {
                                     _.setSelectedItemlist(selectedItemlist!);
                                   },
-                                  value: _.itemlistId,
+                                  value: _.itemlistId.value,
                                   icon: const Icon(Icons.arrow_downward),
                                   alignment: Alignment.center,
                                   iconSize: 20,
@@ -225,16 +225,15 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                               buttons: [
                               DialogButton(
                                 color: AppColor.bondiBlue75,
-                                child: Obx(()=>_.isLoading ? const Center(child: CircularProgressIndicator())
+                                child: Obx(()=>_.isLoading.value ? const Center(child: CircularProgressIndicator())
                                     : Text(AppTranslationConstants.add.tr,
                                 )),
                                 onPressed: () async => {
                                   _.userController.profile.type == ProfileType.instrumentist ?
-                                  (_.appItemState > 0 ? await _.addItemlistItem(context, fanItemState: _.appItemState) :
-                                    Get.snackbar(
-                                      AppTranslationConstants.appItemPrefs.tr,
-                                      MessageTranslationConstants.selectItemStateMsg.tr,
-                                      snackPosition: SnackPosition.bottom
+                                  (_.appItemState > 0 ? await _.addItemlistItem(context, fanItemState: _.appItemState.value) :
+                                    AppUtilities.showSnackBar(
+                                      title: AppTranslationConstants.appItemPrefs.tr,
+                                      message: MessageTranslationConstants.selectItemStateMsg.tr,
                                     )
                                   ) : await _.addItemlistItem(context,
                                       fanItemState: AppItemState.heardIt.value)
@@ -247,12 +246,11 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                Obx(()=> _.wasAdded ? Container(
+                Obx(()=> _.wasAdded.value ? Container(
                   padding: const EdgeInsets.only(top: 10),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                        backgroundColor: MaterialStateProperty
-                            .all<Color>(AppColor.bondiBlue75)
+                      backgroundColor: MaterialStateProperty.all<Color>(AppColor.bondiBlue75)
                     ),
                     child: SizedBox(
                       width: 100,
@@ -266,9 +264,10 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                       onPressed: () => AppUtilities.goHome()
                   )
                 ) : Container()),
-              ]),
+              ]
             ),
           ),
+        ),
       ),
     ),);
   }

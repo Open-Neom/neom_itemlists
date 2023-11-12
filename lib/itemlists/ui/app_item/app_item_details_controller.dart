@@ -20,7 +20,7 @@
 //
 //   AppProfile profile = AppProfile();
 //   Band band = Band();
-//   ItemlistOwner itemlistOwner = ItemlistOwner.profile;
+//   OwnerType itemlistOwner = OwnerType.profile;
 //   AppItem appItem = AppItem();
 //
 //   final RxString _itemlistId = "".obs;
@@ -36,8 +36,8 @@
 //   set appItemState(int appItemState) => _appItemState.value = appItemState;
 //
 //   final RxBool _isPlaying = false.obs;
-//   bool get isPlaying => _isPlaying.value;
-//   set isPlaying(bool isPlaying) => _isPlaying.value = isPlaying;
+//   bool get isPlaying.value => _isPlaying.value;
+//   set isPlaying.value(bool isPlaying.value) => _isPlaying.value = isPlaying.value;
 //
 //   final RxBool _wasAdded = false.obs;
 //   bool get wasAdded => _wasAdded.value;
@@ -52,12 +52,12 @@
 //   set itemlists(Map<String, Itemlist> itemlists) => _itemlists.value = itemlists;
 //
 //   final RxBool _isLoading = true.obs;
-//   bool get isLoading => _isLoading.value;
-//   set isLoading(bool isLoading) => _isLoading.value = isLoading;
+//   bool get isLoading.value => _isLoading.value;
+//   set isLoading.value(bool isLoading.value) => _isLoading.value = isLoading.value;
 //
 //   final RxBool _isButtonDisabled = false.obs;
-//   bool get isButtonDisabled => _isButtonDisabled.value;
-//   set isButtonDisabled(bool isButtonDisabled) => _isButtonDisabled.value = isButtonDisabled;
+//   bool get isButtonDisabled.value => _isButtonDisabled.value;
+//   set isButtonDisabled.value(bool isButtonDisabled.value) => _isButtonDisabled.value = isButtonDisabled.value;
 //
 //   final AudioPlayer audioPlayer = AudioPlayer(playerId: AppInUse.gigmeout.value);
 //
@@ -83,9 +83,9 @@
 //       audioPlayer.setReleaseMode(ReleaseMode.stop);
 //       audioPlayer.stop();
 //       audioPlayer.release();
-//       if(itemlistOwner == ItemlistOwner.profile) {
+//       if(itemlistOwner == OwnerType.profile) {
 //         itemlists.assignAll(profile.itemlists ?? {});
-//       } else if(itemlistOwner == ItemlistOwner.band) {
+//       } else if(itemlistOwner == OwnerType.band) {
 //         itemlists.assignAll(band.itemlists ?? {});
 //       }
 //
@@ -149,7 +149,7 @@
 //       logger.e(e.toString());
 //     }
 //
-//     isLoading = false;
+//     isLoading.value = false;
 //     update([AppPageIdConstants.appItemDetails]);
 //   }
 //
@@ -159,7 +159,7 @@
 //     clear();
 //     audioPlayer.stop();
 //     audioPlayer.release();
-//     isPlaying = false;
+//     isPlaying.value = false;
 //   }
 //
 //   void clear() {
@@ -195,10 +195,10 @@
 //
 //   Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0}) async {
 //
-//     if(!isButtonDisabled) {
+//     if(!isButtonDisabled.value) {
 //
-//       isButtonDisabled = true;
-//       isLoading = true;
+//       isButtonDisabled.value = true;
+//       isLoading.value = true;
 //       update([AppPageIdConstants.appItemDetails]);
 //
 //       logger.i("AppItem ${appItem.name} would be added as $appItemState for Itemlist $itemlistId");
@@ -207,7 +207,7 @@
 //       if(itemlistId.isEmpty) itemlistId = itemlists.values.first.id;
 //
 //       await audioPlayer.stop();
-//       isPlaying = false;
+//       isPlaying.value = false;
 //
 //       AppItemController appItemController;
 //
@@ -243,7 +243,7 @@
 //         AppPageIdConstants.profile]);
 //
 //       try {
-//         if(itemlistOwner == ItemlistOwner.profile) {
+//         if(itemlistOwner == OwnerType.profile) {
 //           if(Get.find<EventDetailsController>().initialized) {
 //             Get.find<EventDetailsController>().addToMatchedItems(appItem);
 //             Navigator.of(context).popUntil(ModalRoute.withName(AppRouteConstants.eventDetails));
@@ -269,7 +269,7 @@
 //     logger.d("removing Item ${appItem.toString()} from itemlist");
 //
 //     await audioPlayer.stop();
-//     isPlaying = false;
+//     isPlaying.value = false;
 //
 //     AppItemController appItemController;
 //     try {
@@ -326,7 +326,7 @@
 //       await audioPlayer.play(UrlSource(appItem.previewUrl));
 //
 //
-//       isPlaying = true;
+//       isPlaying.value = true;
 //     } catch(e) {
 //       logger.e(e.toString());
 //     }
@@ -337,7 +337,7 @@
 //   Future<void> pausePreview() async {
 //     try {
 //       await audioPlayer.pause();
-//       isPlaying = false;
+//       isPlaying.value = false;
 //     } catch(e) {
 //       logger.e(e.toString());
 //     }
@@ -352,7 +352,7 @@
 //     try {
 //       await audioPlayer.stop();
 //       await audioPlayer.release();
-//       isPlaying = false;
+//       isPlaying.value = false;
 //     } catch(e) {
 //       logger.e(e.toString());
 //     }

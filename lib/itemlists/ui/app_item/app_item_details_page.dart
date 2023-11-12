@@ -39,7 +39,7 @@
 //           padding: const EdgeInsets.symmetric(horizontal: 30),
 //           height: AppTheme.fullHeight(context),
 //           decoration: AppTheme.appBoxDecoration,
-//           child: _.isLoading ? const Center(child: CircularProgressIndicator())
+//           child: _.isLoading.value ? const Center(child: CircularProgressIndicator())
 //             : Column(
 //               mainAxisAlignment: MainAxisAlignment.spaceAround,
 //               children: <Widget>[
@@ -100,12 +100,12 @@
 //                         AppTheme.heightSpace10,
 //                         GestureDetector(
 //                           child: Icon(
-//                             _.isPlaying ? Icons.pause_circle_filled : Icons.play_circle_filled,
+//                             _.isPlaying.value ? Icons.pause_circle_filled : Icons.play_circle_filled,
 //                             size: 100,
 //                           ),
 //                           onTap: () async {
 //                             if(_.appItem.previewUrl.isNotEmpty) {
-//                               _.isPlaying ? await _.pausePreview() : await _.playPreview();
+//                               _.isPlaying.value ? await _.pausePreview() : await _.playPreview();
 //                             } else {
 //                               AppUtilities.showSnackBar(AppTranslationConstants.noAvailablePreviewUrl, AppTranslationConstants.noAvailablePreviewUrlMsg);
 //                             }
@@ -223,7 +223,7 @@
 //                               buttons: [
 //                               DialogButton(
 //                                 color: AppColor.bondiBlue75,
-//                                 child: Obx(()=>_.isLoading ? const Center(child: CircularProgressIndicator())
+//                                 child: Obx(()=>_.isLoading.value ? const Center(child: CircularProgressIndicator())
 //                                     : Text(AppTranslationConstants.add.tr,
 //                                 )),
 //                                 onPressed: () async => {

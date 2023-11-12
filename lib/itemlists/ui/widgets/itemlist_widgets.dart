@@ -64,7 +64,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
             title: Text(AppTranslationConstants.itemlistName.tr,),
             content: SizedBox(
               height: AppTheme.fullHeight(context)*0.25,
-              child: Obx(()=> _.isLoading ? const Center(child: CircularProgressIndicator())
+              child: Obx(()=> _.isLoading.value ? const Center(child: CircularProgressIndicator())
                 : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -126,7 +126,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           //         backgroundColor: AppColor.main50,
           //         titleStyle: const TextStyle(color: Colors.white)
           //     ),
-          //     content: Obx(()=> _.isLoading ? const Center(child: CircularProgressIndicator())
+          //     content: Obx(()=> _.isLoading.value ? const Center(child: CircularProgressIndicator())
           //     : Column(
           //         children: <Widget>[
           //           TextField(
@@ -224,10 +224,10 @@ Widget buildSyncPlaylistList(BuildContext context, ItemlistController _) {
                   backgroundColor: AppColor.main50,
                   avatar: CircleAvatar(
                     backgroundColor: AppColor.white80,
-                    child: Obx(()=>_.isLoading && _.currentItemlist.href == spotifyItemlist.href
+                    child: Obx(()=>_.isLoading.value && _.currentItemlist.href == spotifyItemlist.href
                         ? const Center(child: CircularProgressIndicator())
                         : Text(("${(spotifyItemlist.appMediaItems?.isEmpty ?? true)
-                        ? _.spotifyPlaylistSimples.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total
+                        ? _.spotifyPlaylistSimples.value.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total
                         : spotifyItemlist.appMediaItems?.length ?? 0
                     }")
                     ),
@@ -269,9 +269,9 @@ Widget buildSyncPlaylistsButton(BuildContext context, ItemlistController _) {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
         ),
         onPressed: () async {
-          if(!_.isButtonDisabled) await _.synchronizeItemlists();
+          if(!_.isButtonDisabled.value) await _.synchronizeItemlists();
         },
-        child: Obx(()=>_.isLoading ? const Center(child: CircularProgressIndicator())
+        child: Obx(()=>_.isLoading.value ? const Center(child: CircularProgressIndicator())
             : Text(AppTranslationConstants.synchronizePlaylists.tr,
           style: const TextStyle(
               color: Colors.white,

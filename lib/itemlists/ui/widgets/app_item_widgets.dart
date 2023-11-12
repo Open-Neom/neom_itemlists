@@ -20,7 +20,6 @@ import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/app_media_source.dart';
 import 'package:neom_commons/core/utils/enums/profile_type.dart';
-import 'package:neom_music_player/ui/player/media_player_page.dart';
 import 'package:neom_music_player/ui/widgets/download_button.dart';
 import 'package:neom_music_player/ui/widgets/go_spotify_button.dart';
 import 'package:neom_music_player/ui/widgets/image_card.dart';
@@ -103,7 +102,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                 }
               }
           ),
-          onLongPress: () => AppFlavour.appInUse != AppInUse.c || !_.isFixed ? Alert(
+          onLongPress: () => _.itemlist.isModifiable && (AppFlavour.appInUse != AppInUse.c || !_.isFixed) ? Alert(
               context: context,
               title: AppTranslationConstants.appItemPrefs.tr,
               style: AlertStyle(
@@ -148,7 +147,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                         onChanged: (String? newItemState) {
                           _.setItemState(EnumToString.fromString(AppItemState.values, newItemState!) ?? AppItemState.noState);
                         },
-                        value: CoreUtilities.getItemState(_.itemState).name,
+                        value: CoreUtilities.getItemState(_.itemState.value).name,
                         icon: const Icon(Icons.arrow_downward),
                         iconSize: 15,
                         elevation: 15,

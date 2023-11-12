@@ -19,7 +19,7 @@ class SpotifyPlaylistsPage extends StatelessWidget {
     return GetBuilder<ItemlistController>(
       id: AppPageIdConstants.playlistSong,
       builder: (_) => Scaffold(
-        appBar: AppBarChild(title: "${_.spotifyPlaylistSimples.length} Playlists ${AppTranslationConstants.found.tr}"),
+        appBar: AppBarChild(title: "${_.spotifyPlaylistSimples.value.length} Playlists ${AppTranslationConstants.found.tr}"),
         body: Container(
             decoration: AppTheme.appBoxDecoration,
             child: Column(
