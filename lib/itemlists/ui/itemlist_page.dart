@@ -14,6 +14,7 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/owner_type.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
@@ -105,6 +106,7 @@ class ItemlistPage extends StatelessWidget {
           ) : null,
           body: Container(
             decoration: AppTheme.appBoxDecoration,
+            padding: EdgeInsets.only(bottom: _.ownerType == OwnerType.profile ? 80 : 0),
             child: _.isLoading.value ? const Center(child: CircularProgressIndicator())
             : Column(
               children: [
@@ -187,78 +189,6 @@ class ItemlistPage extends StatelessWidget {
                         ],
                       ),
                     )) ?? false;
-
-                    ///DEPRECATED
-                    // Alert(
-                    //     context: context,
-                    //     style: AlertStyle(backgroundColor: AppColor.main50, titleStyle: const TextStyle(color: Colors.white)),
-                    //     title: AppTranslationConstants.addNewItemlist.tr,
-                    //     content: Column(
-                    //       children: <Widget>[
-                    //         //TODO Change lines colors to white.
-                    //         TextField(
-                    //           controller: _.newItemlistNameController,
-                    //           decoration: InputDecoration(
-                    //             labelText: AppTranslationConstants.itemlistName.tr,
-                    //           ),
-                    //         ),
-                    //         TextField(
-                    //           controller: _.newItemlistDescController,
-                    //           minLines: 2,
-                    //           maxLines: 5,
-                    //           decoration: InputDecoration(
-                    //             labelText: AppTranslationConstants.description.tr,
-                    //           ),
-                    //         ),
-                    //         const SizedBox(height: 10), // Add some spacing for the segmented control
-                    //         Obx(() => Container(
-                    //           alignment: Alignment.center,
-                    //           child: GestureDetector(
-                    //             child: Row(
-                    //               children: <Widget>[
-                    //                 Checkbox(
-                    //                   value: _.isPublicNewItemlist.value,
-                    //                   onChanged: (bool? newValue) {
-                    //                     _.setPrivacyOption();
-                    //                   },
-                    //                 ),
-                    //                 Text(AppTranslationConstants.publicList.tr, style: const TextStyle(fontSize: 15)),
-                    //               ],
-                    //             ),
-                    //             onTap: ()=> _.setPrivacyOption(),
-                    //           ),
-                    //         ),),
-                    //
-                    //         Obx(() => _.errorMsg.isNotEmpty ? Column(
-                    //           children: [
-                    //             const SizedBox(height: 10),
-                    //             Container(
-                    //               alignment: Alignment.center,
-                    //               child: Text(_.errorMsg.tr, style: const TextStyle(fontSize: 10, color: AppColor.red)),
-                    //             ),
-                    //           ],) : Container()
-                    //         ),
-                    //       ],
-                    //     ),
-                    //     buttons: [
-                    //       DialogButton(
-                    //         height: 50,
-                    //         color: AppColor.bondiBlue75,
-                    //         onPressed: () async {
-                    //           Navigator.pop(context);
-                    //           // await _.createItemlist();
-                    //           // AppUtilities.showAlert(context,
-                    //           //     title: AppTranslationConstants.itemlistPrefs.tr,
-                    //           //     message: AppTranslationConstants.itemlistCreated.tr);
-                    //           // Get.back();
-                    //           // Get.toNamed(AppRouteConstants.musicPlayerHome);
-                    //         },
-                    //         child: Text(
-                    //           AppTranslationConstants.add.tr,
-                    //         ),
-                    //       ),
-                    //     ]
-                    // ).show();
                   },
                 ),
                 Expanded(
@@ -314,7 +244,8 @@ class ItemlistPage extends StatelessWidget {
                       },
                     ),
                   ],
-                ) : Container()
+                ) : Container(),
+                if(_.ownerType == OwnerType.profile) AppTheme.heightSpace75,
               ]
           ),),
         )

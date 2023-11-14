@@ -68,7 +68,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   @override
   void onInit() async {
     super.onInit();
-    logger.d("");
+    logger.t("onInit Itemlist Controller");
 
     try {
       userController.itemlistOwner = OwnerType.profile;
@@ -79,6 +79,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       if(Get.arguments != null) {
         if(Get.arguments.isNotEmpty && Get.arguments[0] is Band) {
           band = Get.arguments[0];
+          userController.band = band;
         }
 
         if(band != null) {
@@ -156,8 +157,12 @@ class ItemlistController extends GetxController implements ItemlistService {
       if((isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty && newItemlistDescController.text.isNotEmpty)
           || (!isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty)) {
         Itemlist newItemlist = Itemlist.createBasic(newItemlistNameController.text, newItemlistDescController.text);
-        newItemlist.ownerId = profile.id;
+
+        newItemlist.ownerId = ownerId;
+        newItemlist.ownerName = ownerName;
+        newItemlist.ownerType = ownerType;
         String newItemlistId = "";
+
         if (profile.position?.latitude != 0.0) {
           newItemlist.position = profile.position!;
         }
@@ -241,7 +246,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       if(await ItemlistFirestore().delete(itemlist.id)) {
         logger.d("Itemlist ${itemlist.id} removed");
 
-        if(itemlist.appMediaItems?.isNotEmpty ?? false) {
+        if((itemlist.appMediaItems?.isNotEmpty ?? false) && ownerType == OwnerType.profile) {
           List<String> appMediaItemsIds = itemlist.appMediaItems!.map((e) => e.id).toList();
 
           if(await ProfileFirestore().removeFavoriteItems(profile.id, appMediaItemsIds)) {
@@ -253,6 +258,7 @@ class ItemlistController extends GetxController implements ItemlistService {
             }
           }
 
+          ///DEPRECATED
           // for(var appItem in itemlist.appMediaItems ?? []) {
           //   if(await ProfileFirestore().removeFavoriteItem(profile.id, appItem.id)) {
           //     if (userController.profile.favoriteItems != null &&
@@ -284,6 +290,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   }
 
 
+  ///DEPRECATED
   // @override
   // Future<void> setAsFavorite(Itemlist itemlist) async {
   //   logger.d("Making favorite for $itemlist");
@@ -398,11 +405,17 @@ class ItemlistController extends GetxController implements ItemlistService {
 
       String itemlistId = "";
       Itemlist? existingItemlist;
-      List<Itemlist>? existingItemlists = userController.profile.itemlists?.values
-          .where((element) => element.name == itemlist.name).toList();
+      List<Itemlist>? existingItemlists;
+      if(ownerType == OwnerType.profile) {
+        existingItemlists = userController.profile.itemlists?.values
+            .where((element) => element.name == itemlist.name).toList();
+      } else {
+        existingItemlists = userController.band.itemlists?.values
+            .where((element) => element.name == itemlist.name).toList();
+      }
 
       if(existingItemlists?.isNotEmpty ?? false) {
-        existingItemlist= existingItemlists?.first;
+        existingItemlist = existingItemlists?.first;
       }
 
       if(existingItemlist?.id.isNotEmpty ?? false) {
@@ -441,18 +454,19 @@ class ItemlistController extends GetxController implements ItemlistService {
           userController.profile.itemlists![itemlist.id] = itemlist;
           currentItemlist = itemlist;
 
+          List<String> appMediaItemsIds = itemlist.appMediaItems!.map((e) => e.id).toList();
+          if(await ProfileFirestore().addFavoriteItems(profile.id, appMediaItemsIds)) {
+
+          }
           for (AppMediaItem appItem in itemlist.appMediaItems ?? []) {
             itemName.value = appItem.name;
             itemNumber++;
             update([AppPageIdConstants.itemlist, AppPageIdConstants.playlistSong]);
-
-            AppMediaItemFirestore().existsOrInsert(appItem);
-            if(await ProfileFirestore().addFavoriteItem(profile.id, appItem.id)) {
-              if (userController.profile.itemlists!.isNotEmpty) {
-                logger.d("Adding item to global itemlist from userController");
-                userController.profile.favoriteItems!.add(appItem.id);
-              }
+            if (userController.profile.itemlists!.isNotEmpty) {
+              logger.d("Adding item to global itemlist from userController");
+              userController.profile.favoriteItems!.add(appItem.id);
             }
+            AppMediaItemFirestore().existsOrInsert(appItem);
           }
         } else if(ownerType == OwnerType.band) {
           userController.band.itemlists![itemlist.id] = itemlist;

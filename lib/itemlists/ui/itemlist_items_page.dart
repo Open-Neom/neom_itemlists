@@ -15,7 +15,6 @@ import 'widgets/app_item_widgets.dart';
 class ItemlistItemsPage extends StatelessWidget {
   const ItemlistItemsPage({Key? key}) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
     return GetBuilder<AppMediaItemController>(

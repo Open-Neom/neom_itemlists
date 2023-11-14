@@ -1,12 +1,11 @@
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/ui/widgets/appbar_child.dart';
+import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_assets.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
@@ -155,24 +154,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                               Text(itemState.name.tr),
                                               itemState.value == 0 ? Container() : const Text(" - "),
                                               itemState.value == 0 ? Container() :
-                                                RatingBar(
-                                                  initialRating: itemState.value.toDouble(),
-                                                  minRating: 1,
-                                                  ignoreGestures: true,
-                                                  direction: Axis.horizontal,
-                                                  allowHalfRating: false,
-                                                  itemCount: 5,
-                                                  ratingWidget: RatingWidget(
-                                                    full: CoreUtilities.ratingImage(AppAssets.heart),
-                                                    half: CoreUtilities.ratingImage(AppAssets.heartHalf),
-                                                    empty: CoreUtilities.ratingImage(AppAssets.heartBorder),
-                                                  ),
-                                                  itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
-                                                  itemSize: 12,
-                                                  onRatingUpdate: (rating) {
-                                                    _.logger.i("New Rating set to $rating");
-                                                  },
-                                                ),
+                                              RatingHeartBar(state: itemState.value.toDouble()),
                                             ],
                                           )
                                       );

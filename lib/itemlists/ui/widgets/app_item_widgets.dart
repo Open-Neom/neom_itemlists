@@ -9,6 +9,7 @@ import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/constants/app_assets.dart';
@@ -38,35 +39,18 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
     itemBuilder: (context, index) {
       AppMediaItem appMediaItem = _.itemlistItems.values.elementAt(index);
       return ListTile(
-            title: Row(
+          title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(appMediaItem.name.isEmpty ? ""
+              children: [
+                Text(appMediaItem.name.isEmpty ? ""
                     : appMediaItem.name.length > AppConstants.maxAppItemNameLength
                     ? "${appMediaItem.name.substring(0,AppConstants.maxAppItemNameLength)}..."
                     : appMediaItem.name),
-                  const SizedBox(width:5),
-                  (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed)) ?
-                    RatingBar(
-                    initialRating: appMediaItem.state.toDouble(),
-                    minRating: 1,
-                    ignoreGestures: true,
-                    direction: Axis.horizontal,
-                    allowHalfRating: false,
-                    itemCount: 5,
-                    ratingWidget: RatingWidget(
-                    full: CoreUtilities.ratingImage(AppAssets.heart),
-                    half: CoreUtilities.ratingImage(AppAssets.heartHalf),
-                    empty: CoreUtilities.ratingImage(AppAssets.heartBorder),
-                    ),
-                    itemPadding: const EdgeInsets.symmetric(horizontal: 1.0),
-                    itemSize: 15,
-                    onRatingUpdate: (rating) {
-                    _.logger.i("New Rating set to $rating");
-                    },
-                    ) : Container(),
-                ]
-            ),
+                const SizedBox(width:5),
+                (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed)) ?
+                RatingHeartBar(state: appMediaItem.state.toDouble()) : Container(),
+              ]
+          ),
             subtitle: (AppFlavour.appInUse == AppInUse.c && (appMediaItem.description?.isNotEmpty ?? false)) ?
             Text(appMediaItem.description ?? '', textAlign: TextAlign.justify,) :
             Text(appMediaItem.artist.isEmpty ? "" : appMediaItem.artist.length > AppConstants.maxArtistNameLength
@@ -74,9 +58,8 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
             onTap: () => AppFlavour.appInUse == AppInUse.c || !_.isFixed ? _.getItemlistItemDetails(appMediaItem) : {},
             leading: Hero(
               tag: CoreUtilities.getAppItemHeroTag(index),
-              child: Image.network(
-                  appMediaItem.imgUrl.isNotEmpty ? appMediaItem.imgUrl
-                      : appMediaItem.imgUrl.isNotEmpty ? appMediaItem.imgUrl
+              child: Image.network(appMediaItem.imgUrl.isNotEmpty ? appMediaItem.imgUrl
+                      : _.itemlist.imgUrl.isNotEmpty ? _.itemlist.imgUrl
                       : AppFlavour.getNoImageUrl()
               ),
             ),

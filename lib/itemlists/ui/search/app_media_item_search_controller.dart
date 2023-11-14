@@ -122,7 +122,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
   @override
   Future<void> setSearchParam(String text) async {
-    AppUtilities.logger.d("setSearchParam");
+    AppUtilities.logger.d("Set SearchParam: $text");
 
     searchParam.value = text;
     try {
@@ -157,7 +157,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
           switch(AppFlavour.appInUse){
             case AppInUse.g:
-              Map<String, AppMediaItem> spotifySongs = await SpotifySearch().searchSongs(searchParam.value);
+              Map<String, AppMediaItem> spotifySongs = await SpotifySearch.searchSongs(searchParam.value);
 
               appMediaItems.addAll(spotifySongs);
               break;
@@ -438,14 +438,17 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
             Navigator.pop(context);
           } else {
             Get.offAllNamed(AppRouteConstants.home);
-            Get.toNamed(AppRouteConstants.listItems);
+            // Get.toNamed(AppRouteConstants.listItems);
           }
         } else {
           Get.offAllNamed(AppRouteConstants.home);
-          Get.toNamed(AppRouteConstants.bandsRoom);
-          Get.toNamed(AppRouteConstants.bandLists);
+          // Get.toNamed(AppRouteConstants.bandsRoom);
+          // Get.toNamed(AppRouteConstants.listItems);
         }
 
+        AppUtilities.showSnackBar(
+          message: '"${appMediaItem.name}" ${AppTranslationConstants.wasAddedToItemList.tr}.'
+        );
       } catch (e) {
         Get.offAllNamed(AppRouteConstants.home);
         Get.toNamed(AppRouteConstants.listItems);

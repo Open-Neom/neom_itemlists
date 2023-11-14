@@ -8,15 +8,13 @@ import 'package:spotify/spotify.dart';
 import '../../../utils/constants/app_spotify_constants.dart';
 
 class SpotifySearch {
+  
+  static SpotifyApi spotify = SpotifyApi(AppSpotifyConstants.getSpotifyCredentials());
+  static Map<String, AppMediaItem> songs = {};
+  static Map<String, Itemlist> giglists = {};
 
-  final logger = AppUtilities.logger;
-  final spotify = SpotifyApi(AppSpotifyConstants.getSpotifyCredentials());
-
-  Map<String, AppMediaItem> songs = {};
-  Map<String, Itemlist> giglists = {};
-
-  Future<Map<String, AppMediaItem>> searchSongs(String searchParam) async {
-    logger.t("Searching for songs");
+  static Future<Map<String, AppMediaItem>> searchSongs(String searchParam) async {
+    AppUtilities.logger.t("Searching for songs by param: $searchParam}");
 
     try {
       var searchData = await spotify.search
@@ -24,43 +22,22 @@ class SpotifySearch {
             types: [SearchType.track])
           .first(20)
           .catchError((err) {
-            logger.e(err.toString());
+            AppUtilities.logger.e(err.toString());
             return err;
           });
 
       await loadSongsFromSpotify(searchData);
 
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     return songs;
-
   }
 
-
-  Future<Map<String, Itemlist>> searchPlaylists(String searchParam) async {
-    logger.d("Searching for playlists");
-
-    try {
-      var searchData = await spotify.search
-          .get(searchParam.toLowerCase(),
-            types: [SearchType.playlist])
-          .first(50);
-
-      logger.i("Retrieving playlists from Spotify");
-      loadPlaylistsFromSpotify(searchData);
-
-    } catch (e) {
-      logger.e(e.toString());
-    }
-
-    return giglists;
-  }
-
-
-  Future<void> loadSongsFromSpotify(List<Page<dynamic>> searchData) async {
-    logger.t("Retrieving songs from Spotify");
+  static Future<void> loadSongsFromSpotify(List<Page<dynamic>> searchData) async {
+    AppUtilities.logger.t("Retrieving songs from Spotify");
+    songs.clear();
     try {
       for (var page in searchData) {
         for (var item in page.items!) {
@@ -76,11 +53,30 @@ class SpotifySearch {
         }
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
   }
 
+
+  Future<Map<String, Itemlist>> searchPlaylists(String searchParam) async {
+    AppUtilities.logger.d("Searching for playlists");
+
+    try {
+      var searchData = await spotify.search
+          .get(searchParam.toLowerCase(),
+            types: [SearchType.playlist])
+          .first(50);
+
+      AppUtilities.logger.i("Retrieving playlists from Spotify");
+      loadPlaylistsFromSpotify(searchData);
+
+    } catch (e) {
+      AppUtilities.logger.e(e.toString());
+    }
+
+    return giglists;
+  }
 
   void loadPlaylistsFromSpotify(List<Page<dynamic>> searchData) async {
 
@@ -97,27 +93,27 @@ class SpotifySearch {
         }
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
-    logger.d("${giglists.length} playlists retrieved");
+    AppUtilities.logger.d("${giglists.length} playlists retrieved");
   }
 
   Future<Artist> loadArtistDetails(String artistId) async {
-    logger.d("Retrieving Details for artistId $artistId");
+    AppUtilities.logger.d("Retrieving Details for artistId $artistId");
     Artist artist = Artist();
 
     try {
       artist = await spotify.artists.get(artistId);
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     return artist;
   }
 
   Future<List<AppMediaItem>> loadSongsFromPlaylist(String playlistId) async {
-    logger.d("Loading songs from playlist $playlistId");
+    AppUtilities.logger.d("Loading songs from playlist $playlistId");
     List<AppMediaItem> playlistSongs = [];
     Playlist playlist = Playlist();
 
@@ -128,7 +124,7 @@ class SpotifySearch {
         playlistSongs = AppMediaItem.mapTracksToSongs(playlist.tracks!);
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     return playlistSongs;

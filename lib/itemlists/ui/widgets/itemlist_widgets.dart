@@ -44,7 +44,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           onPressed: () async {
             // await _.gotoItemlistItems(itemlist);
 
-            if(AppFlavour.appInUse == AppInUse.c) {
+            if(AppFlavour.appInUse == AppInUse.c || !itemlist.isModifiable) {
               await _.gotoItemlistItems(itemlist);
             } else {
               Get.toNamed(AppRouteConstants.itemSearch,

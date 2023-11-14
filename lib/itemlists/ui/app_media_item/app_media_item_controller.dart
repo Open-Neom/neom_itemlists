@@ -15,6 +15,7 @@ import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/owner_type.dart';
 import 'package:neom_commons/core/utils/enums/push_notification_type.dart';
+import 'package:neom_music_player/ui/player/media_player_controller.dart';
 
 import '../../domain/use_cases/app_item_service.dart';
 
@@ -56,7 +57,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
       }
 
       if(itemlist.id.isNotEmpty) {
-        logger.i("AppMediaItemController for Itemlist ${itemlist.name}");
+        logger.i("AppMediaItemController for Itemlist: ${itemlist.id} ${itemlist.name} ");
         logger.d("${itemlist.appMediaItems?.length ?? 0} items in itemlist");
         loadItemsFromList();
       } else {
@@ -76,7 +77,6 @@ class AppMediaItemController extends GetxController implements AppItemService {
   @override
   void onReady() {
     super.onReady();
-    logger.d("");
     isLoading.value = false;
     update([AppPageIdConstants.itemlistItem]);
   }
@@ -222,6 +222,8 @@ class AppMediaItemController extends GetxController implements AppItemService {
   @override
   Future<void> getItemlistItemDetails(AppMediaItem appMediaItem) async {
     logger.d("getItemlistItemDetails ${appMediaItem.name}");
+
+    if(appMediaItem.imgUrl.isEmpty && itemlist.imgUrl.isNotEmpty) appMediaItem.imgUrl = itemlist.imgUrl;
     switch(AppFlavour.appInUse) {
       case AppInUse.c:
         ChamberPreset chamberPreset = itemlist.chamberPresets?.firstWhere((element) => element.name == appMediaItem.name) ?? ChamberPreset();
@@ -232,7 +234,13 @@ class AppMediaItemController extends GetxController implements AppItemService {
         break;
       case AppInUse.g:
         ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
-        Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+        if (Get.isRegistered<MediaPlayerController>()) {
+          Get.delete<MediaPlayerController>();
+          Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+        } else {
+          Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+        }
+
         break;
       case AppInUse.e:
         Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
@@ -262,9 +270,9 @@ class AppMediaItemController extends GetxController implements AppItemService {
       });
     }
 
-    itemlist.appMediaItems?.forEach((s) {
-      logger.d(s.name);
-      items[s.id] = s;
+    itemlist.appMediaItems?.forEach((item) {
+      logger.d(item.name);
+      items[item.id] = item;
     });
 
     itemlistItems.value = items;
