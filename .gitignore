@@ -1,6 +1,3 @@
-# Created by https://www.toptal.com/developers/gitignore/api/flutter,visualstudiocode,androidstudio,android,xcode,swift,kotlin,fastlane
-# Edit at https://www.toptal.com/developers/gitignore?templates=flutter,visualstudiocode,androidstudio,android,xcode,swift,kotlin,fastlane
-
 ### Android ###
 # Gradle files
 .gradle/
@@ -12,6 +9,9 @@ local.properties
 # Log/OS Files
 *.log
 
+.flutter-plugins-dependencies
+.flutter-plugins
+
 # Android Studio generated files and folders
 captures/
 .externalNativeBuild/
@@ -21,7 +21,7 @@ output.json
 
 # IntelliJ
 *.iml
-.idea/
+.idea/**
 misc.xml
 deploymentTargetDropDown.xml
 render.experimental.xml
