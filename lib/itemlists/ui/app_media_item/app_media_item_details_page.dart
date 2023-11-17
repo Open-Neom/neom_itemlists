@@ -2,6 +2,7 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/ui/widgets/appbar_child.dart';
+import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
 import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
@@ -44,7 +45,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                 Column(
                     children: [
                       AppTheme.heightSpace20,
-                      SizedBox(width: 200, child: _.appMediaItem.imgUrl.isEmpty ? const Text("") : Image.network(_.appMediaItem.imgUrl)),
+                      SizedBox(width: 200, child: _.appMediaItem.imgUrl.isEmpty ? const Text("") : HandledCachedNetworkImage(_.appMediaItem.imgUrl, enableFullScreen: false,)),
                       AppTheme.heightSpace20,
                       Text(_.appMediaItem.name.isEmpty ? ""
                           : _.appMediaItem.name.length > AppConstants.maxAppItemNameLength ?

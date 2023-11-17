@@ -1,14 +1,13 @@
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:hive/hive.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
+import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
 import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
@@ -21,12 +20,13 @@ import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/app_media_source.dart';
 import 'package:neom_commons/core/utils/enums/profile_type.dart';
+import 'package:neom_music_player/data/implementations/app_hive_controller.dart';
+import 'package:neom_music_player/ui/player/media_player_controller.dart';
 import 'package:neom_music_player/ui/widgets/download_button.dart';
 import 'package:neom_music_player/ui/widgets/go_spotify_button.dart';
 import 'package:neom_music_player/ui/widgets/image_card.dart';
 import 'package:neom_music_player/ui/widgets/like_button.dart';
 import 'package:neom_music_player/ui/widgets/song_tile_trailing_menu.dart';
-import 'package:neom_music_player/utils/constants/app_hive_constants.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../app_media_item/app_media_item_controller.dart';
@@ -39,12 +39,8 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
     itemBuilder: (context, index) {
       AppMediaItem appMediaItem = _.itemlistItems.values.elementAt(index);
       return ListTile(
-          leading: Hero(
-            tag: CoreUtilities.getAppItemHeroTag(index),
-            child: Image.network(appMediaItem.imgUrl.isNotEmpty ? appMediaItem.imgUrl
-                : _.itemlist.imgUrl.isNotEmpty ? _.itemlist.imgUrl
-                : AppFlavour.getNoImageUrl()
-            ),
+          leading: HandledCachedNetworkImage(appMediaItem.imgUrl.isNotEmpty ? appMediaItem.imgUrl
+                : _.itemlist.imgUrl.isNotEmpty ? _.itemlist.imgUrl : AppFlavour.getNoImageUrl()
           ),
           title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -173,9 +169,6 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       mainAxisSize: MainAxisSize.min,
       children: [
         LikeButton(appMediaItem: appMediaItem,),
-        // appMediaItem.mediaSource != AppMediaSource.internal
-        //     ? downloadAllowed ? DownloadButton(mediaItem: appMediaItem,) : Container()
-        //     : GoSpotifyButton(appMediaItem: appMediaItem, size: 22),
         appMediaItem.mediaSource == AppMediaSource.internal
             ? (downloadAllowed ? DownloadButton(mediaItem: appMediaItem,) : Container())
             : (appMediaItem.mediaSource == AppMediaSource.spotify ? GoSpotifyButton(appMediaItem: appMediaItem, size: 22) : Container()),
@@ -190,21 +183,13 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       CoreUtilities.copyToClipboard(context: context, text: appMediaItem.permaUrl,);
     },
     onTap: () {
-      query = appMediaItem.name.trim();
-      List searchQueries = Hive.box(AppHiveConstants.settings).get('search', defaultValue: [],) as List;
-      final idx = searchQueries.indexOf(query);
-      if (idx != -1) {
-        searchQueries.removeAt(idx);
+      AppHiveController().addQuery(appMediaItem.name);
+      if (Get.isRegistered<MediaPlayerController>()) {
+        Get.delete<MediaPlayerController>();
+        Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+      } else {
+        Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
       }
-      searchQueries.insert(0, query);
-      if (searchQueries.length > 10) {
-        searchQueries = searchQueries
-            .sublist(0, 10);
-      }
-      Hive.box(AppHiveConstants.settings).put('search', searchQueries);
-
-      ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
-      Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
     },
   );
 }
@@ -216,6 +201,7 @@ Widget buildSpotifySongList(BuildContext context, AppMediaItemSearchController _
     itemBuilder: (context, index) {
       AppMediaItem song = _.appMediaItems.values.elementAt(index);
       return ListTile(
+        leading: HandledCachedNetworkImage(song.imgUrl),
         title: Text(song.name.isEmpty ? ""
             : song.name.length > AppConstants.maxAppItemNameLength
             ? "${song.name.substring(0,AppConstants.maxAppItemNameLength)}..."
@@ -272,8 +258,6 @@ Widget buildSpotifySongList(BuildContext context, AppMediaItemSearchController _
         tileColor: _.addedItems.contains(song) ? AppColor.getMain() : Colors.transparent,
         onTap: () => _.handleItemlistItems(song, AppItemState.heardIt),
         onLongPress: () => _.getAppMediaItemDetails(song),
-        leading: Image.network(song.imgUrl.isNotEmpty ? song.imgUrl : AppFlavour.getNoImageUrl()
-        ),
       );
     },
   );

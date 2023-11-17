@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
@@ -32,7 +33,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
                   : itemlist.name.capitalizeFirst),
               ///DEPRECATE .isFav ? const Icon(Icons.favorite, size: 10,) : Container()
             ]),
-        subtitle: itemlist.description.isNotEmpty ? Text(itemlist.description.capitalizeFirst) : null,
+        subtitle: itemlist.description.isNotEmpty ? Text(itemlist.description.capitalizeFirst, maxLines: 3, overflow: TextOverflow.ellipsis,) : null,
         trailing: ActionChip(
           labelPadding: EdgeInsets.zero,
           backgroundColor: AppColor.main25,
@@ -202,6 +203,9 @@ Widget buildSyncPlaylistList(BuildContext context, ItemlistController _) {
     itemBuilder: (context, index) {
       Itemlist  spotifyItemlist = _.spotifyItemlists.values.elementAt(index);
       return ListTile(
+          leading: HandledCachedNetworkImage(
+            spotifyItemlist.imgUrl.isNotEmpty ? spotifyItemlist.imgUrl : AppFlavour.getNoImageUrl(),
+          ),
           title: Text((spotifyItemlist.name.isEmpty) ? ""
               : spotifyItemlist.name.length > AppConstants.maxAppItemNameLength
               ? "${spotifyItemlist.name.substring(0,AppConstants.maxAppItemNameLength)}..."
@@ -245,14 +249,6 @@ Widget buildSyncPlaylistList(BuildContext context, ItemlistController _) {
           onLongPress: () => {
             _.gotoPlaylistSongs(spotifyItemlist)
           },
-          leading: Image.network(
-            spotifyItemlist.imgUrl.isNotEmpty
-                ? spotifyItemlist.imgUrl
-                : AppFlavour.getNoImageUrl(),
-            errorBuilder: (BuildContext context, Object exception, StackTrace? stackTrace) {
-              return Image.network(AppFlavour.getNoImageUrl());
-            },
-          )
       );
     },
   );

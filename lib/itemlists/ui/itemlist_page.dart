@@ -226,7 +226,7 @@ class ItemlistPage extends StatelessWidget {
                             AppFlavour.appInUse == AppInUse.g
                                 ? _.synchronizeSpotifyPlaylists()
                                 : Get.toNamed(AppRouteConstants.PDFViewer,
-                                arguments: [Get.find<LoginController>().appInfo.suggestedUrl, 0, 150]);
+                                arguments: [Get.find<LoginController>().appInfo.value.suggestedUrl, 0, 150]);
                             },
                         ),
                       ),
@@ -240,7 +240,7 @@ class ItemlistPage extends StatelessWidget {
                         AppFlavour.appInUse == AppInUse.g
                         ? _.synchronizeSpotifyPlaylists()
                         : Get.toNamed(AppRouteConstants.PDFViewer,
-                        arguments: [Get.find<LoginController>().appInfo.suggestedUrl, true, 0, 250])
+                        arguments: [Get.find<LoginController>().appInfo.value.suggestedUrl, true, 0, 250])
                       },
                     ),
                   ],
