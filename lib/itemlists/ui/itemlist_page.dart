@@ -9,7 +9,6 @@ import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
@@ -28,28 +27,29 @@ class ItemlistPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        return (await showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            backgroundColor: AppColor.getMain(),
-            title: const Text(AppConstants.appTitle),
-            content:  Text(AppTranslationConstants.wantToCloseApp.tr),
-            actions: <Widget>[
-              TextButton(
-                child: Text(AppTranslationConstants.no.tr,
-                  style: const TextStyle(color: AppColor.white),
-                ),
-                onPressed: () => Navigator.of(context).pop(false),
-              ),
-              TextButton(
-                child: Text(AppTranslationConstants.yes.tr,
-                  style: const TextStyle(color: AppColor.white),
-                ),
-                onPressed: () => Navigator.of(context).pop(true),
-              )
-            ],
-          ),
-        )) ?? false;
+        return true;
+        // return (await showDialog(
+        //   context: context,
+        //   builder: (context) => AlertDialog(
+        //     backgroundColor: AppColor.getMain(),
+        //     title: const Text(AppConstants.appTitle.tr),
+        //     content:  Text(AppTranslationConstants.wantToCloseApp.tr),
+        //     actions: <Widget>[
+        //       TextButton(
+        //         child: Text(AppTranslationConstants.no.tr,
+        //           style: const TextStyle(color: AppColor.white),
+        //         ),
+        //         onPressed: () => Navigator.of(context).pop(false),
+        //       ),
+        //       TextButton(
+        //         child: Text(AppTranslationConstants.yes.tr,
+        //           style: const TextStyle(color: AppColor.white),
+        //         ),
+        //         onPressed: () => Navigator.of(context).pop(true),
+        //       )
+        //     ],
+        //   ),
+        // )) ?? false;
       },
       child: GetBuilder<ItemlistController>(
         id: AppPageIdConstants.itemlist,
@@ -147,7 +147,7 @@ class ItemlistPage extends StatelessWidget {
                                   labelText: AppTranslationConstants.description.tr,
                                 ),
                               ),
-                              AppTheme.heightSpace10,
+                              AppTheme.heightSpace5,
                               Container(
                                 alignment: Alignment.center,
                                 child: GestureDetector(
@@ -245,7 +245,7 @@ class ItemlistPage extends StatelessWidget {
                     ),
                   ],
                 ) : Container(),
-                if(_.ownerType == OwnerType.profile) AppTheme.heightSpace75,
+                if(_.ownerType == OwnerType.profile && AppFlavour.appInUse == AppInUse.g) AppTheme.heightSpace75,
               ]
           ),),
         )

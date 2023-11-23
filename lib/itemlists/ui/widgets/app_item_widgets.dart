@@ -39,8 +39,9 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
     itemBuilder: (context, index) {
       AppMediaItem appMediaItem = _.itemlistItems.values.elementAt(index);
       return ListTile(
-          leading: HandledCachedNetworkImage(appMediaItem.imgUrl.isNotEmpty ? appMediaItem.imgUrl
-                : _.itemlist.imgUrl.isNotEmpty ? _.itemlist.imgUrl : AppFlavour.getNoImageUrl()
+          leading: HandledCachedNetworkImage(appMediaItem.imgUrl.isNotEmpty
+              ? appMediaItem.imgUrl : _.itemlist.imgUrl, enableFullScreen: false,
+            width: 40,
           ),
           title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -190,6 +191,32 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       } else {
         Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
       }
+    },
+  );
+}
+
+ListTile createMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
+    {Itemlist? itemlist, String query = '', AppMediaItemSearchController? searchController}) {
+  return ListTile(
+    contentPadding: const EdgeInsets.only(left: 15.0,),
+    title: Text(appMediaItem.name,
+      style: const TextStyle(fontWeight: FontWeight.w500,),
+      overflow: TextOverflow.ellipsis,
+    ),
+    subtitle: Text(appMediaItem.artist,
+      overflow: TextOverflow.ellipsis,
+    ),
+    isThreeLine: false,
+    leading: imageCard(
+        placeholderImage: const AssetImage(AppAssets.musicPlayerCover),
+        imageUrl: appMediaItem.imgUrl
+    ),
+    onLongPress: () {
+      CoreUtilities.copyToClipboard(context: context, text: appMediaItem.permaUrl,);
+    },
+    onTap: () {
+      AppHiveController().addQuery(appMediaItem.name);
+      Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
     },
   );
 }

@@ -34,6 +34,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
   bool isFixed = false;
 
   String profileId = "";
+  String itemlistId = "";
   Band band = Band();
   int _prevItemState = 0;
   OwnerType itemlistOwner = OwnerType.profile;
@@ -50,7 +51,12 @@ class AppMediaItemController extends GetxController implements AppItemService {
 
       if(Get.arguments != null) {
         List<dynamic> arguments = Get.arguments;
-        itemlist =  arguments[0];
+        if(arguments[0] is Itemlist) {
+          itemlist =  arguments[0];
+        } else if(arguments[0] is String) {
+          itemlistId = arguments[0];
+          itemlist = await ItemlistFirestore().retrieve(itemlistId);
+        }
         if(arguments.length > 1) {
           isFixed = arguments[1];
         }

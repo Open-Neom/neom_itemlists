@@ -8,10 +8,10 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'app_media_item_search_controller.dart';
 
 
-class AppBarSpotifySearch extends StatelessWidget implements PreferredSizeWidget {
+class AppBarItemSearch extends StatelessWidget implements PreferredSizeWidget {
 
   final AppMediaItemSearchController itemSearchController;
-  const AppBarSpotifySearch(this.itemSearchController, {Key? key}) : super(key: key);
+  const AppBarItemSearch(this.itemSearchController, {Key? key}) : super(key: key);
   
   @override
   Size get preferredSize => AppTheme.appBarHeight;
