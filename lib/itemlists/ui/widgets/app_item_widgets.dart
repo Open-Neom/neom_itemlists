@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
-import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
 import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
@@ -68,8 +67,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
               onPressed: () {
                 switch(AppFlavour.appInUse) {
                   case AppInUse.c:
-                    ChamberPreset preset = _.itemlist.chamberPresets!.firstWhere((element) => element.id == appMediaItem.id);
-                    Get.toNamed(AppRouteConstants.generator,  arguments: [preset.clone()]);
+                    Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
                     break;
                   case AppInUse.g:
                     ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);

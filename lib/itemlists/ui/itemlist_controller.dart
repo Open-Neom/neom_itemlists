@@ -19,11 +19,9 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/owner_type.dart';
-import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:spotify/spotify.dart' as spotify;
 
 import '../data/api_services/spotify/spotify_api_calls.dart';
-import '../data/api_services/spotify/spotify_search.dart';
 import '../data/firestore/app_media_item_firestore.dart';
 import 'app_media_item/app_media_item_controller.dart';
 import 'sync/spotify_playlist_page.dart';
@@ -141,7 +139,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     currentItemlist = Itemlist();
   }
 
-
+  @override
   void clearNewItemlist() {
     newItemlistNameController.clear();
     newItemlistDescController.clear();
@@ -210,29 +208,30 @@ class ItemlistController extends GetxController implements ItemlistService {
     update([AppPageIdConstants.itemlist]);
   }
 
-  Future<void> searchItemlist() async {
-
-    logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
-
-    Get.back();
-
-    try {
-      if(newItemlistNameController.text.isNotEmpty) {
-        await Get.toNamed(AppRouteConstants.playlistSearch,
-            arguments: [SpotifySearchType.playlist, newItemlistNameController.text]
-        );
-      } else {
-        AppUtilities.showSnackBar(
-          title: MessageTranslationConstants.searchPlaylist.tr,
-          message: MessageTranslationConstants.missingPlaylistName.tr,
-        );
-      }
-    } catch (e) {
-      logger.e(e.toString());
-    }
-
-    update([AppPageIdConstants.itemlist]);
-  }
+  ///DEPRECATED Verify if in use
+  // Future<void> searchItemlist() async {
+  //
+  //   logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
+  //
+  //   Get.back();
+  //
+  //   try {
+  //     if(newItemlistNameController.text.isNotEmpty) {
+  //       await Get.toNamed(AppRouteConstants.playlistSearch,
+  //           arguments: [SpotifySearchType.playlist, newItemlistNameController.text]
+  //       );
+  //     } else {
+  //       AppUtilities.showSnackBar(
+  //         title: MessageTranslationConstants.searchPlaylist.tr,
+  //         message: MessageTranslationConstants.missingPlaylistName.tr,
+  //       );
+  //     }
+  //   } catch (e) {
+  //     logger.e(e.toString());
+  //   }
+  //
+  //   update([AppPageIdConstants.itemlist]);
+  // }
 
 
   @override
@@ -374,7 +373,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     update([AppPageIdConstants.itemlist]);
   }
 
-
+  @override
   Future<void> gotoItemlistItems(Itemlist itemlist) async {
 
     if(AppFlavour.appInUse == AppInUse.c) {
@@ -396,6 +395,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   }
 
+  @override
   Future<bool> synchronizeItemlist(Itemlist itemlist) async {
     logger.i("Synchronizing Itemlist ${itemlist.name}");
     isButtonDisabled.value = true;
@@ -494,6 +494,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     return wasSync;
   }
 
+  @override
   Future<void> getSpotifyToken() async {
     logger.d("Getting SpotifyToken");
     String spotifyToken = await SpotifyApiCalls.getSpotifyToken();
@@ -506,6 +507,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     update([AppPageIdConstants.itemlist]);
   }
 
+  @override
   Future<void> synchronizeSpotifyPlaylists() async {
     logger.i("Getting Spotify Information with token: ${userController.user!.spotifyToken}");
 
@@ -536,6 +538,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     update([AppPageIdConstants.itemlist]);
   }
 
+  @override
   void handlePlaylistList(Itemlist spotifyItemlist) {
 
     try {
@@ -555,15 +558,16 @@ class ItemlistController extends GetxController implements ItemlistService {
     update([AppPageIdConstants.playlistSong]);
   }
 
-  //TODO Verify if needed
-  void loadSongsForPlaylist(spotify.PlaylistSimple playlist) {
-    itemlists.forEach((playlistId, giglist) async {
-      giglist.appMediaItems = await SpotifySearch().loadSongsFromPlaylist(playlistId);
-      logger.i("Adding ${giglist.appMediaItems?.length} song to Giglist ${giglist.name}");
-      itemlists[playlistId] = giglist;
-    });
-  }
+  ///DEPRECATED TODO Verify if needed
+  // void loadSongsForPlaylist(spotify.PlaylistSimple playlist) {
+  //   itemlists.forEach((playlistId, giglist) async {
+  //     giglist.appMediaItems = await SpotifySearch().loadSongsFromPlaylist(playlistId);
+  //     logger.i("Adding ${giglist.appMediaItems?.length} song to Giglist ${giglist.name}");
+  //     itemlists[playlistId] = giglist;
+  //   });
+  // }
 
+  @override
   Future<void> gotoPlaylistSongs(Itemlist itemlist) async {
 
     spotify.Playlist spotifyPlaylist = spotify.Playlist();
@@ -588,6 +592,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   }
 
+  @override
   Future<void> synchronizeItemlists() async {
     logger.i("Synchronizing ${addedItemlists.length} Giglists from Spotify Playlists");
 
@@ -636,6 +641,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     update();
   }
 
+  @override
   Future<void> setPrivacyOption() async {
     logger.t('setPrivacyOption for Playlist');
     isPublicNewItemlist.value = !isPublicNewItemlist.value;

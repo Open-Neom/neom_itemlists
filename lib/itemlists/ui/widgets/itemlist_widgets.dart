@@ -39,8 +39,8 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           backgroundColor: AppColor.main25,
           avatar: CircleAvatar(
             backgroundColor: AppColor.white80,
-            child: Text(((itemlist.appMediaItems?.length ?? 0) + (itemlist.appReleaseItems?.length ?? 0)+ (itemlist.chamberPresets?.length ?? 0)).toString(),
-                style: TextStyle(color: Colors.black87),
+            child: Text(((itemlist.appMediaItems?.length ?? 0) + (itemlist.appReleaseItems?.length ?? 0)).toString(),
+                style: const TextStyle(color: Colors.black87),
             ),
           ),
           label: Icon(AppFlavour.getAppItemIcon(), color: AppColor.white80),

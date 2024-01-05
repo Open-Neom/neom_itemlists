@@ -7,7 +7,6 @@ import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/band.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
-import 'package:neom_commons/core/domain/model/neom/chamber_preset.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
@@ -230,12 +229,15 @@ class AppMediaItemController extends GetxController implements AppItemService {
     logger.d("getItemlistItemDetails ${appMediaItem.name}");
 
     if(appMediaItem.imgUrl.isEmpty && itemlist.imgUrl.isNotEmpty) appMediaItem.imgUrl = itemlist.imgUrl;
+
+    ///DELETE SWITCH WHEN READLIST IS APART
     switch(AppFlavour.appInUse) {
       case AppInUse.c:
-        ChamberPreset chamberPreset = itemlist.chamberPresets?.firstWhere((element) => element.name == appMediaItem.name) ?? ChamberPreset();
-        if(chamberPreset.name.isNotEmpty) {
-          Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [chamberPreset.clone()]
-          );
+        if (Get.isRegistered<MediaPlayerController>()) {
+          Get.delete<MediaPlayerController>();
+          Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+        } else {
+          Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
         }
         break;
       case AppInUse.g:
@@ -264,14 +266,6 @@ class AppMediaItemController extends GetxController implements AppItemService {
       itemlist.appReleaseItems?.forEach((releaseItem) {
         AppMediaItem item = AppMediaItem.fromAppReleaseItem(releaseItem);
         logger.d(releaseItem.name);
-        items[item.id] = item;
-      });
-    }
-
-    if(itemlist.chamberPresets?.isNotEmpty ?? false) {
-      itemlist.chamberPresets?.forEach((preset) {
-        AppMediaItem item = AppMediaItem.fromChamberPreset(preset);
-        logger.d(item.name);
         items[item.id] = item;
       });
     }
