@@ -179,7 +179,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       ],
     ),
     onLongPress: () {
-      CoreUtilities.copyToClipboard(context: context, text: appMediaItem.permaUrl,);
+      CoreUtilities.copyToClipboard(text: appMediaItem.permaUrl,);
     },
     onTap: () {
       AppHiveController().addQuery(appMediaItem.name);
@@ -210,7 +210,7 @@ ListTile createMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
         imageUrl: appMediaItem.imgUrl
     ),
     onLongPress: () {
-      CoreUtilities.copyToClipboard(context: context, text: appMediaItem.permaUrl,);
+      CoreUtilities.copyToClipboard(text: appMediaItem.permaUrl,);
     },
     onTap: () {
       AppHiveController().addQuery(appMediaItem.name);
