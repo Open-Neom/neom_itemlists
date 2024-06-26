@@ -3,9 +3,8 @@ import 'dart:async';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
+import 'package:neom_commons/core/utils/constants/app_spotify_constants.dart';
 import 'package:spotify/spotify.dart';
-
-import '../../../utils/constants/app_spotify_constants.dart';
 
 class SpotifySearch {
   

@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/api_services/google_books/google_books_api.dart';
+import 'package:neom_commons/core/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
@@ -25,7 +26,6 @@ import 'package:neom_events/events/ui/event_details_controller.dart';
 import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
 
 import '../../data/api_services/spotify/spotify_search.dart';
-import '../../data/firestore/app_media_item_firestore.dart';
 import '../../domain/use_cases/app_media_item_search_search_service.dart';
 import '../app_media_item/app_media_item_controller.dart';
 

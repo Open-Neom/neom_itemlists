@@ -1,10 +1,9 @@
 import 'package:http/http.dart' as http;
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
+import 'package:neom_commons/core/utils/constants/app_spotify_constants.dart';
 import 'package:spotify/spotify.dart' as spotify;
 import 'package:spotify_sdk/spotify_sdk.dart';
-
-import '../../../utils/constants/app_spotify_constants.dart';
 
 class SpotifyApiCalls {
 

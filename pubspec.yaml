@@ -21,29 +21,15 @@ dependencies:
   neom_posts:
     git:
       url: git@github.com:Cyberneom/neom_posts.git
-
   neom_music_player:
     git:
       url: https://github.com/Cyberneom/neom_music_player.git
 
-  spotify_sdk: ^2.3.1
   percent_indicator: ^4.2.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.0
-
-dependency_overrides:
-#  neom_commons:
-#    path: ../neom_commons
-#  neom_posts:
-#    path: ../neom_posts
-#  neom_events:
-#    path: ../neom_events
-#  neom_music_player:
-#    path: ../neom_music_player
-  uuid: 4.1.0
-  logger: ^2.0.2+1
 
 flutter:
