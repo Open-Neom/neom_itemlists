@@ -45,19 +45,19 @@ class SpotifyPlaylistsPage extends StatelessWidget {
                       progressColor: AppColor.bondiBlue,
                     )
                   ): buildSyncPlaylistsButton(context, _)
-                ) : Container(),
+                ) : const SizedBox.shrink(),
                 Obx(()=> _.itemName.isNotEmpty
                     ? Text(_.currentItemlist.name,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                ) : Container()),
+                ) : const SizedBox.shrink()),
                 Obx(()=> _.itemName.isNotEmpty
                     ? Text(_.itemName.value,
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                ) : Container()),
+                ) : const SizedBox.shrink()),
               ],
             )
         ),

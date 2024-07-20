@@ -44,7 +44,7 @@ class ItemlistsRoutes {
     GetPage(
         name: AppRouteConstants.listItems,
         page: () => const ItemlistItemsPage(),
-        transition: Transition.leftToRight
+        transition: Transition.zoom
     ),
     GetPage(
         name: AppRouteConstants.finishingSpotifySync,

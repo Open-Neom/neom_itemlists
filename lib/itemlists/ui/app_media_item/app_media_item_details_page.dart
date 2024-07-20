@@ -24,11 +24,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return true;
-      },
-      child: GetBuilder<AppMediaItemDetailsController>(
+    return GetBuilder<AppMediaItemDetailsController>(
       id: AppPageIdConstants.appMediaItemDetails,
       init: AppMediaItemDetailsController(),
       builder: (_) => Scaffold(
@@ -119,9 +115,9 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                       children: <Widget>[
                       ElevatedButton(
                         style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty
+                            backgroundColor: WidgetStateProperty
                               .all<Color>(AppColor.bondiBlue75),
-                          minimumSize: MaterialStateProperty.all<Size>(
+                          minimumSize: WidgetStateProperty.all<Size>(
                               Size(AppTheme.fullWidth(context)/2,AppTheme.fullHeight(context)/15))
                         ),
                         child: Row(
@@ -153,8 +149,8 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                             children: [
                                               Text(itemState.name.tr),
-                                              itemState.value == 0 ? Container() : const Text(" - "),
-                                              itemState.value == 0 ? Container() :
+                                              itemState.value == 0 ? const SizedBox.shrink() : const Text(" - "),
+                                              itemState.value == 0 ? const SizedBox.shrink() :
                                               RatingHeartBar(state: itemState.value.toDouble()),
                                             ],
                                           )
@@ -174,7 +170,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                       height: 1,
                                       color: Colors.grey,
                                     ),
-                                  )) : Container(),
+                                  )) : const SizedBox.shrink(),
                                   _.itemlists.length > 1 ? Obx(()=> DropdownButton<String>(
                                   items: _.itemlists.values.map((itemlist) =>
                                     DropdownMenuItem<String>(
@@ -202,7 +198,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                     height: 1,
                                     color: Colors.grey,
                                   ),
-                                )) : Container()
+                                )) : const SizedBox.shrink()
                                 ],
                               ),
                               buttons: [
@@ -229,11 +225,11 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                     ),
                   ],
                 ),
-                Obx(()=> _.wasAdded.value ? Container(
+                Obx(()=> _.wasAdded.value ? Padding(
                   padding: const EdgeInsets.only(top: 10),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: MaterialStateProperty.all<Color>(AppColor.bondiBlue75)
+                      backgroundColor: WidgetStateProperty.all<Color>(AppColor.bondiBlue75)
                     ),
                     child: SizedBox(
                       width: 100,
@@ -246,12 +242,12 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                       ),
                       onPressed: () => AppUtilities.goHome()
                   )
-                ) : Container()),
+                ) : const SizedBox.shrink()),
               ]
             ),
           ),
         ),
       ),
-    ),);
+    );
   }
 }

@@ -25,33 +25,7 @@ class ItemlistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        return true;
-        // return (await showDialog(
-        //   context: context,
-        //   builder: (context) => AlertDialog(
-        //     backgroundColor: AppColor.getMain(),
-        //     title: const Text(AppConstants.appTitle.tr),
-        //     content:  Text(AppTranslationConstants.wantToCloseApp.tr),
-        //     actions: <Widget>[
-        //       TextButton(
-        //         child: Text(AppTranslationConstants.no.tr,
-        //           style: const TextStyle(color: AppColor.white),
-        //         ),
-        //         onPressed: () => Navigator.of(context).pop(false),
-        //       ),
-        //       TextButton(
-        //         child: Text(AppTranslationConstants.yes.tr,
-        //           style: const TextStyle(color: AppColor.white),
-        //         ),
-        //         onPressed: () => Navigator.of(context).pop(true),
-        //       )
-        //     ],
-        //   ),
-        // )) ?? false;
-      },
-      child: GetBuilder<ItemlistController>(
+    return GetBuilder<ItemlistController>(
         id: AppPageIdConstants.itemlist,
         init: ItemlistController(),
         builder: (_) => Scaffold(
@@ -122,73 +96,7 @@ class ItemlistPage extends StatelessWidget {
                     ),
                   ),
                   onTap: () async {
-                    (await showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
-                        backgroundColor: AppColor.main75,
-                        title: Text(AppTranslationConstants.addNewItemlist.tr,),
-                        content: Obx(() => SizedBox(
-                          height: AppTheme.fullHeight(context)*0.3,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              //TODO Change lines colors to white.
-                              TextField(
-                                controller: _.newItemlistNameController,
-                                decoration: InputDecoration(
-                                  labelText: AppTranslationConstants.itemlistName.tr,
-                                ),
-                              ),
-                              TextField(
-                                controller: _.newItemlistDescController,
-                                minLines: 2,
-                                maxLines: 5,
-                                decoration: InputDecoration(
-                                  labelText: AppTranslationConstants.description.tr,
-                                ),
-                              ),
-                              AppTheme.heightSpace5,
-                              Container(
-                                alignment: Alignment.center,
-                                child: GestureDetector(
-                                  child: Row(
-                                    children: <Widget>[
-                                      Checkbox(
-                                        value: _.isPublicNewItemlist.value,
-                                        onChanged: (bool? newValue) => _.setPrivacyOption(),
-                                      ),
-                                      Text(AppTranslationConstants.publicList.tr, style: const TextStyle(fontSize: 15)),
-                                    ],
-                                  ),
-                                  onTap: () => _.setPrivacyOption(),
-                                ),
-                              ),
-                              _.errorMsg.isNotEmpty ? Column(
-                                children: [
-                                  Container(
-                                    alignment: Alignment.center,
-                                    child: Text(_.errorMsg.value.tr, style: const TextStyle(fontSize: 12, color: AppColor.red)),
-                                  ),
-                                ],) : Container()
-                            ],
-                          ),
-                        ),),
-                        actions: <Widget>[
-                          DialogButton(
-                            height: 50,
-                            color: AppColor.bondiBlue75,
-                            onPressed: () async {
-                              await _.createItemlist();
-                              if(_.errorMsg.value.isEmpty) Navigator.pop(ctx);
-                            },
-                            child: Text(
-                              AppTranslationConstants.add.tr,
-                              style: const TextStyle(fontSize: 14),
-                            ),
-                          ),
-                        ],
-                      ),
-                    )) ?? false;
+                    await showAddItemlistDialog(context, _);
                   },
                 ),
                 Expanded(
@@ -197,7 +105,7 @@ class ItemlistPage extends StatelessWidget {
               ],
             )
           ),
-          floatingActionButton: _.isLoading.value ? Container() : Container(
+          floatingActionButton: _.isLoading.value ? const SizedBox.shrink() : Container(
             margin: const EdgeInsets.only(bottom: 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -230,7 +138,7 @@ class ItemlistPage extends StatelessWidget {
                             },
                         ),
                       ),
-                    ) : Container(),
+                    ) : const SizedBox.shrink(),
                     const SizedBox(width: 5,),
                     FloatingActionButton(
                       heroTag: AppPageIdConstants.spotifySync,
@@ -244,12 +152,81 @@ class ItemlistPage extends StatelessWidget {
                       },
                     ),
                   ],
-                ) : Container(),
+                ) : const SizedBox.shrink(),
                 if(_.ownerType == OwnerType.profile && AppFlavour.appInUse == AppInUse.g) AppTheme.heightSpace75,
               ]
           ),),
         )
-      )
     );
+  }
+
+  Future<void> showAddItemlistDialog(BuildContext context, ItemlistController _) async {
+    (await showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColor.main75,
+        title: Text(AppTranslationConstants.addNewItemlist.tr,),
+        content: Obx(() => SizedBox(
+          height: AppTheme.fullHeight(context)*0.3,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              //TODO Change lines colors to white.
+              TextField(
+                controller: _.newItemlistNameController,
+                decoration: InputDecoration(
+                  labelText: AppTranslationConstants.itemlistName.tr,
+                ),
+              ),
+              TextField(
+                controller: _.newItemlistDescController,
+                minLines: 1,
+                maxLines: 5,
+                decoration: InputDecoration(
+                  labelText: AppTranslationConstants.description.tr,
+                ),
+              ),
+              AppTheme.heightSpace5,
+              Align(
+                alignment: Alignment.center,
+                child: GestureDetector(
+                  child: Row(
+                    children: <Widget>[
+                      Checkbox(
+                        value: _.isPublicNewItemlist.value,
+                        onChanged: (bool? newValue) => _.setPrivacyOption(),
+                      ),
+                      Text(AppTranslationConstants.publicList.tr, style: const TextStyle(fontSize: 15)),
+                    ],
+                  ),
+                  onTap: () => _.setPrivacyOption(),
+                ),
+              ),
+              _.errorMsg.isNotEmpty ? Column(
+                children: [
+                  Align(
+                    alignment: Alignment.center,
+                    child: Text(_.errorMsg.value.tr, style: const TextStyle(fontSize: 12, color: AppColor.red)),
+                  ),
+                ],) : const SizedBox.shrink()
+            ],
+          ),
+        ),),
+        actions: <Widget>[
+          DialogButton(
+            height: 50,
+            color: AppColor.bondiBlue75,
+            onPressed: () async {
+              await _.createItemlist();
+              if(_.errorMsg.value.isEmpty) Navigator.pop(ctx);
+            },
+            child: Text(
+              AppTranslationConstants.add.tr,
+              style: const TextStyle(fontSize: 14),
+            ),
+          ),
+        ],
+      ),
+    )) ?? false;
   }
 }

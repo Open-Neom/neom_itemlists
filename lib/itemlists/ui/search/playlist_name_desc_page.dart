@@ -30,7 +30,7 @@ class PlaylistNameDescPage extends StatelessWidget {
                   AppTheme.heightSpace50,
                   HeaderIntro(subtitle: AppTranslationConstants.createEventNameDesc.tr),
                   AppTheme.heightSpace20,
-                  Container(
+                  Padding(
                     padding: const EdgeInsets.only(left: 20, right: 20, top:20),
                     child: TextFormField(
                       controller: _.nameController,
@@ -44,7 +44,7 @@ class PlaylistNameDescPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Container(
+                  Padding(
                     padding: const EdgeInsets.only(left: 20, right: 20, top:20),
                     child: TextFormField(
                       minLines: 1,
@@ -77,7 +77,7 @@ class PlaylistNameDescPage extends StatelessWidget {
                     onTap: () => _.addItemlistImage()
                   ),
                   AppTheme.heightSpace20,
-                  _.postUploadController.mediaFile.value.path.isEmpty ? Container():
+                  _.postUploadController.mediaFile.value.path.isEmpty ? const SizedBox.shrink():
                   Stack(
                     alignment: Alignment.bottomRight,
                     children: [

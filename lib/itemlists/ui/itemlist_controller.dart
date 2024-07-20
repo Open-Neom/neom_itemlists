@@ -19,6 +19,7 @@ import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/itemlist_type.dart';
 import 'package:neom_commons/core/utils/enums/owner_type.dart';
 import 'package:spotify/spotify.dart' as spotify;
 
@@ -90,13 +91,23 @@ class ItemlistController extends GetxController implements ItemlistService {
 
       logger.t('Itemlists being loaded from ${ownerType.name}');
       if(ownerType == OwnerType.profile) {
-        itemlists.value = profile.itemlists ?? {};
+        itemlists.value = Map.from(profile.itemlists ?? {});
       } else if(ownerType == OwnerType.band){
-        itemlists.value = band?.itemlists ?? {};
+        itemlists.value = Map.from(band?.itemlists ?? {});
       }
 
       if(itemlists.isEmpty) {
-        itemlists.value = await ItemlistFirestore().fetchAll(ownerId: ownerId, ownerType: ownerType);
+        itemlists.value = await ItemlistFirestore().fetchAll(
+            ownerId: ownerId,
+            ownerType: ownerType,
+            itemlistType: AppFlavour.appInUse == AppInUse.e ? ItemlistType.readlist : null
+        );
+      } else {
+        itemlists.removeWhere((id, itemlist) {
+          return AppFlavour.appInUse == AppInUse.e && itemlist.type != ItemlistType.readlist;
+        });
+
+
       }
     } catch (e) {
       logger.e(e.toString());

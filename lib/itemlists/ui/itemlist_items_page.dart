@@ -32,7 +32,7 @@ class ItemlistItemsPage extends StatelessWidget {
           child: _.isLoading.value ? const Center(child: CircularProgressIndicator())
               : Obx(()=> buildItemList(context, _)),
         ),
-        floatingActionButton: _.isFixed || !_.itemlist.isModifiable ? Container()
+        floatingActionButton: _.isFixed || !_.itemlist.isModifiable ? const SizedBox.shrink()
             : FloatingActionButton(
           tooltip: AppTranslationConstants.addItem.tr,
           onPressed: ()=> {

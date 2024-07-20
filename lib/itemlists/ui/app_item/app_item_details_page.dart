@@ -151,8 +151,8 @@
 //                                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 //                                             children: [
 //                                               Text(itemState.name.tr),
-//                                               itemState.value == 0 ? Container() : const Text(" - "),
-//                                               itemState.value == 0 ? Container() :
+//                                               itemState.value == 0 ? SizedBox.shrink() : const Text(" - "),
+//                                               itemState.value == 0 ? SizedBox.shrink() :
 //                                                 RatingBar(
 //                                                   initialRating: itemState.value.toDouble(),
 //                                                   minRating: 1,
@@ -189,7 +189,7 @@
 //                                       height: 1,
 //                                       color: Colors.grey,
 //                                     ),
-//                                   )) : Container(),
+//                                   )) : SizedBox.shrink(),
 //                                   _.itemlists.length > 1 ? Obx(()=> DropdownButton<String>(
 //                                   items: _.itemlists.values.map((itemlist) =>
 //                                     DropdownMenuItem<String>(
@@ -217,7 +217,7 @@
 //                                     height: 1,
 //                                     color: Colors.grey,
 //                                   ),
-//                                 )) : Container()
+//                                 )) : SizedBox.shrink()
 //                                 ],
 //                               ),
 //                               buttons: [
@@ -263,7 +263,7 @@
 //                       ),
 //                       onPressed: () => AppUtilities.goHome()
 //                   )
-//                 ) : Container()),
+//                 ) : SizedBox.shrink()),
 //               ]),
 //             ),
 //           ),

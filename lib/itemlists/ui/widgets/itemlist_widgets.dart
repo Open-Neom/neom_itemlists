@@ -31,7 +31,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
               Text(itemlist.name.length > AppConstants.maxItemlistNameLength
                   ? "${itemlist.name.substring(0,AppConstants.maxItemlistNameLength).capitalizeFirst}..."
                   : itemlist.name.capitalizeFirst),
-              ///DEPRECATE .isFav ? const Icon(Icons.favorite, size: 10,) : Container()
+              ///DEPRECATE .isFav ? const Icon(Icons.favorite, size: 10,) : SizedBox.shrink()
             ]),
         subtitle: itemlist.description.isNotEmpty ? Text(itemlist.description.capitalizeFirst, maxLines: 3, overflow: TextOverflow.ellipsis,) : null,
         trailing: ActionChip(

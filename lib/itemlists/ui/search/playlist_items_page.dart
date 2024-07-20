@@ -31,7 +31,7 @@
 //           decoration: AppTheme.appBoxDecoration,
 //           child: AppFlavour.appInUse == AppInUse.g
 //               ? Obx(()=> buildSpotifySongList(context, _))
-//               : Container(),
+//               : SizedBox.shrink(),
 //         ),
 //         floatingActionButton: _.addedItems.isNotEmpty ?
 //           FloatingActionButton(
@@ -41,7 +41,7 @@
 //                 arguments: [SpotifySearchType.song, _.itemlist])
 //           },
 //           child: const Icon(Icons.navigate_next),
-//         ) : Container(),
+//         ) : SizedBox.shrink(),
 //       ),
 //     );
 //   }

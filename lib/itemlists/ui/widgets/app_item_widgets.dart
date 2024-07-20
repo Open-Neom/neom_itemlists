@@ -7,6 +7,7 @@ import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/core/ui/widgets/neom_image_card.dart';
 import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
@@ -23,7 +24,6 @@ import 'package:neom_music_player/data/implementations/app_hive_controller.dart'
 import 'package:neom_music_player/ui/player/media_player_controller.dart';
 import 'package:neom_music_player/ui/widgets/download_button.dart';
 import 'package:neom_music_player/ui/widgets/go_spotify_button.dart';
-import 'package:neom_music_player/ui/widgets/image_card.dart';
 import 'package:neom_music_player/ui/widgets/like_button.dart';
 import 'package:neom_music_player/ui/widgets/song_tile_trailing_menu.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
@@ -51,7 +51,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                     : appMediaItem.name),
                 const SizedBox(width:5),
                 (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed)) ?
-                RatingHeartBar(state: appMediaItem.state.toDouble()) : Container(),
+                RatingHeartBar(state: appMediaItem.state.toDouble()) : const SizedBox.shrink(),
               ]
           ),
           subtitle: (AppFlavour.appInUse == AppInUse.c && (appMediaItem.description?.isNotEmpty ?? false)) ?
@@ -98,8 +98,8 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(appItemState.name.tr),
-                                  appItemState.value == 0 ? Container() : const Text(" - "),
-                                  appItemState.value == 0 ? Container() :
+                                  appItemState.value == 0 ? const SizedBox.shrink() : const Text(" - "),
+                                  appItemState.value == 0 ? const SizedBox.shrink() :
                                   RatingHeartBar(state: appItemState.value.toDouble(),),
                                 ],
                               )
@@ -160,7 +160,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       overflow: TextOverflow.ellipsis,
     ),
     isThreeLine: false,
-    leading: imageCard(
+    leading: NeomImageCard(
       placeholderImage: const AssetImage(AppAssets.musicPlayerCover),
       imageUrl: appMediaItem.imgUrl
     ),
@@ -169,8 +169,8 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       children: [
         LikeButton(appMediaItem: appMediaItem,),
         appMediaItem.mediaSource == AppMediaSource.internal
-            ? (downloadAllowed ? DownloadButton(mediaItem: appMediaItem,) : Container())
-            : (appMediaItem.mediaSource == AppMediaSource.spotify ? GoSpotifyButton(appMediaItem: appMediaItem, size: 22) : Container()),
+            ? (downloadAllowed ? DownloadButton(mediaItem: appMediaItem,) : const SizedBox.shrink())
+            : (appMediaItem.mediaSource == AppMediaSource.spotify ? GoSpotifyButton(appMediaItem: appMediaItem, size: 22) : const SizedBox.shrink()),
         SongTileTrailingMenu(
           appMediaItem: appMediaItem,
           itemlist: itemlist,
@@ -205,7 +205,7 @@ ListTile createMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
       overflow: TextOverflow.ellipsis,
     ),
     isThreeLine: false,
-    leading: imageCard(
+    leading: NeomImageCard(
         placeholderImage: const AssetImage(AppAssets.musicPlayerCover),
         imageUrl: appMediaItem.imgUrl
     ),
