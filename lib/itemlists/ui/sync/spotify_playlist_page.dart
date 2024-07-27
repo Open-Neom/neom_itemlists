@@ -37,10 +37,10 @@ class SpotifyPlaylistsPage extends StatelessWidget {
                       width: AppTheme.fullWidth(context),
                       padding: const EdgeInsets.symmetric(horizontal: 15),
                       lineHeight: 25.0,
-                      percent: _.itemNumber/_.totalItemsToSynch,
+                      percent: _.itemNumber/_.totalItemsToSync,
                       center: Text("${AppTranslationConstants.adding.tr} "
                           "${_.itemNumber} ${AppTranslationConstants.outOf.tr} "
-                          "${_.totalItemsToSynch}"
+                          "${_.totalItemsToSync}"
                       ),
                       progressColor: AppColor.bondiBlue,
                     )

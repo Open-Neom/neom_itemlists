@@ -29,7 +29,6 @@ import 'sync/spotify_playlist_page.dart';
 
 class ItemlistController extends GetxController implements ItemlistService {
 
-  final logger = AppUtilities.logger;
   final userController = Get.find<UserController>();
 
   Itemlist currentItemlist = Itemlist();
@@ -50,6 +49,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   String ownerId = '';
   String ownerName = '';
   OwnerType ownerType = OwnerType.profile;
+  ItemlistType itemlistType = ItemlistType.playlist;
 
   final RxBool isLoading = true.obs;
   final RxBool isButtonDisabled = false.obs;
@@ -62,12 +62,12 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   RxString itemName = "".obs;
   RxInt itemNumber = 0.obs;
-  int totalItemsToSynch = 0;
+  int totalItemsToSync = 0;
 
   @override
   void onInit() async {
     super.onInit();
-    logger.t("onInit Itemlist Controller");
+    AppUtilities.logger.t("onInit Itemlist Controller");
 
     try {
       userController.itemlistOwner = OwnerType.profile;
@@ -77,19 +77,25 @@ class ItemlistController extends GetxController implements ItemlistService {
 
       if(Get.arguments != null) {
         if(Get.arguments.isNotEmpty && Get.arguments[0] is Band) {
-          band = Get.arguments[0];
-          userController.band = band;
+          if(Get.arguments[0] is Band) {
+            band = Get.arguments[0];
+            if(band != null) {
+              ownerId = band!.id;
+              ownerName = band!.name;
+              ownerType = OwnerType.band;
+
+              userController.band = band;
+              userController.itemlistOwner = OwnerType.band;
+            }
+          } else if(Get.arguments[0] is ItemlistType) {
+            itemlistType = Get.arguments[0];
+          }
         }
 
-        if(band != null) {
-          ownerId = band!.id;
-          ownerName = band!.name;
-          ownerType = OwnerType.band;
-          userController.itemlistOwner = OwnerType.band;
-        }
+
       }
 
-      logger.t('Itemlists being loaded from ${ownerType.name}');
+      AppUtilities.logger.t('Itemlists being loaded from ${ownerType.name}');
       if(ownerType == OwnerType.profile) {
         itemlists.value = Map.from(profile.itemlists ?? {});
       } else if(ownerType == OwnerType.band){
@@ -104,13 +110,14 @@ class ItemlistController extends GetxController implements ItemlistService {
         );
       } else {
         itemlists.removeWhere((id, itemlist) {
-          return AppFlavour.appInUse == AppInUse.e && itemlist.type != ItemlistType.readlist;
+          return AppFlavour.appInUse == AppInUse.e &&
+              (itemlist.type != ItemlistType.readlist
+                  && itemlist.type != ItemlistType.single);
         });
-
 
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
   }
@@ -126,14 +133,14 @@ class ItemlistController extends GetxController implements ItemlistService {
                 .now().subtract(const Duration(days: 30))
                 .millisecondsSinceEpoch
         ) {
-          logger.d("Spotify Last Sync was more than 30 days");
+          AppUtilities.logger.d("Spotify Last Sync was more than 30 days");
           outOfSync = true;
         } else {
-          logger.i("Spotify Last Sync in scope");
+          AppUtilities.logger.i("Spotify Last Sync in scope");
         }
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
       AppUtilities.showSnackBar(
         title: MessageTranslationConstants.spotifySynchronization.tr,
         message: e.toString(),
@@ -159,7 +166,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   Future<void> createItemlist() async {
-    logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
+    AppUtilities.logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
 
     try {
       errorMsg.value = '';
@@ -181,29 +188,29 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         ///DEPRECATED
         // if(isPublicNewItemlist.value) {
-        //   logger.i("Inserting Public Itemlist to Public collection");
+        //   AppUtilities.logger.i("Inserting Public Itemlist to Public collection");
         //   newItemlistId = await ItemlistFirestore().insert(newItemlist);
         // } else {
-        //   logger.i("Inserting Private Itemlist to collection for profileId ${newItemlist.ownerId}");
+        //   AppUtilities.logger.i("Inserting Private Itemlist to collection for profileId ${newItemlist.ownerId}");
         //   newItemlistId = await ItemlistFirestore().insert(newItemlist);
         // }
 
-        logger.i("Empty Itemlist created successfully for profile ${newItemlist.ownerId}");
+        AppUtilities.logger.i("Empty Itemlist created successfully for profile ${newItemlist.ownerId}");
         newItemlist.id = newItemlistId;
 
         if(newItemlistId.isNotEmpty){
           itemlists[newItemlistId] = newItemlist;
-          logger.t("Itemlists $itemlists");
+          AppUtilities.logger.t("Itemlists $itemlists");
           clearNewItemlist();
           AppUtilities.showSnackBar(
               title: AppTranslationConstants.itemlistPrefs.tr,
               message: AppTranslationConstants.itemlistCreated.tr
           );
         } else {
-          logger.d("Something happens trying to insert itemlist");
+          AppUtilities.logger.d("Something happens trying to insert itemlist");
         }
       } else {
-        logger.d(MessageTranslationConstants.pleaseFillItemlistInfo.tr);
+        AppUtilities.logger.d(MessageTranslationConstants.pleaseFillItemlistInfo.tr);
         errorMsg.value = newItemlistNameController.text.isEmpty ? MessageTranslationConstants.pleaseAddName
             : MessageTranslationConstants.pleaseAddDescription;
 
@@ -213,7 +220,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         );
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.itemlist]);
@@ -222,7 +229,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   ///DEPRECATED Verify if in use
   // Future<void> searchItemlist() async {
   //
-  //   logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
+  //   AppUtilities.logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
   //
   //   Get.back();
   //
@@ -238,7 +245,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   //       );
   //     }
   //   } catch (e) {
-  //     logger.e(e.toString());
+  //     AppUtilities.logger.e(e.toString());
   //   }
   //
   //   update([AppPageIdConstants.itemlist]);
@@ -247,14 +254,14 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   Future<void> deleteItemlist(Itemlist itemlist) async {
-    logger.d("Removing for $itemlist");
+    AppUtilities.logger.d("Removing for $itemlist");
 
     try {
       isLoading.value = true;
       update([AppPageIdConstants.itemlist]);
 
       if(await ItemlistFirestore().delete(itemlist.id)) {
-        logger.d("Itemlist ${itemlist.id} removed");
+        AppUtilities.logger.d("Itemlist ${itemlist.id} removed");
 
         if((itemlist.appMediaItems?.isNotEmpty ?? false) && ownerType == OwnerType.profile) {
           List<String> appMediaItemsIds = itemlist.appMediaItems!.map((e) => e.id).toList();
@@ -262,7 +269,7 @@ class ItemlistController extends GetxController implements ItemlistService {
           if(await ProfileFirestore().removeFavoriteItems(profile.id, appMediaItemsIds)) {
             for (var itemId in appMediaItemsIds) {
               if (userController.profile.favoriteItems != null && userController.profile.favoriteItems!.isNotEmpty) {
-                logger.d("Removing item from global state items for profile from userController");
+                AppUtilities.logger.d("Removing item from global state items for profile from userController");
                 userController.profile.favoriteItems!.remove(itemId);
               }
             }
@@ -273,7 +280,7 @@ class ItemlistController extends GetxController implements ItemlistService {
           //   if(await ProfileFirestore().removeFavoriteItem(profile.id, appItem.id)) {
           //     if (userController.profile.favoriteItems != null &&
           //         userController.profile.favoriteItems!.isNotEmpty) {
-          //       logger.d("Removing item from global state items for profile from userController");
+          //       AppUtilities.logger.d("Removing item from global state items for profile from userController");
           //       userController.profile.favoriteItems!.remove(appItem.id);
           //     }
           //   }
@@ -289,10 +296,10 @@ class ItemlistController extends GetxController implements ItemlistService {
             title: AppTranslationConstants.itemlistPrefs.tr,
             message: AppTranslationConstants.itemlistRemovedErrorMsg.tr
         );
-        logger.e("Something happens trying to remove itemlist");
+        AppUtilities.logger.e("Something happens trying to remove itemlist");
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     isLoading.value = false;
@@ -303,24 +310,24 @@ class ItemlistController extends GetxController implements ItemlistService {
   ///DEPRECATED
   // @override
   // Future<void> setAsFavorite(Itemlist itemlist) async {
-  //   logger.d("Making favorite for $itemlist");
+  //   AppUtilities.logger.d("Making favorite for $itemlist");
   //
   //   try {
   //     if(await ItemlistFirestore().setAsFavorite(profile.id, itemlist)){
   //       itemlist.isFav = true;
   //       itemlists[itemlist.id] = itemlist;
-  //       logger.i("Itemlist ${itemlist.id} set as favorite");
+  //       AppUtilities.logger.i("Itemlist ${itemlist.id} set as favorite");
   //       if(await ItemlistFirestore().unsetOfFavorite(profile.id, _favItemlist)) {
-  //         logger.i("Itemlist ${profile.id} unset from favorite");
+  //         AppUtilities.logger.i("Itemlist ${profile.id} unset from favorite");
   //         _favItemlist.isFav = false;
   //         itemlists[_favItemlist.id] = _favItemlist;
   //       }
   //       _favItemlist = itemlist;
   //     } else {
-  //       logger.e("Something happens trying to remove itemlist");
+  //       AppUtilities.logger.e("Something happens trying to remove itemlist");
   //     }
   //   } catch (e) {
-  //     logger.e(e.toString());
+  //     AppUtilities.logger.e(e.toString());
   //   }
   //
   //   Get.back();
@@ -331,7 +338,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   @override
   Future<void> updateItemlist(String itemlistId, Itemlist itemlist) async {
 
-    logger.d("Updating to $itemlist");
+    AppUtilities.logger.d("Updating to $itemlist");
 
     try {
       isLoading.value = true;
@@ -351,7 +358,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         }
 
         if(await ItemlistFirestore().update(itemlist)){
-          logger.d("Itemlist $itemlistId updated");
+          AppUtilities.logger.d("Itemlist $itemlistId updated");
           itemlists[itemlist.id] = itemlist;
           clearNewItemlist();
           AppUtilities.showSnackBar(
@@ -359,7 +366,7 @@ class ItemlistController extends GetxController implements ItemlistService {
               message: AppTranslationConstants.itemlistUpdated.tr
           );
         } else {
-          logger.i("Something happens trying to update itemlist");
+          AppUtilities.logger.i("Something happens trying to update itemlist");
           AppUtilities.showSnackBar(
               title: AppTranslationConstants.itemlistPrefs.tr,
               message: AppTranslationConstants.itemlistUpdatedErrorMsg.tr
@@ -372,7 +379,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         );
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
       AppUtilities.showSnackBar(
           title: AppTranslationConstants.itemlistPrefs.tr,
           message: AppTranslationConstants.itemlistUpdatedErrorMsg.tr
@@ -396,8 +403,8 @@ class ItemlistController extends GetxController implements ItemlistService {
         appItemController.itemlist = itemlist;
         appItemController.loadItemsFromList();
       } catch (e) {
-        logger.w(e.toString());
-        logger.i("Controller is not active");
+        AppUtilities.logger.w(e.toString());
+        AppUtilities.logger.i("Controller is not active");
       }
 
       await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
@@ -408,7 +415,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   Future<bool> synchronizeItemlist(Itemlist itemlist) async {
-    logger.i("Synchronizing Itemlist ${itemlist.name}");
+    AppUtilities.logger.i("Synchronizing Itemlist ${itemlist.name}");
     isButtonDisabled.value = true;
     isLoading.value = true;
     bool wasSync = false;
@@ -443,10 +450,10 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         for (AppMediaItem currentItem in currentItems) {
           itemlist.appMediaItems?.removeWhere((appItem) => appItem.id == currentItem.id);
-          logger.d("Removing item ${currentItem.name} from being synchronized");
+          AppUtilities.logger.d("Removing item ${currentItem.name} from being synchronized");
         }
 
-        totalItemsToSynch -= currentItems.length;
+        totalItemsToSync -= currentItems.length;
       }
 
       if(itemlistId.isEmpty) {
@@ -455,7 +462,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         itemlist.ownerName = ownerName;
 
         itemlistId = await ItemlistFirestore().insert(itemlist);
-        logger.i("Itemlist inserted with id $itemlistId");
+        AppUtilities.logger.i("Itemlist inserted with id $itemlistId");
       }
 
       if(itemlistId.isNotEmpty && (itemlist.appMediaItems?.isNotEmpty ?? false)) {
@@ -474,7 +481,7 @@ class ItemlistController extends GetxController implements ItemlistService {
             itemNumber++;
             update([AppPageIdConstants.itemlist, AppPageIdConstants.playlistSong]);
             if (userController.profile.itemlists!.isNotEmpty) {
-              logger.d("Adding item to global itemlist from userController");
+              AppUtilities.logger.d("Adding item to global itemlist from userController");
               userController.profile.favoriteItems!.add(appItem.id);
             }
             AppMediaItemFirestore().existsOrInsert(appItem);
@@ -486,7 +493,7 @@ class ItemlistController extends GetxController implements ItemlistService {
             //TODO Add sync for band itemlist
           }
         }
-        logger.d("Items added successfully from Itemlist");
+        AppUtilities.logger.d("Items added successfully from Itemlist");
         wasSync = true;
       } else {
         Get.snackbar(
@@ -498,7 +505,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       }
       isButtonDisabled.value = false;
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     update();
@@ -507,11 +514,11 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   Future<void> getSpotifyToken() async {
-    logger.d("Getting SpotifyToken");
+    AppUtilities.logger.d("Getting SpotifyToken");
     String spotifyToken = await SpotifyApiCalls.getSpotifyToken();
 
     if(spotifyToken.isNotEmpty) {
-      logger.t("Spotify access token is: $spotifyToken");
+      AppUtilities.logger.t("Spotify access token is: $spotifyToken");
       userController.user!.spotifyToken = spotifyToken;
       await UserFirestore().updateSpotifyToken(userController.user!.id, spotifyToken);
     }
@@ -520,7 +527,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   Future<void> synchronizeSpotifyPlaylists() async {
-    logger.i("Getting Spotify Information with token: ${userController.user!.spotifyToken}");
+    AppUtilities.logger.i("Getting Spotify Information with token: ${userController.user!.spotifyToken}");
 
     isLoading.value = true;
     update([AppPageIdConstants.itemlist]);
@@ -542,7 +549,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         // Get.toNamed(AppRouteConstants.spotifyPlaylists);
       }
     } catch(e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     isLoading.value = false;
@@ -554,16 +561,16 @@ class ItemlistController extends GetxController implements ItemlistService {
 
     try {
       if (addedItemlists.contains(spotifyItemlist)) {
-        logger.d("Removing gigList ${spotifyItemlist.name}");
+        AppUtilities.logger.d("Removing gigList ${spotifyItemlist.name}");
         addedItemlists.remove(spotifyItemlist);
-        totalItemsToSynch -= spotifyPlaylistSimples.value.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
+        totalItemsToSync -= spotifyPlaylistSimples.value.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
       } else {
-        logger.d("Adding giglist with name ${spotifyItemlist.name}");
+        AppUtilities.logger.d("Adding giglist with name ${spotifyItemlist.name}");
         addedItemlists.add(spotifyItemlist);
-        totalItemsToSynch += spotifyPlaylistSimples.value.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
+        totalItemsToSync += spotifyPlaylistSimples.value.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.playlistSong]);
@@ -573,7 +580,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   // void loadSongsForPlaylist(spotify.PlaylistSimple playlist) {
   //   itemlists.forEach((playlistId, giglist) async {
   //     giglist.appMediaItems = await SpotifySearch().loadSongsFromPlaylist(playlistId);
-  //     logger.i("Adding ${giglist.appMediaItems?.length} song to Giglist ${giglist.name}");
+  //     AppUtilities.logger.i("Adding ${giglist.appMediaItems?.length} song to Giglist ${giglist.name}");
   //     itemlists[playlistId] = giglist;
   //   });
   // }
@@ -592,10 +599,10 @@ class ItemlistController extends GetxController implements ItemlistService {
 
       if(spotifyPlaylist.href?.isNotEmpty ?? false) {
         itemlist.appMediaItems = AppMediaItem.mapTracksToSongs(spotifyPlaylist.tracks!);
-        logger.d("${itemlist.appMediaItems?.length ?? 0} songs were mapped from ${spotifyPlaylist.name}");
+        AppUtilities.logger.d("${itemlist.appMediaItems?.length ?? 0} songs were mapped from ${spotifyPlaylist.name}");
       }
     } catch (e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
     await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist, true]);
@@ -605,7 +612,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   Future<void> synchronizeItemlists() async {
-    logger.i("Synchronizing ${addedItemlists.length} Giglists from Spotify Playlists");
+    AppUtilities.logger.i("Synchronizing ${addedItemlists.length} Giglists from Spotify Playlists");
 
     Map<Itemlist, bool> wereSynchronized = {};
     isLoading.value = true;
@@ -623,7 +630,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         if(playlistToSync.href?.isNotEmpty ?? false) {
           addedItemlist.appMediaItems = AppMediaItem.mapTracksToSongs(playlistToSync.tracks!);
-          logger.i("${addedItemlist.appMediaItems?.length ?? 0} songs were mapped from ${playlistToSync.name}");
+          AppUtilities.logger.i("${addedItemlist.appMediaItems?.length ?? 0} songs were mapped from ${playlistToSync.name}");
           wereSynchronized[addedItemlist] = await synchronizeItemlist(addedItemlist);
         }
 
@@ -633,16 +640,16 @@ class ItemlistController extends GetxController implements ItemlistService {
         ProfileFirestore().updateLastSpotifySync(userController.profile.id);
         Get.toNamed(AppRouteConstants.finishingSpotifySync, arguments: [AppRouteConstants.finishingSpotifySync]);
       } else {
-        logger.i("No giglist was updated. Each one is up to date");
+        AppUtilities.logger.i("No giglist was updated. Each one is up to date");
       }
     } catch(e) {
-      logger.e(e.toString());
+      AppUtilities.logger.e(e.toString());
     }
 
 
     wereSynchronized.forEach((giglist, wasSync) {
       if(!wasSync) {
-        logger.d("Removing added Giglist ${giglist.name} as it's up to date");
+        AppUtilities.logger.d("Removing added Giglist ${giglist.name} as it's up to date");
         addedItemlists.remove(giglist);
       }
     });
@@ -654,9 +661,9 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   Future<void> setPrivacyOption() async {
-    logger.t('setPrivacyOption for Playlist');
+    AppUtilities.logger.t('setPrivacyOption for Playlist');
     isPublicNewItemlist.value = !isPublicNewItemlist.value;
-    logger.d("New Itemlist would be ${isPublicNewItemlist.value ? 'Public':'Private'}");
+    AppUtilities.logger.d("New Itemlist would be ${isPublicNewItemlist.value ? 'Public':'Private'}");
     update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
   }
 
