@@ -108,9 +108,9 @@ class AppMediaItemDetailsController extends GetxController {
           digitalAmount = releasedItem.digitalPrice!.amount;
           physicalAmount = releasedItem.physicalPrice?.amount ?? 0;
           currentCurrency = releasedItem.digitalPrice!.currency;
-          if((releasedItem.boughtUsers?.contains(userController.user!.id) ?? false)
-              || (userController.user!.releaseItemIds?.contains(releasedItem.id) ?? false)
-              || (userController.user!.boughtItems?.contains(releasedItem.id) ?? false)
+          if((releasedItem.boughtUsers?.contains(userController.user.id) ?? false)
+              || (userController.user.releaseItemIds?.contains(releasedItem.id) ?? false)
+              || (userController.user.boughtItems?.contains(releasedItem.id) ?? false)
           ) {
             allowFullAccess = true;
           }

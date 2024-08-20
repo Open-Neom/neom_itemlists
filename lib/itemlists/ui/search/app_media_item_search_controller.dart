@@ -150,7 +150,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
           for (var value in appReleaseItems.value.values) {
             if(value.name.toLowerCase().contains(searchParam.value)
-                || value.ownerName.toLowerCase().contains(searchParam.value)) {
+                || (value.ownerName?.toLowerCase().contains(searchParam.value) ?? false)) {
               appMediaItems[value.id] = AppMediaItem.fromAppReleaseItem(value);
             }
           }
@@ -164,7 +164,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
             case AppInUse.e:
               List<GoogleBook> googleBooks = await GoogleBooksApi.searchBooks(searchParam.value);
               for (var googleBook in googleBooks) {
-                AppMediaItem book = GoogleBook.toAppMediaItem(googleBook);
+                AppMediaItem book = AppMediaItem.fromGoogleBook(googleBook);
                 appMediaItems[book.id] = book;
               }
               break;

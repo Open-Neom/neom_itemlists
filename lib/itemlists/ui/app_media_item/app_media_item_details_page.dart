@@ -20,7 +20,7 @@ import 'app_media_item_details_controller.dart';
 
 class AppMediaItemDetailsPage extends StatelessWidget {
 
-  const AppMediaItemDetailsPage({Key? key}) : super(key: key);
+  const AppMediaItemDetailsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -139,7 +139,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                             title: AppTranslationConstants.appItemPrefs.tr,
                             content: Column(
                               children: <Widget>[
-                                _.userController.profile.type == ProfileType.instrumentist ?
+                                _.userController.profile.type == ProfileType.artist ?
                                 Obx(()=>
                                   DropdownButton<String>(
                                     items: AppItemState.values.map((AppItemState itemState) {
@@ -208,7 +208,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                     : Text(AppTranslationConstants.add.tr,
                                 )),
                                 onPressed: () async => {
-                                  _.userController.profile.type == ProfileType.instrumentist ?
+                                  _.userController.profile.type == ProfileType.artist ?
                                   (_.appItemState > 0 ? await _.addItemlistItem(context, fanItemState: _.appItemState.value) :
                                     AppUtilities.showSnackBar(
                                       title: AppTranslationConstants.appItemPrefs.tr,

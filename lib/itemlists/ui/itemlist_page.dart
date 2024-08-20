@@ -21,7 +21,7 @@ import 'itemlist_controller.dart';
 import 'widgets/itemlist_widgets.dart';
 
 class ItemlistPage extends StatelessWidget {
-  const ItemlistPage({Key? key}) : super(key: key);
+  const ItemlistPage({super.key});
 
   @override
   Widget build(BuildContext context) {

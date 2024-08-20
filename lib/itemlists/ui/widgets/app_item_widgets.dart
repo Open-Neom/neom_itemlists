@@ -50,7 +50,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                     ? "${appMediaItem.name.substring(0,AppConstants.maxAppItemNameLength)}..."
                     : appMediaItem.name),
                 const SizedBox(width:5),
-                (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.instrumentist && !_.isFixed)) ?
+                (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.artist && !_.isFixed)) ?
                 RatingHeartBar(state: appMediaItem.state.toDouble()) : const SizedBox.shrink(),
               ]
           ),

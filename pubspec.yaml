@@ -1,6 +1,6 @@
 name: neom_itemlists
 description: Itemlists for Cyberneom.
-version: 1.1.2
+version: 1.2.0
 homepage: https://github.com/Cyberneom/neom_itemlists
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 
@@ -21,9 +21,9 @@ dependencies:
   neom_posts:
     git:
       url: git@github.com:Cyberneom/neom_posts.git
-  neom_music_player:
+  neom_audio_player:
     git:
-      url: https://github.com/Cyberneom/neom_music_player.git
+      url: https://github.com/Cyberneom/neom_audio_player.git
 
 dev_dependencies:
   flutter_test:

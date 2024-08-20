@@ -45,7 +45,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   ///DEPRECATED
   // Itemlist _favItemlist = Itemlist();
   AppProfile profile = AppProfile();
-  Band? band;
+  Band band = Band();
   String ownerId = '';
   String ownerName = '';
   OwnerType ownerType = OwnerType.profile;
@@ -79,14 +79,12 @@ class ItemlistController extends GetxController implements ItemlistService {
         if(Get.arguments.isNotEmpty && Get.arguments[0] is Band) {
           if(Get.arguments[0] is Band) {
             band = Get.arguments[0];
-            if(band != null) {
-              ownerId = band!.id;
-              ownerName = band!.name;
-              ownerType = OwnerType.band;
+            ownerId = band.id;
+            ownerName = band.name;
+            ownerType = OwnerType.band;
 
-              userController.band = band;
-              userController.itemlistOwner = OwnerType.band;
-            }
+            userController.band = band;
+            userController.itemlistOwner = OwnerType.band;
           } else if(Get.arguments[0] is ItemlistType) {
             itemlistType = Get.arguments[0];
           }
@@ -99,7 +97,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       if(ownerType == OwnerType.profile) {
         itemlists.value = Map.from(profile.itemlists ?? {});
       } else if(ownerType == OwnerType.band){
-        itemlists.value = Map.from(band?.itemlists ?? {});
+        itemlists.value = Map.from(band.itemlists ?? {});
       }
 
       if(itemlists.isEmpty) {
@@ -128,7 +126,7 @@ class ItemlistController extends GetxController implements ItemlistService {
     try {
       if(AppFlavour.appInUse == AppInUse.g && !Platform.isIOS) {
         getSpotifyToken();
-        if (userController.user!.spotifyToken.isNotEmpty
+        if (userController.user.spotifyToken.isNotEmpty
             && userController.profile.lastSpotifySync < DateTime
                 .now().subtract(const Duration(days: 30))
                 .millisecondsSinceEpoch
@@ -519,24 +517,24 @@ class ItemlistController extends GetxController implements ItemlistService {
 
     if(spotifyToken.isNotEmpty) {
       AppUtilities.logger.t("Spotify access token is: $spotifyToken");
-      userController.user!.spotifyToken = spotifyToken;
-      await UserFirestore().updateSpotifyToken(userController.user!.id, spotifyToken);
+      userController.user.spotifyToken = spotifyToken;
+      await UserFirestore().updateSpotifyToken(userController.user.id, spotifyToken);
     }
     update([AppPageIdConstants.itemlist]);
   }
 
   @override
   Future<void> synchronizeSpotifyPlaylists() async {
-    AppUtilities.logger.i("Getting Spotify Information with token: ${userController.user!.spotifyToken}");
+    AppUtilities.logger.i("Getting Spotify Information with token: ${userController.user.spotifyToken}");
 
     isLoading.value = true;
     update([AppPageIdConstants.itemlist]);
 
-    spotify.User spotifyUser = await SpotifyApiCalls.getUserProfile(spotifyToken: userController.user!.spotifyToken);
+    spotify.User spotifyUser = await SpotifyApiCalls.getUserProfile(spotifyToken: userController.user.spotifyToken);
 
     try {
       if(spotifyUser.id?.isNotEmpty ?? false) {
-        spotifyPlaylistSimples.value =  await SpotifyApiCalls.getUserPlaylistSimples(spotifyToken: userController.user!.spotifyToken, userId: spotifyUser.id!);
+        spotifyPlaylistSimples.value =  await SpotifyApiCalls.getUserPlaylistSimples(spotifyToken: userController.user.spotifyToken, userId: spotifyUser.id!);
 
         for (var playlist in spotifyPlaylistSimples.value) {
           if(playlist.id?.isNotEmpty ?? false) {
@@ -594,7 +592,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       spotify.PlaylistSimple playlistSimple = spotifyPlaylistSimples.value.where((element) => element.href == itemlist.href).first;
 
       if(playlistSimple.id?.isNotEmpty ?? false) {
-        spotifyPlaylist = await SpotifyApiCalls.getPlaylist(spotifyToken: userController.user!.spotifyToken, playlistId: playlistSimple.id!);
+        spotifyPlaylist = await SpotifyApiCalls.getPlaylist(spotifyToken: userController.user.spotifyToken, playlistId: playlistSimple.id!);
       }
 
       if(spotifyPlaylist.href?.isNotEmpty ?? false) {
@@ -625,7 +623,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         spotify.PlaylistSimple playlistSimple = spotifyPlaylistSimples.value.where((element) => element.href == addedItemlist.href).first;
 
         if(playlistSimple.id?.isNotEmpty ?? false) {
-          playlistToSync = await SpotifyApiCalls.getPlaylist(spotifyToken: userController.user!.spotifyToken, playlistId: playlistSimple.id!);
+          playlistToSync = await SpotifyApiCalls.getPlaylist(spotifyToken: userController.user.spotifyToken, playlistId: playlistSimple.id!);
         }
 
         if(playlistToSync.href?.isNotEmpty ?? false) {

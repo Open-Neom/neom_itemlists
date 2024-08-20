@@ -11,7 +11,7 @@ import 'app_media_item_search_controller.dart';
 import 'appbar_item_search.dart';
 
 class AppMediaItemSearchPage extends StatelessWidget {
-  const AppMediaItemSearchPage({Key? key}) : super(key: key);
+  const AppMediaItemSearchPage({super.key});
 
   @override
   Widget build(BuildContext context) {

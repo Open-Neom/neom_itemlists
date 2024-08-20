@@ -66,7 +66,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
         logger.d("${itemlist.appMediaItems?.length ?? 0} items in itemlist");
         loadItemsFromList();
       } else {
-        logger.i("ItemlistItemController Init ready loco with no itemlist");
+        logger.i("ItemlistItemController Init ready with no itemlist");
       }
 
       if(AppFlavour.appInUse == AppInUse.c) {

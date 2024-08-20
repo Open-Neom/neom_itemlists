@@ -12,7 +12,7 @@ import 'package:neom_commons/core/utils/constants/app_translation_constants.dart
 import 'app_media_item_search_controller.dart';
 
 class PlaylistNameDescPage extends StatelessWidget {
-  const PlaylistNameDescPage({Key? key}) : super(key: key);
+  const PlaylistNameDescPage({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -11,7 +11,7 @@ import 'app_media_item_search_controller.dart';
 class AppBarItemSearch extends StatelessWidget implements PreferredSizeWidget {
 
   final AppMediaItemSearchController itemSearchController;
-  const AppBarItemSearch(this.itemSearchController, {Key? key}) : super(key: key);
+  const AppBarItemSearch(this.itemSearchController, {super.key});
   
   @override
   Size get preferredSize => AppTheme.appBarHeight;

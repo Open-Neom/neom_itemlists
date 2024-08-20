@@ -11,7 +11,7 @@ import '../itemlist_controller.dart';
 import '../widgets/itemlist_widgets.dart';
 
 class SpotifyPlaylistsPage extends StatelessWidget {
-  const SpotifyPlaylistsPage({Key? key}) : super(key: key);
+  const SpotifyPlaylistsPage({super.key});
 
 
   @override
