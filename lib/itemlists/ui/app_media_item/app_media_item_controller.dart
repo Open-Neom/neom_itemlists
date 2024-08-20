@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:neom_audio_player/ui/player/media_player_controller.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/api_services/push_notification/firebase_messaging_calls.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
@@ -14,7 +15,6 @@ import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/owner_type.dart';
 import 'package:neom_commons/core/utils/enums/push_notification_type.dart';
-import 'package:neom_music_player/ui/player/media_player_controller.dart';
 
 import '../../domain/use_cases/app_item_service.dart';
 

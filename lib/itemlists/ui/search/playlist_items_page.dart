@@ -1,4 +1,4 @@
-///DEPRECATED
+//DEPRECATED
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import 'package:neom_commons/core/app_flavour.dart';

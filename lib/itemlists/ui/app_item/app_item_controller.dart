@@ -1,4 +1,4 @@
-///DEPRECATED
+//DEPRECATED
 // import 'package:get/get.dart';
 // import 'package:neom_commons/core/app_flavour.dart';
 // import 'package:neom_commons/core/data/api_services/push_notification/firebase_messaging_calls.dart';
