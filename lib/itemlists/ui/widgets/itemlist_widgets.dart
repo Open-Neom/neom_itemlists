@@ -20,20 +20,20 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
             width: 50,
             child: itemlist.imgUrl.isNotEmpty
                 ? CachedNetworkImage(imageUrl: itemlist.imgUrl)
-                : (itemlist.appMediaItems?.isNotEmpty ?? false)
-                ? (itemlist.appMediaItems!.first.imgUrl.isNotEmpty
+                : ((itemlist.appMediaItems?.isNotEmpty ?? false) && (itemlist.appMediaItems!.first.imgUrl.isNotEmpty))
                 ? CachedNetworkImage(imageUrl: itemlist.appMediaItems!.first.imgUrl)
-                : CachedNetworkImage(imageUrl: AppFlavour.getNoImageUrl()))
+                : ((itemlist.appReleaseItems?.isNotEmpty ?? false) && (itemlist.appReleaseItems!.first.imgUrl.isNotEmpty))
+                ? CachedNetworkImage(imageUrl: itemlist.appReleaseItems!.first.imgUrl)
                 : CachedNetworkImage(imageUrl: AppFlavour.getAppLogoUrl())
         ),
         title: Row(
             children: <Widget>[
-              Text(itemlist.name.length > AppConstants.maxItemlistNameLength
-                  ? "${itemlist.name.substring(0,AppConstants.maxItemlistNameLength).capitalizeFirst}..."
-                  : itemlist.name.capitalizeFirst),
+              Text(CoreUtilities.capitalizeFirstLetter(itemlist.name.length > AppConstants.maxItemlistNameLength
+                  ? "${itemlist.name.substring(0,AppConstants.maxItemlistNameLength)}..."
+                  : itemlist.name)),
               ///DEPRECATE .isFav ? const Icon(Icons.favorite, size: 10,) : SizedBox.shrink()
             ]),
-        subtitle: itemlist.description.isNotEmpty ? Text(itemlist.description.capitalizeFirst, maxLines: 3, overflow: TextOverflow.ellipsis,) : null,
+        subtitle: itemlist.description.isNotEmpty ? Text(CoreUtilities.capitalizeFirstLetter(itemlist.description), maxLines: 3, overflow: TextOverflow.ellipsis,) : null,
         trailing: ActionChip(
           labelPadding: EdgeInsets.zero,
           backgroundColor: AppColor.main25,

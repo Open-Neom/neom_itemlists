@@ -101,9 +101,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       }
 
       if(itemlists.isEmpty) {
-        itemlists.value = await ItemlistFirestore().fetchAll(
-            ownerId: ownerId,
-            ownerType: ownerType,
+        itemlists.value = await ItemlistFirestore().getByOwnerId(ownerId, ownerType: ownerType,
             itemlistType: AppFlavour.appInUse == AppInUse.e ? ItemlistType.readlist : null
         );
       } else {

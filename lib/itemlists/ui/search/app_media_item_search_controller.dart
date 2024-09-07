@@ -150,7 +150,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
           for (var value in appReleaseItems.value.values) {
             if(value.name.toLowerCase().contains(searchParam.value)
-                || (value.ownerName?.toLowerCase().contains(searchParam.value) ?? false)) {
+                || (value.ownerName.toLowerCase().contains(searchParam.value))) {
               appMediaItems[value.id] = AppMediaItem.fromAppReleaseItem(value);
             }
           }

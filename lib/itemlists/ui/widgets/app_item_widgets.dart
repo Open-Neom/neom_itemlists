@@ -45,19 +45,20 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
           title: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(appMediaItem.name.isEmpty ? ""
-                    : appMediaItem.name.length > AppConstants.maxAppItemNameLength
-                    ? "${appMediaItem.name.substring(0,AppConstants.maxAppItemNameLength)}..."
-                    : appMediaItem.name),
-                const SizedBox(width:5),
+                SizedBox(
+                  width: AppTheme.fullWidth(context)*0.4,
+                  child: Text(appMediaItem.name, maxLines: 5, overflow: TextOverflow.ellipsis,),
+                ),
                 (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.artist && !_.isFixed)) ?
                 RatingHeartBar(state: appMediaItem.state.toDouble()) : const SizedBox.shrink(),
               ]
           ),
-          subtitle: (AppFlavour.appInUse == AppInUse.c && (appMediaItem.description?.isNotEmpty ?? false)) ?
+          subtitle: SizedBox(
+            width: AppTheme.fullWidth(context)*0.4,
+            child: (AppFlavour.appInUse == AppInUse.c && (appMediaItem.description?.isNotEmpty ?? false)) ?
             Text(appMediaItem.description ?? '', textAlign: TextAlign.justify,) :
-            Text(appMediaItem.artist.isEmpty ? "" : appMediaItem.artist.length > AppConstants.maxArtistNameLength
-                ? "${appMediaItem.artist.substring(0,AppConstants.maxArtistNameLength)}..." : appMediaItem.artist),
+            Text(appMediaItem.artist, maxLines: 2, overflow: TextOverflow.ellipsis,),
+          ),
           trailing: IconButton(
               icon: const Icon(
                   CupertinoIcons.forward
@@ -65,18 +66,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               onPressed: () {
-                switch(AppFlavour.appInUse) {
-                  case AppInUse.c:
-                    Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
-                    break;
-                  case AppInUse.g:
-                    ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
-                    Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
-                    break;
-                  case AppInUse.e:
-                    Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
-                    break;
-                }
+                Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
               }
           ),
           onTap: () => AppFlavour.appInUse == AppInUse.c || !_.isFixed ? _.getItemlistItemDetails(appMediaItem) : {},

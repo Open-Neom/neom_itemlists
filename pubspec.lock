@@ -897,10 +897,10 @@ packages:
     dependency: transitive
     description:
       name: get
-      sha256: "2841187ac3a30c8042c91d95738c17369c79792971cc3166222be8cede72e10c"
+      sha256: fa0e73cad89b9a6df0ac46d899989f5a1f61359192961e9c2e180543ff9a3c62
       url: "https://pub.dev"
     source: hosted
-    version: "5.0.0-release-candidate-6"
+    version: "5.0.0-release-candidate-9.2"
   get_it:
     dependency: transitive
     description:
