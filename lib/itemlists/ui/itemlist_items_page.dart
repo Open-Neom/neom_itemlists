@@ -21,7 +21,7 @@ class ItemlistItemsPage extends StatelessWidget {
       id: AppPageIdConstants.itemlistItem,
       init: AppMediaItemController(),
       builder: (_) => Scaffold(
-        backgroundColor: AppColor.getMain(),
+        backgroundColor: AppColor.main50,
         appBar: AppBarChild(title: _.itemlist.name.length > AppConstants.maxItemlistNameLength
             ? "${_.itemlist.name.substring(0,AppConstants.maxItemlistNameLength)}..."
             : _.itemlist.name),

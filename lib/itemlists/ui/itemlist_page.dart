@@ -29,7 +29,7 @@ class ItemlistPage extends StatelessWidget {
         id: AppPageIdConstants.itemlist,
         init: ItemlistController(),
         builder: (_) => Scaffold(
-          backgroundColor: AppColor.main75,
+          backgroundColor: AppColor.main50,
           appBar: AppFlavour.appInUse == AppInUse.g ? AppBar(
             actions: [
               Padding(
@@ -133,7 +133,7 @@ class ItemlistPage extends StatelessWidget {
                           onTap: () {
                             AppFlavour.appInUse == AppInUse.g
                                 ? _.synchronizeSpotifyPlaylists()
-                                : Get.toNamed(AppRouteConstants.PDFViewer,
+                                : Get.toNamed(AppRouteConstants.pdfViewer,
                                 arguments: [Get.find<LoginController>().appInfo.value.suggestedUrl, 0, 150]);
                             },
                         ),
@@ -147,8 +147,7 @@ class ItemlistPage extends StatelessWidget {
                       onPressed: () => {
                         AppFlavour.appInUse == AppInUse.g
                         ? _.synchronizeSpotifyPlaylists()
-                        : Get.toNamed(AppRouteConstants.PDFViewer,
-                        arguments: [Get.find<LoginController>().appInfo.value.suggestedUrl, true, 0, 250])
+                        : _.gotoSuggestedItem()
                       },
                     ),
                   ],

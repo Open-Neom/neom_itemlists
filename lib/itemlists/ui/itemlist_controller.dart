@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/auth/ui/login/login_controller.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
@@ -10,6 +11,7 @@ import 'package:neom_commons/core/data/firestore/user_firestore.dart';
 import 'package:neom_commons/core/data/implementations/user_controller.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
+import 'package:neom_commons/core/domain/model/app_release_item.dart';
 import 'package:neom_commons/core/domain/model/band.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/domain/use_cases/itemlist_service.dart';
@@ -74,6 +76,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       profile = userController.profile;
       ownerId = profile.id;
       ownerName = profile.name;
+      itemlistType = userController.defaultItemlistType;
 
       if(Get.arguments != null) {
         if(Get.arguments.isNotEmpty && Get.arguments[0] is Band) {
@@ -89,8 +92,6 @@ class ItemlistController extends GetxController implements ItemlistService {
             itemlistType = Get.arguments[0];
           }
         }
-
-
       }
 
       AppUtilities.logger.t('Itemlists being loaded from ${ownerType.name}');
@@ -105,11 +106,16 @@ class ItemlistController extends GetxController implements ItemlistService {
             itemlistType: AppFlavour.appInUse == AppInUse.e ? ItemlistType.readlist : null
         );
       } else {
-        itemlists.removeWhere((id, itemlist) {
-          return AppFlavour.appInUse == AppInUse.e &&
-              (itemlist.type != ItemlistType.readlist
-                  && itemlist.type != ItemlistType.single);
-        });
+        if(itemlistType == ItemlistType.readlist) {
+          itemlists.removeWhere((id, itemlist) {
+            return AppFlavour.appInUse == AppInUse.e &&
+                (itemlist.type != ItemlistType.readlist
+                    && itemlist.type != ItemlistType.publication);
+          });
+        } else {
+          itemlists.removeWhere((id,list) => list.type == ItemlistType.readlist || list.type == ItemlistType.publication);
+        }
+
 
       }
     } catch (e) {
@@ -168,18 +174,22 @@ class ItemlistController extends GetxController implements ItemlistService {
       errorMsg.value = '';
       if((isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty && newItemlistDescController.text.isNotEmpty)
           || (!isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty)) {
-        Itemlist newItemlist = Itemlist.createBasic(newItemlistNameController.text, newItemlistDescController.text);
+        Itemlist newItemlist = Itemlist(
+          name: newItemlistNameController.text,
+          description: newItemlistDescController.text,
+          ownerId: ownerId,
+          ownerName: ownerName,
+          ownerType: ownerType,
+          type: itemlistType,
+          public: isPublicNewItemlist.value,
+        );
 
-        newItemlist.ownerId = ownerId;
-        newItemlist.ownerName = ownerName;
-        newItemlist.ownerType = ownerType;
         String newItemlistId = "";
 
         if (profile.position?.latitude != 0.0) {
           newItemlist.position = profile.position!;
         }
 
-        newItemlist.public = isPublicNewItemlist.value;
         newItemlistId = await ItemlistFirestore().insert(newItemlist);
 
         ///DEPRECATED
@@ -196,7 +206,15 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         if(newItemlistId.isNotEmpty){
           itemlists[newItemlistId] = newItemlist;
+          if(userController.profile.itemlists == null) {
+            userController.profile.itemlists = {};
+            userController.profile.itemlists![newItemlistId] = newItemlist;
+          } else {
+            userController.profile.itemlists![newItemlistId] = newItemlist;
+          }
+
           AppUtilities.logger.t("Itemlists $itemlists");
+
           clearNewItemlist();
           AppUtilities.showSnackBar(
               title: AppTranslationConstants.itemlistPrefs.tr,
@@ -508,6 +526,14 @@ class ItemlistController extends GetxController implements ItemlistService {
     return wasSync;
   }
 
+  Future<void> gotoSuggestedItem() async {
+    AppReleaseItem suggestedItem = AppReleaseItem(
+      previewUrl: Get.find<LoginController>().appInfo.value.suggestedUrl,
+      duration: 107,
+    );
+
+    Get.toNamed(AppRouteConstants.pdfViewer, arguments: [suggestedItem, true, true]);
+  }
   @override
   Future<void> getSpotifyToken() async {
     AppUtilities.logger.d("Getting SpotifyToken");
