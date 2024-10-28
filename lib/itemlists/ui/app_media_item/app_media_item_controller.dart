@@ -255,18 +255,18 @@ class AppMediaItemController extends GetxController implements AppItemService {
       case AppInUse.c:
         if (Get.isRegistered<MediaPlayerController>()) {
           Get.delete<MediaPlayerController>();
-          Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
         } else {
-          Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
         }
         break;
       case AppInUse.g:
         ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
         if (Get.isRegistered<MediaPlayerController>()) {
           Get.delete<MediaPlayerController>();
-          Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
         } else {
-          Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
         }
 
         break;

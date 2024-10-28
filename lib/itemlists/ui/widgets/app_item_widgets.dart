@@ -151,7 +151,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
     ),
     isThreeLine: false,
     leading: NeomImageCard(
-      placeholderImage: const AssetImage(AppAssets.musicPlayerCover),
+      placeholderImage: const AssetImage(AppAssets.audioPlayerCover),
       imageUrl: appMediaItem.imgUrl
     ),
     trailing: Row(
@@ -175,9 +175,9 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       AppHiveController().addQuery(appMediaItem.name);
       if (Get.isRegistered<MediaPlayerController>()) {
         Get.delete<MediaPlayerController>();
-        Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+        Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
       } else {
-        Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+        Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
       }
     },
   );
@@ -196,7 +196,7 @@ ListTile createMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
     ),
     isThreeLine: false,
     leading: NeomImageCard(
-        placeholderImage: const AssetImage(AppAssets.musicPlayerCover),
+        placeholderImage: const AssetImage(AppAssets.audioPlayerCover),
         imageUrl: appMediaItem.imgUrl
     ),
     onLongPress: () {

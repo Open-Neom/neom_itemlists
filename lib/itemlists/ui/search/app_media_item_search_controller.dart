@@ -226,7 +226,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
     // PageRouteBuilder(
     //   pageBuilder: (_, __, ___) => MediaPlayerPage(appMediaItem: appMediaItem), opaque: false,
     // );
-    Get.toNamed(AppRouteConstants.musicPlayerMedia, arguments: [appMediaItem]);
+    Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
 
     ///DEPRECATED
     // NeomPlayerInvoke.init(

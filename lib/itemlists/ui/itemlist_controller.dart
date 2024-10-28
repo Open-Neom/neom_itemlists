@@ -534,10 +534,14 @@ class ItemlistController extends GetxController implements ItemlistService {
 
     Get.toNamed(AppRouteConstants.pdfViewer, arguments: [suggestedItem, true, true]);
   }
+
   @override
   Future<void> getSpotifyToken() async {
     AppUtilities.logger.d("Getting SpotifyToken");
-    String spotifyToken = await SpotifyApiCalls.getSpotifyToken();
+    AppUtilities.logger.w("DEPRECATED - spotify_sdk was working for android and not allowing to build on ios");
+
+    // String spotifyToken = await SpotifyApiCalls.getSpotifyToken();
+    String spotifyToken = '';
 
     if(spotifyToken.isNotEmpty) {
       AppUtilities.logger.t("Spotify access token is: $spotifyToken");

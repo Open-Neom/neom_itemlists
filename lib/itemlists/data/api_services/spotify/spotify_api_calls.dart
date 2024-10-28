@@ -1,30 +1,28 @@
 import 'package:http/http.dart' as http;
-import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_spotify_constants.dart';
 import 'package:spotify/spotify.dart' as spotify;
-import 'package:spotify_sdk/spotify_sdk.dart';
+// import 'package:spotify_sdk/spotify_sdk.dart';
 
 class SpotifyApiCalls {
 
-  static Future<String> getSpotifyToken() async {
-    AppUtilities.logger.d("Getting access and Spotify Token");
-    String spotifyToken = "";
-
-    if(await SpotifySdk.connectToSpotifyRemote(
-      clientId: AppFlavour.getSpotifyClientId(),
-      redirectUrl: AppSpotifyConstants.redirectUrl,)
-    ) {
-      spotifyToken = await SpotifySdk.getAccessToken(
-          clientId: AppFlavour.getSpotifyClientId(),
-          redirectUrl: AppSpotifyConstants.redirectUrl,
-          scope: AppSpotifyConstants.scope
-      );
-    }
-
-    AppUtilities.logger.t("Spotify Token Retrieved $spotifyToken");
-    return spotifyToken;
-  }
+  // static Future<String> getSpotifyToken() async {
+  //   AppUtilities.logger.d("Getting access and Spotify Token");
+  //   String spotifyToken = "";
+  //
+  //   if(await SpotifySdk.connectToSpotifyRemote(
+  //     clientId: AppFlavour.getSpotifyClientId(),
+  //     redirectUrl: AppSpotifyConstants.redirectUrl,)
+  //   ) {
+  //     spotifyToken = await SpotifySdk.getAccessToken(
+  //         clientId: AppFlavour.getSpotifyClientId(),
+  //         redirectUrl: AppSpotifyConstants.redirectUrl,
+  //         scope: AppSpotifyConstants.scope
+  //     );
+  //   }
+  //
+  //   AppUtilities.logger.t("Spotify Token Retrieved $spotifyToken");
+  //   return spotifyToken;
+  // }
 
 
   static Future<spotify.User> getUserProfile({required String spotifyToken,}) async {
