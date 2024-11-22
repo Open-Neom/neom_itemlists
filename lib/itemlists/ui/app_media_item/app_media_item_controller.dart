@@ -65,8 +65,12 @@ class AppMediaItemController extends GetxController implements AppItemService {
 
       if(itemlist.id.isNotEmpty) {
         AppUtilities.logger.i("AppMediaItemController for Itemlist: ${itemlist.id} ${itemlist.name} ");
-        AppUtilities.logger.d("${itemlist.appMediaItems?.length ?? 0} items in itemlist");
+        AppUtilities.logger.d("${itemlist.appReleaseItems?.length ?? 0} internal items in itemlist");
+        AppUtilities.logger.d("${itemlist.appMediaItems?.length ?? 0} external items in itemlist");
         loadItemsFromList();
+        if(itemlistItems.length == 1) {
+          getItemlistItemDetails(itemlistItems.values.first);
+        }
       } else {
         AppUtilities.logger.i("ItemlistItemController Init ready with no itemlist");
       }
@@ -282,13 +286,11 @@ class AppMediaItemController extends GetxController implements AppItemService {
   void loadItemsFromList(){
     Map<String, AppMediaItem> items = {};
 
-    if(itemlist.appReleaseItems?.isNotEmpty ?? false) {
-      itemlist.appReleaseItems?.forEach((releaseItem) {
-        AppMediaItem item = AppMediaItem.fromAppReleaseItem(releaseItem);
-        AppUtilities.logger.d(releaseItem.name);
-        items[item.id] = item;
-      });
-    }
+    itemlist.appReleaseItems?.forEach((releaseItem) {
+      AppMediaItem item = AppMediaItem.fromAppReleaseItem(releaseItem);
+      AppUtilities.logger.d(releaseItem.name);
+      items[item.id] = item;
+    });
 
     itemlist.appMediaItems?.forEach((item) {
       AppUtilities.logger.d(item.name);

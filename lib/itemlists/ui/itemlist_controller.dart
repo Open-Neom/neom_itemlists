@@ -540,8 +540,8 @@ class ItemlistController extends GetxController implements ItemlistService {
     AppUtilities.logger.d("Getting SpotifyToken");
     AppUtilities.logger.w("DEPRECATED - spotify_sdk was working for android and not allowing to build on ios");
 
-    // String spotifyToken = await SpotifyApiCalls.getSpotifyToken();
-    String spotifyToken = '';
+    String spotifyToken = await SpotifyApiCalls.getSpotifyToken();
+    // String spotifyToken = '';
 
     if(spotifyToken.isNotEmpty) {
       AppUtilities.logger.t("Spotify access token is: $spotifyToken");

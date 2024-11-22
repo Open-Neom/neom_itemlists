@@ -4,11 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:neom_audio_player/data/implementations/app_hive_controller.dart';
+import 'package:neom_audio_player/neom_player_invoker.dart';
 import 'package:neom_audio_player/ui/player/media_player_controller.dart';
 import 'package:neom_audio_player/ui/widgets/download_button.dart';
 import 'package:neom_audio_player/ui/widgets/go_spotify_button.dart';
 import 'package:neom_audio_player/ui/widgets/like_button.dart';
 import 'package:neom_audio_player/ui/widgets/song_tile_trailing_menu.dart';
+import 'package:neom_audio_player/utils/helpers/media_item_mapper.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
@@ -138,8 +140,11 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
   );
 }
 
-ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
-    {Itemlist? itemlist, String query = '', AppMediaItemSearchController? searchController, bool downloadAllowed = false}) {
+ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem, {Itemlist? itemlist,
+  String query = '', AppMediaItemSearchController? searchController, bool downloadAllowed = false}) {
+
+  bool isInternal = appMediaItem.mediaSource == AppMediaSource.internal || appMediaItem.mediaSource == AppMediaSource.offline;
+
   return ListTile(
     contentPadding: const EdgeInsets.only(left: 15.0,),
     title: Text(appMediaItem.name,
@@ -157,15 +162,14 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
     trailing: Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        LikeButton(appMediaItem: appMediaItem,),
-        appMediaItem.mediaSource == AppMediaSource.internal
-            ? (downloadAllowed ? DownloadButton(mediaItem: appMediaItem,) : const SizedBox.shrink())
+        isInternal ? LikeButton(appMediaItem: appMediaItem,)
             : (appMediaItem.mediaSource == AppMediaSource.spotify ? GoSpotifyButton(appMediaItem: appMediaItem, size: 22) : const SizedBox.shrink()),
-        SongTileTrailingMenu(
+        if(downloadAllowed) DownloadButton(mediaItem: appMediaItem,),
+        isInternal ? SongTileTrailingMenu(
           appMediaItem: appMediaItem,
           itemlist: itemlist,
           searchController: searchController,
-        ),
+        ) : AppTheme.widthSpace10,
       ],
     ),
     onLongPress: () {
@@ -173,11 +177,23 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
     },
     onTap: () {
       AppHiveController().addQuery(appMediaItem.name);
-      if (Get.isRegistered<MediaPlayerController>()) {
-        Get.delete<MediaPlayerController>();
-        Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+
+      if(appMediaItem.mediaSource == AppMediaSource.internal || appMediaItem.mediaSource == AppMediaSource.offline) {
+        if (Get.isRegistered<MediaPlayerController>()) {
+          Get.delete<MediaPlayerController>();
+          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+        } else {
+          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+        }
       } else {
-        Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+        NeomPlayerInvoker.updateNowPlaying([MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem)], 0);
+
+        ///DEPRECATED
+        // if(Get.isRegistered<MiniPlayerController>()) {
+        //   Get.find<MiniPlayerController>().setMediaItem(MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem));
+        // } else {
+        //   Get.put(MiniPlayerController()).setMediaItem(MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem));
+        // }
       }
     },
   );

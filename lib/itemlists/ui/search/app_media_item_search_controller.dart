@@ -73,15 +73,17 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
       }
 
       if(Get.arguments != null) {
-        spotifySearchType = Get.arguments[0];
-        if(Get.arguments.length == 2) {
-          switch(spotifySearchType) {
-            case(SpotifySearchType.song):
-              itemlist =  Get.arguments[1];
-              break;
-            case(SpotifySearchType.playlist):
-              await initSearchParam(Get.arguments[1]);
-              break;
+        if(Get.arguments[0] is SpotifySearchType) {
+          spotifySearchType = Get.arguments[0];
+          if(Get.arguments.length == 2) {
+            switch(spotifySearchType) {
+              case(SpotifySearchType.song):
+                itemlist =  Get.arguments[1];
+                break;
+              case(SpotifySearchType.playlist):
+                await initSearchParam(Get.arguments[1]);
+                break;
+            }
           }
         }
       }

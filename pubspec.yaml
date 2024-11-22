@@ -25,6 +25,8 @@ dependencies:
     git:
       url: https://github.com/Cyberneom/neom_audio_player.git
 
+  spotify_sdk: ^3.0.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
