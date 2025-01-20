@@ -127,28 +127,29 @@ class ItemlistController extends GetxController implements ItemlistService {
   @override
   void onReady() async {
     super.onReady();
-    try {
-      if(AppFlavour.appInUse == AppInUse.g && !Platform.isIOS) {
-        getSpotifyToken();
-        if (userController.user.spotifyToken.isNotEmpty
-            && userController.profile.lastSpotifySync < DateTime
-                .now().subtract(const Duration(days: 30))
-                .millisecondsSinceEpoch
-        ) {
-          AppUtilities.logger.d("Spotify Last Sync was more than 30 days");
-          outOfSync = true;
-        } else {
-          AppUtilities.logger.i("Spotify Last Sync in scope");
-        }
-      }
-    } catch (e) {
-      AppUtilities.logger.e(e.toString());
-      AppUtilities.showSnackBar(
-        title: MessageTranslationConstants.spotifySynchronization.tr,
-        message: e.toString(),
-      );
-      spotifyAvailable = false;
-    }
+    ///NOT USEFUL RIGHT NOW - IS IT USEFUL TO GET SONGS FROM SPOTIFY???
+    // try {
+    //   if(AppFlavour.appInUse == AppInUse.g && !Platform.isIOS) {
+    //     getSpotifyToken();
+    //     if (userController.user.spotifyToken.isNotEmpty
+    //         && userController.profile.lastSpotifySync < DateTime
+    //             .now().subtract(const Duration(days: 30))
+    //             .millisecondsSinceEpoch
+    //     ) {
+    //       AppUtilities.logger.d("Spotify Last Sync was more than 30 days");
+    //       outOfSync = true;
+    //     } else {
+    //       AppUtilities.logger.i("Spotify Last Sync in scope");
+    //     }
+    //   }
+    // } catch (e) {
+    //   AppUtilities.logger.e(e.toString());
+    //   AppUtilities.showSnackBar(
+    //     title: MessageTranslationConstants.spotifySynchronization.tr,
+    //     message: e.toString(),
+    //   );
+    //   spotifyAvailable = false;
+    // }
     isLoading.value = false;
     update([AppPageIdConstants.itemlist]);
   }

@@ -111,8 +111,7 @@ class ItemlistPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                AppFlavour.appInUse != AppInUse.c
-                    && (AppFlavour.appInUse == AppInUse.e || (Platform.isAndroid || kDebugMode)) ?
+                AppFlavour.appInUse == AppInUse.e ?
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [

@@ -159,9 +159,9 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
           switch(AppFlavour.appInUse){
             case AppInUse.g:
-              Map<String, AppMediaItem> spotifySongs = await SpotifySearch.searchSongs(searchParam.value);
-
-              appMediaItems.addAll(spotifySongs);
+              ///VERIFY IF IS A GOOD STRATEGY TO USE SEARCH ON SPOTIFY OR IF ITS JUST NOISE
+              // Map<String, AppMediaItem> spotifySongs = await SpotifySearch.searchSongs(searchParam.value);
+              // appMediaItems.addAll(spotifySongs);
               break;
             case AppInUse.e:
               List<GoogleBook> googleBooks = await GoogleBooksApi.searchBooks(searchParam.value);

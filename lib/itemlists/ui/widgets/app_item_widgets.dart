@@ -187,13 +187,6 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
         }
       } else {
         NeomPlayerInvoker.updateNowPlaying([MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem)], 0);
-
-        ///DEPRECATED
-        // if(Get.isRegistered<MiniPlayerController>()) {
-        //   Get.find<MiniPlayerController>().setMediaItem(MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem));
-        // } else {
-        //   Get.put(MiniPlayerController()).setMediaItem(MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem));
-        // }
       }
     },
   );
