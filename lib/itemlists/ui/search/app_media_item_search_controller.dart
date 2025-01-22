@@ -464,7 +464,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
     bool itemAlreadyInList = false;
 
     itemlists.forEach((key, iList) {
-      for (var item in iList.appMediaItems!) {
+      for (var item in iList.appMediaItems ?? []) {
         if (item.id == appMediaItem.id) {
           itemAlreadyInList = true;
           appMediaItem.state = item.state;

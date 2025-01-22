@@ -115,7 +115,8 @@ class ItemlistPage extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    AppFlavour.appInUse == AppInUse.e || _.outOfSync
+                    AppFlavour.appInUse == AppInUse.e
+                    ///DEPRECATED || _.outOfSync
                         ? SizedBox(
                       child: DefaultTextStyle(
                         style: const TextStyle(
@@ -125,15 +126,20 @@ class ItemlistPage extends StatelessWidget {
                           repeatForever: true,
                           animatedTexts: [
                             FlickerAnimatedText(
-                                AppFlavour.appInUse == AppInUse.g ?
-                                AppTranslationConstants.synchronizeSpotifyPlaylists.tr
-                                : AppTranslationConstants.suggestedReading.tr),
+                                AppTranslationConstants.suggestedReading.tr)
+                                ///DEPRECATED
+                                // AppFlavour.appInUse == AppInUse.g ?
+                                // AppTranslationConstants.synchronizeSpotifyPlaylists.tr
+                                // : AppTranslationConstants.suggestedReading.tr),
                           ],
                           onTap: () {
-                            AppFlavour.appInUse == AppInUse.g
-                                ? _.synchronizeSpotifyPlaylists()
-                                : Get.toNamed(AppRouteConstants.pdfViewer,
+                            Get.toNamed(AppRouteConstants.pdfViewer,
                                 arguments: [Get.find<LoginController>().appInfo.value.suggestedUrl, 0, 150]);
+                            ///DEPRECATED
+                            // AppFlavour.appInUse == AppInUse.g
+                            //     ? _.synchronizeSpotifyPlaylists()
+                            //     : Get.toNamed(AppRouteConstants.pdfViewer,
+                            //     arguments: [Get.find<LoginController>().appInfo.value.suggestedUrl, 0, 150]);
                             },
                         ),
                       ),
@@ -144,9 +150,10 @@ class ItemlistPage extends StatelessWidget {
                       elevation: AppTheme.elevationFAB,
                       child: Icon(AppFlavour.getSyncIcon()),
                       onPressed: () => {
-                        AppFlavour.appInUse == AppInUse.g
-                        ? _.synchronizeSpotifyPlaylists()
-                        : _.gotoSuggestedItem()
+                        _.gotoSuggestedItem()
+                        ///DEPRECATED
+                        // AppFlavour.appInUse == AppInUse.g
+                        // ? _.synchronizeSpotifyPlaylists() : _.gotoSuggestedItem()
                       },
                     ),
                   ],

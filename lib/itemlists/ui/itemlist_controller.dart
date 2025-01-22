@@ -59,7 +59,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   final RxBool isPublicNewItemlist = true.obs;
   final RxString errorMsg = "".obs;
 
-  bool outOfSync = false;
+  ///DEPRECATED bool outOfSync = false;
   bool spotifyAvailable = true;
 
   RxString itemName = "".obs;
@@ -552,36 +552,37 @@ class ItemlistController extends GetxController implements ItemlistService {
     update([AppPageIdConstants.itemlist]);
   }
 
-  @override
-  Future<void> synchronizeSpotifyPlaylists() async {
-    AppUtilities.logger.i("Getting Spotify Information with token: ${userController.user.spotifyToken}");
-
-    isLoading.value = true;
-    update([AppPageIdConstants.itemlist]);
-
-    spotify.User spotifyUser = await SpotifyApiCalls.getUserProfile(spotifyToken: userController.user.spotifyToken);
-
-    try {
-      if(spotifyUser.id?.isNotEmpty ?? false) {
-        spotifyPlaylistSimples.value =  await SpotifyApiCalls.getUserPlaylistSimples(spotifyToken: userController.user.spotifyToken, userId: spotifyUser.id!);
-
-        for (var playlist in spotifyPlaylistSimples.value) {
-          if(playlist.id?.isNotEmpty ?? false) {
-            spotifyItemlists[playlist.id!] = Itemlist.mapPlaylistSimpleToItemlist(playlist);
-          }
-        }
-
-        Get.to(() => const SpotifyPlaylistsPage(), transition: Transition.rightToLeft);
-        ///DEPRECATED
-        // Get.toNamed(AppRouteConstants.spotifyPlaylists);
-      }
-    } catch(e) {
-      AppUtilities.logger.e(e.toString());
-    }
-
-    isLoading.value = false;
-    update([AppPageIdConstants.itemlist]);
-  }
+  ///DEPRECATED
+  // @override
+  // Future<void> synchronizeSpotifyPlaylists() async {
+  //   AppUtilities.logger.i("Getting Spotify Information with token: ${userController.user.spotifyToken}");
+  //
+  //   isLoading.value = true;
+  //   update([AppPageIdConstants.itemlist]);
+  //
+  //   spotify.User spotifyUser = await SpotifyApiCalls.getUserProfile(spotifyToken: userController.user.spotifyToken);
+  //
+  //   try {
+  //     if(spotifyUser.id?.isNotEmpty ?? false) {
+  //       spotifyPlaylistSimples.value =  await SpotifyApiCalls.getUserPlaylistSimples(spotifyToken: userController.user.spotifyToken, userId: spotifyUser.id!);
+  //
+  //       for (var playlist in spotifyPlaylistSimples.value) {
+  //         if(playlist.id?.isNotEmpty ?? false) {
+  //           spotifyItemlists[playlist.id!] = Itemlist.mapPlaylistSimpleToItemlist(playlist);
+  //         }
+  //       }
+  //
+  //       Get.to(() => const SpotifyPlaylistsPage(), transition: Transition.rightToLeft);
+  //       ///DEPRECATED
+  //       // Get.toNamed(AppRouteConstants.spotifyPlaylists);
+  //     }
+  //   } catch(e) {
+  //     AppUtilities.logger.e(e.toString());
+  //   }
+  //
+  //   isLoading.value = false;
+  //   update([AppPageIdConstants.itemlist]);
+  // }
 
   @override
   void handlePlaylistList(Itemlist spotifyItemlist) {
