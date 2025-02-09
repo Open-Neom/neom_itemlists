@@ -114,7 +114,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
           updatedItem.state = _prevItemState;
           userController.profile.itemlists![itemlist.id]!
               .appMediaItems!.remove(updatedItem);
-          if(await ItemlistFirestore().deleteItem(itemlistId: itemlist.id, appMediaItemId: updatedItem.id)){
+          if(await ItemlistFirestore().deleteItem(itemlistId: itemlist.id, appMediaItem: updatedItem)){
             AppUtilities.logger.d("ItemlistItem was updated and old version deleted.");
           } else {
             AppUtilities.logger.d("ItemlistItem was updated but old version remains.");
@@ -193,7 +193,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
       if(releaseItem != null && await ItemlistFirestore().deleteReleaseItem(itemlist.id, releaseItem)) {
         AppUtilities.logger.d("ReleaseItem was deleted from itemlist: ${itemlist.id}");
         wasRemoved = true;
-      } else if(await ItemlistFirestore().deleteItem(itemlistId: itemlist.id, appMediaItemId: appMediaItem.id
+      } else if(await ItemlistFirestore().deleteItem(itemlistId: itemlist.id, appMediaItem: appMediaItem
 
       )) {
         AppUtilities.logger.d("AppMediaItem was deleted from itemlist: ${itemlist.id}");
@@ -275,7 +275,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
 
         break;
       case AppInUse.e:
-        Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
+        Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
         break;
     }
 

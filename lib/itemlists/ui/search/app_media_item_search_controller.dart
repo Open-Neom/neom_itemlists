@@ -390,9 +390,10 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
   }
 
 
-  Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0}) async {
+  Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0, bool goHome = true}) async {
     AppUtilities.logger.t("addItemlistItem ${appMediaItem.id}");
 
+    
     if(existsInItemlist.value) {
       AppUtilities.showSnackBar(message: '"${appMediaItem.name}" ${AppTranslationConstants.isAlreadyInPlaylist.tr} ${itemlist.name}');
     } else if(!isButtonDisabled.value) {
@@ -439,13 +440,18 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
             Get.find<EventDetailsController>().addToMatchedItems(appMediaItem);
             Navigator.pop(context);
           } else {
-            Get.offAllNamed(AppRouteConstants.home);
-            // Get.toNamed(AppRouteConstants.listItems);
+            if(goHome) {
+              Get.offAllNamed(AppRouteConstants.home);
+            } else {
+              Navigator.pop(context);
+            }
           }
         } else {
-          Get.offAllNamed(AppRouteConstants.home);
-          // Get.toNamed(AppRouteConstants.bandsRoom);
-          // Get.toNamed(AppRouteConstants.listItems);
+          if(goHome) {
+            Get.offAllNamed(AppRouteConstants.home);
+          } else {
+            Navigator.pop(context);
+          }
         }
 
         AppUtilities.showSnackBar(

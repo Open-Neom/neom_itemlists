@@ -3,7 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
-import 'package:neom_audio_player/data/implementations/app_hive_controller.dart';
+import 'package:neom_audio_player/data/implementations/player_hive_controller.dart';
 import 'package:neom_audio_player/neom_player_invoker.dart';
 import 'package:neom_audio_player/ui/player/media_player_controller.dart';
 import 'package:neom_audio_player/ui/widgets/download_button.dart';
@@ -12,6 +12,7 @@ import 'package:neom_audio_player/ui/widgets/like_button.dart';
 import 'package:neom_audio_player/ui/widgets/song_tile_trailing_menu.dart';
 import 'package:neom_audio_player/utils/helpers/media_item_mapper.dart';
 import 'package:neom_commons/core/app_flavour.dart';
+import 'package:neom_commons/core/data/implementations/app_hive_controller.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
@@ -19,6 +20,7 @@ import 'package:neom_commons/core/ui/widgets/neom_image_card.dart';
 import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
+import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_assets.dart';
 import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
@@ -68,7 +70,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
               onPressed: () {
-                Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
+                Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
               }
           ),
           onTap: () => AppFlavour.appInUse == AppInUse.c || !_.isFixed ? _.getItemlistItemDetails(appMediaItem) : {},
@@ -151,7 +153,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       style: const TextStyle(fontWeight: FontWeight.w500,),
       overflow: TextOverflow.ellipsis,
     ),
-    subtitle: Text(appMediaItem.artist,
+    subtitle: Text(AppUtilities.getArtistName(appMediaItem.artist),
       overflow: TextOverflow.ellipsis,
     ),
     isThreeLine: false,
@@ -174,20 +176,23 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
     ),
     onLongPress: () {
       CoreUtilities.copyToClipboard(text: appMediaItem.permaUrl,);
+      Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
     },
     onTap: () {
-      AppHiveController().addQuery(appMediaItem.name);
+      PlayerHiveController().addQuery(appMediaItem.name);
 
       if(appMediaItem.mediaSource == AppMediaSource.internal || appMediaItem.mediaSource == AppMediaSource.offline) {
         if (Get.isRegistered<MediaPlayerController>()) {
-          Get.delete<MediaPlayerController>();
-          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+          Get.find<MediaPlayerController>().setMediaItem(MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem));
         } else {
-          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+          Get.put(MediaPlayerController()).setMediaItem(MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem));
         }
+        NeomPlayerInvoker.updateNowPlaying([MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem)], 0);
       } else {
         NeomPlayerInvoker.updateNowPlaying([MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem)], 0);
       }
+
+      // Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
     },
   );
 }
@@ -213,7 +218,7 @@ ListTile createMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
     },
     onTap: () {
       AppHiveController().addQuery(appMediaItem.name);
-      Get.toNamed(AppFlavour.getItemDetailsRoute(), arguments: [appMediaItem]);
+      Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
     },
   );
 }

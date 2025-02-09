@@ -1,4 +1,3 @@
-import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -27,7 +26,6 @@ import 'package:spotify/spotify.dart' as spotify;
 
 import '../data/api_services/spotify/spotify_api_calls.dart';
 import 'app_media_item/app_media_item_controller.dart';
-import 'sync/spotify_playlist_page.dart';
 
 class ItemlistController extends GetxController implements ItemlistService {
 

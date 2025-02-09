@@ -194,10 +194,7 @@ class AppMediaItemDetailsController extends GetxController {
       }
 
       try {
-        if(!await AppMediaItemFirestore().exists(appMediaItem.id)) {
-          await AppMediaItemFirestore().insert(appMediaItem);
-        }
-
+        AppMediaItemFirestore().existsOrInsert(appMediaItem);
         if(!existsInItemlist.value) {
           appMediaItem.state = appItemState.value;
 

@@ -26,7 +26,7 @@ class AppBarItemSearch extends StatelessWidget implements PreferredSizeWidget {
         decoration: InputDecoration(
           suffixIcon: const Icon(CupertinoIcons.search),
           contentPadding: const EdgeInsets.all(10),
-          hintText: AppTranslationConstants.searchOnGigmeout.tr,
+          hintText: AppTranslationConstants.searchInApp.tr,
           border: OutlineInputBorder(
             borderRadius: const BorderRadius.all(
               Radius.circular(10),
