@@ -139,7 +139,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                             title: AppTranslationConstants.appItemPrefs.tr,
                             content: Column(
                               children: <Widget>[
-                                _.userController.profile.type == ProfileType.artist ?
+                                _.userController.profile.type == ProfileType.appArtist ?
                                 Obx(()=>
                                   DropdownButton<String>(
                                     items: AppItemState.values.map((AppItemState itemState) {
@@ -208,7 +208,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                     : Text(AppTranslationConstants.add.tr,
                                 )),
                                 onPressed: () async => {
-                                  _.userController.profile.type == ProfileType.artist ?
+                                  _.userController.profile.type == ProfileType.appArtist ?
                                   (_.appItemState > 0 ? await _.addItemlistItem(context, fanItemState: _.appItemState.value) :
                                     AppUtilities.showSnackBar(
                                       title: AppTranslationConstants.appItemPrefs.tr,

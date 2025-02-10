@@ -1,7 +1,6 @@
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:neom_audio_player/data/implementations/player_hive_controller.dart';
 import 'package:neom_audio_player/neom_player_invoker.dart';
@@ -22,7 +21,6 @@ import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_assets.dart';
-import 'package:neom_commons/core/utils/constants/app_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/core_utilities.dart';
@@ -53,7 +51,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                   width: AppTheme.fullWidth(context)*0.4,
                   child: Text(appMediaItem.name, maxLines: 5, overflow: TextOverflow.ellipsis,),
                 ),
-                (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.artist && !_.isFixed)) ?
+                (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.appArtist && !_.isFixed)) ?
                 RatingHeartBar(state: appMediaItem.state.toDouble()) : const SizedBox.shrink(),
               ]
           ),
@@ -175,7 +173,7 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
       ],
     ),
     onLongPress: () {
-      CoreUtilities.copyToClipboard(text: appMediaItem.permaUrl,);
+      // CoreUtilities.copyToClipboard(text: appMediaItem.permaUrl,);
       Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
     },
     onTap: () {
@@ -183,9 +181,9 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
 
       if(appMediaItem.mediaSource == AppMediaSource.internal || appMediaItem.mediaSource == AppMediaSource.offline) {
         if (Get.isRegistered<MediaPlayerController>()) {
-          Get.find<MediaPlayerController>().setMediaItem(MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem));
+          Get.find<MediaPlayerController>().setMediaItem(appItem: appMediaItem);
         } else {
-          Get.put(MediaPlayerController()).setMediaItem(MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem));
+          Get.put(MediaPlayerController()).setMediaItem(appItem: appMediaItem);
         }
         NeomPlayerInvoker.updateNowPlaying([MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem)], 0);
       } else {
@@ -223,71 +221,71 @@ ListTile createMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
   );
 }
 
-Widget buildSpotifySongList(BuildContext context, AppMediaItemSearchController _) {
-  return ListView.separated(
-    separatorBuilder: (context, index) => const Divider(),
-    itemCount: _.appMediaItems.length,
-    itemBuilder: (context, index) {
-      AppMediaItem song = _.appMediaItems.values.elementAt(index);
-      return ListTile(
-        leading: HandledCachedNetworkImage(song.imgUrl),
-        title: Text(song.name.isEmpty ? ""
-            : song.name.length > AppConstants.maxAppItemNameLength
-            ? "${song.name.substring(0,AppConstants.maxAppItemNameLength)}..."
-            : song.name),
-        subtitle: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(song.artist.isEmpty ? ""
-                  : song.artist.length > AppConstants.maxArtistNameLength
-                  ? "${song.artist.substring(0,AppConstants.maxArtistNameLength)}..."
-                  : song.artist),
-              AppTheme.widthSpace5,
-              Row(
-                children: [
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: Icon(song.state > 0 ? FontAwesomeIcons.solidHeart
-                        : FontAwesomeIcons.heart,
-                        size:15),
-                    onPressed: () => _.handleItemlistItems(song, AppItemState.heardIt),
-                  ),
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: Icon(song.state > 1 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                        size:15),
-                    onPressed: () => _.handleItemlistItems(song, AppItemState.learningIt),
-                  ),
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: Icon(song.state > 2 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                        size:15),
-                    onPressed: () => _.handleItemlistItems(song, AppItemState.needToPractice),
-                  ),
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: Icon(song.state > 3 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                        size:15),
-                    onPressed: () => _.handleItemlistItems(song, AppItemState.readyToPlay),
-                  ),
-                  IconButton(
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(),
-                    icon: Icon(song.state > 4 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
-                        size:15),
-                    onPressed: () => _.handleItemlistItems(song, AppItemState.knowByHeart),
-                  ),
-                ],
-              )
-            ]),
-        tileColor: _.addedItems.contains(song) ? AppColor.getMain() : Colors.transparent,
-        onTap: () => _.handleItemlistItems(song, AppItemState.heardIt),
-        onLongPress: () => _.getAppMediaItemDetails(song),
-      );
-    },
-  );
-}
+// Widget buildSpotifySongList(BuildContext context, AppMediaItemSearchController _) {
+//   return ListView.separated(
+//     separatorBuilder: (context, index) => const Divider(),
+//     itemCount: _.appMediaItems.length,
+//     itemBuilder: (context, index) {
+//       AppMediaItem song = _.appMediaItems.values.elementAt(index);
+//       return ListTile(
+//         leading: HandledCachedNetworkImage(song.imgUrl),
+//         title: Text(song.name.isEmpty ? ""
+//             : song.name.length > AppConstants.maxAppItemNameLength
+//             ? "${song.name.substring(0,AppConstants.maxAppItemNameLength)}..."
+//             : song.name),
+//         subtitle: Row(
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Text(song.artist.isEmpty ? ""
+//                   : song.artist.length > AppConstants.maxArtistNameLength
+//                   ? "${song.artist.substring(0,AppConstants.maxArtistNameLength)}..."
+//                   : song.artist),
+//               AppTheme.widthSpace5,
+//               Row(
+//                 children: [
+//                   IconButton(
+//                     padding: EdgeInsets.zero,
+//                     constraints: const BoxConstraints(),
+//                     icon: Icon(song.state > 0 ? FontAwesomeIcons.solidHeart
+//                         : FontAwesomeIcons.heart,
+//                         size:15),
+//                     onPressed: () => _.handleItemlistItems(song, AppItemState.heardIt),
+//                   ),
+//                   IconButton(
+//                     padding: EdgeInsets.zero,
+//                     constraints: const BoxConstraints(),
+//                     icon: Icon(song.state > 1 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+//                         size:15),
+//                     onPressed: () => _.handleItemlistItems(song, AppItemState.learningIt),
+//                   ),
+//                   IconButton(
+//                     padding: EdgeInsets.zero,
+//                     constraints: const BoxConstraints(),
+//                     icon: Icon(song.state > 2 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+//                         size:15),
+//                     onPressed: () => _.handleItemlistItems(song, AppItemState.needToPractice),
+//                   ),
+//                   IconButton(
+//                     padding: EdgeInsets.zero,
+//                     constraints: const BoxConstraints(),
+//                     icon: Icon(song.state > 3 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+//                         size:15),
+//                     onPressed: () => _.handleItemlistItems(song, AppItemState.readyToPlay),
+//                   ),
+//                   IconButton(
+//                     padding: EdgeInsets.zero,
+//                     constraints: const BoxConstraints(),
+//                     icon: Icon(song.state > 4 ? FontAwesomeIcons.solidHeart : FontAwesomeIcons.heart,
+//                         size:15),
+//                     onPressed: () => _.handleItemlistItems(song, AppItemState.knowByHeart),
+//                   ),
+//                 ],
+//               )
+//             ]),
+//         tileColor: _.addedItems.contains(song) ? AppColor.getMain() : Colors.transparent,
+//         onTap: () => _.handleItemlistItems(song, AppItemState.heardIt),
+//         onLongPress: () => _.getAppMediaItemDetails(song),
+//       );
+//     },
+//   );
+// }

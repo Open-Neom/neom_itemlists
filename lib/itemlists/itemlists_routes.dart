@@ -7,6 +7,7 @@ import 'ui/itemlist_items_page.dart';
 import 'ui/itemlist_page.dart';
 import 'ui/search/app_media_item_search_page.dart';
 import 'ui/search/playlist_name_desc_page.dart';
+import 'ui/widgets/readlist_page.dart';
 
 class ItemlistsRoutes {
 
@@ -14,6 +15,10 @@ class ItemlistsRoutes {
     GetPage(
       name: AppRouteConstants.lists,
       page: () => const ItemlistPage(),
+    ),
+    GetPage(
+      name: AppRouteConstants.readlists,
+      page: () => const ReadlistPage(),
     ),
     GetPage(
       name: AppRouteConstants.itemSearch,

@@ -15,6 +15,7 @@ import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/app_media_source.dart';
+import 'package:neom_commons/core/utils/enums/itemlist_type.dart';
 import 'package:neom_commons/core/utils/enums/owner_type.dart';
 import 'package:neom_commons/core/utils/enums/push_notification_type.dart';
 
@@ -275,7 +276,12 @@ class AppMediaItemController extends GetxController implements AppItemService {
 
         break;
       case AppInUse.e:
-        Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
+        if(itemlist.type == ItemlistType.readlist) {
+          Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
+        } else {
+          Get.toNamed(AppFlavour.getSecondaryItemDetailsRoute(), arguments: [appMediaItem]);
+        }
+
         break;
     }
 

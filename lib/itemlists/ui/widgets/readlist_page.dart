@@ -2,24 +2,20 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/auth/ui/login/login_controller.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/utils/app_color.dart';
 import 'package:neom_commons/core/utils/app_theme.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/itemlist_type.dart';
 import 'package:neom_commons/core/utils/enums/owner_type.dart';
-import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-import 'itemlist_controller.dart';
-import 'widgets/itemlist_widgets.dart';
+import '../itemlist_controller.dart';
+import 'itemlist_widgets.dart';
 
-class ItemlistPage extends StatelessWidget {
-  const ItemlistPage({super.key});
+class ReadlistPage extends StatelessWidget {
+  const ReadlistPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,54 +24,6 @@ class ItemlistPage extends StatelessWidget {
         init: ItemlistController(),
         builder: (_) => Scaffold(
           backgroundColor: AppColor.main50,
-          appBar: AppBar(
-            actions: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () async {
-                    if(_.itemlists.isNotEmpty) {
-                      Get.toNamed(AppRouteConstants.itemSearch,
-                          arguments: [MediaSearchType.song]
-                      );
-                    } else {
-                      AppUtilities.showSnackBar(
-                          title: AppTranslationConstants.noItemlistsMsg,
-                          message: AppTranslationConstants.noItemlistsMsg2
-                      );
-                    }
-                  },
-                ),
-              ),
-            ],
-            title: Text(AppTranslationConstants.myItemlists.tr,
-              style: TextStyle(
-                fontSize: 18,
-                color: Theme.of(context).textTheme.bodyLarge!.color,
-              ),
-            ),
-            centerTitle: true,
-            backgroundColor: AppColor.main75,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            leading: Padding(
-              padding: EdgeInsets.zero,
-              child: Transform.rotate(
-                angle: 22 / 7 * 2,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.horizontal_split_rounded,
-                  ),
-                  // color: Theme.of(context).iconTheme.color,
-                  onPressed: () {
-                    Scaffold.of(context).openDrawer();
-                  },
-                  tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-                ),
-              ),
-            ),
-          ),
           body: Container(
             decoration: AppTheme.appBoxDecoration,
             padding: EdgeInsets.only(bottom: _.ownerType == OwnerType.profile ? 80 : 0),
@@ -83,7 +31,7 @@ class ItemlistPage extends StatelessWidget {
             : Column(
               children: [
                 ListTile(
-                  title: Text(AppTranslationConstants.createItemlist.tr),
+                  title: Text(AppTranslationConstants.createReadlist.tr),
                   leading: SizedBox.square(
                     dimension: 40,
                     child: Center(
@@ -109,13 +57,10 @@ class ItemlistPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                AppFlavour.appInUse == AppInUse.e ?
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    AppFlavour.appInUse == AppInUse.e
-                    ///DEPRECATED || _.outOfSync
-                        ? SizedBox(
+                    SizedBox(
                       child: DefaultTextStyle(
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
@@ -123,40 +68,25 @@ class ItemlistPage extends StatelessWidget {
                         child: AnimatedTextKit(
                           repeatForever: true,
                           animatedTexts: [
-                            FlickerAnimatedText(
-                                AppTranslationConstants.suggestedReading.tr)
-                                ///DEPRECATED
-                                // AppFlavour.appInUse == AppInUse.g ?
-                                // AppTranslationConstants.synchronizeSpotifyPlaylists.tr
-                                // : AppTranslationConstants.suggestedReading.tr),
+                            FlickerAnimatedText(AppTranslationConstants.suggestedReading.tr)
                           ],
                           onTap: () {
-                            Get.toNamed(AppRouteConstants.pdfViewer,
-                                arguments: [Get.find<LoginController>().appInfo.value.suggestedUrl, 0, 150]);
-                            ///DEPRECATED
-                            // AppFlavour.appInUse == AppInUse.g
-                            //     ? _.synchronizeSpotifyPlaylists()
-                            //     : Get.toNamed(AppRouteConstants.pdfViewer,
-                            //     arguments: [Get.find<LoginController>().appInfo.value.suggestedUrl, 0, 150]);
-                            },
+                            _.gotoSuggestedItem();
+                          },
                         ),
                       ),
-                    ) : const SizedBox.shrink(),
+                    ),
                     const SizedBox(width: 5,),
                     FloatingActionButton(
-                      heroTag: AppPageIdConstants.spotifySync,
                       elevation: AppTheme.elevationFAB,
                       child: Icon(AppFlavour.getSyncIcon()),
                       onPressed: () => {
                         _.gotoSuggestedItem()
-                        ///DEPRECATED
-                        // AppFlavour.appInUse == AppInUse.g
-                        // ? _.synchronizeSpotifyPlaylists() : _.gotoSuggestedItem()
                       },
                     ),
+
                   ],
-                ) : const SizedBox.shrink(),
-                if(_.ownerType == OwnerType.profile && AppFlavour.appInUse == AppInUse.g) AppTheme.heightSpace75,
+                ),
               ]
           ),),
         )
@@ -220,7 +150,7 @@ class ItemlistPage extends StatelessWidget {
             height: 50,
             color: AppColor.bondiBlue75,
             onPressed: () async {
-              await _.createItemlist();
+              await _.createItemlist(type: ItemlistType.readlist);
               if(_.errorMsg.value.isEmpty) Navigator.pop(ctx);
             },
             child: Text(

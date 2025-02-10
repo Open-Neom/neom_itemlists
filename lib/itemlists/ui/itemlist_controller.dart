@@ -166,7 +166,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
 
   @override
-  Future<void> createItemlist() async {
+  Future<void> createItemlist({ItemlistType? type}) async {
     AppUtilities.logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
 
     try {
@@ -179,7 +179,7 @@ class ItemlistController extends GetxController implements ItemlistService {
           ownerId: ownerId,
           ownerName: ownerName,
           ownerType: ownerType,
-          type: itemlistType,
+          type: type ?? itemlistType,
           public: isPublicNewItemlist.value,
         );
 
@@ -249,7 +249,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   //   try {
   //     if(newItemlistNameController.text.isNotEmpty) {
   //       await Get.toNamed(AppRouteConstants.playlistSearch,
-  //           arguments: [SpotifySearchType.playlist, newItemlistNameController.text]
+  //           arguments: [MediaSearchType.playlist, newItemlistNameController.text]
   //       );
   //     } else {
   //       AppUtilities.showSnackBar(

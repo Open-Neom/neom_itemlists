@@ -38,7 +38,7 @@
 //           tooltip: AppTranslationConstants.addItem.tr,
 //           onPressed: ()=>{
 //             Get.toNamed(AppRouteConstants.playlistNameDesc,
-//                 arguments: [SpotifySearchType.song, _.itemlist])
+//                 arguments: [MediaSearchType.song, _.itemlist])
 //           },
 //           child: const Icon(Icons.navigate_next),
 //         ) : SizedBox.shrink(),

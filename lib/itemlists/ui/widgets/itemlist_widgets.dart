@@ -51,7 +51,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
               await _.gotoItemlistItems(itemlist);
             } else {
               Get.toNamed(AppRouteConstants.itemSearch,
-                  arguments: [SpotifySearchType.song, itemlist]
+                  arguments: [MediaSearchType.song, itemlist]
               );
             }
           },

@@ -19,6 +19,8 @@ import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
+import 'package:neom_commons/core/utils/enums/itemlist_type.dart';
+import 'package:neom_commons/core/utils/enums/media_item_type.dart';
 import 'package:neom_commons/core/utils/enums/owner_type.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
@@ -55,7 +57,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
   OwnerType ownerType = OwnerType.profile;
   Itemlist itemlist = Itemlist();
   AppMediaItem appMediaItem = AppMediaItem();
-  SpotifySearchType spotifySearchType = SpotifySearchType.song;
+  MediaSearchType searchType = MediaSearchType.song;
 
   @override
   void onInit() async {
@@ -73,20 +75,33 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
       }
 
       if(Get.arguments != null) {
-        if(Get.arguments[0] is SpotifySearchType) {
-          spotifySearchType = Get.arguments[0];
+        if(Get.arguments[0] is MediaSearchType) {
+          searchType = Get.arguments[0];
           if(Get.arguments.length == 2) {
-            switch(spotifySearchType) {
-              case(SpotifySearchType.song):
+            switch(searchType) {
+              case(MediaSearchType.song):
                 itemlist =  Get.arguments[1];
                 break;
-              case(SpotifySearchType.playlist):
+              case(MediaSearchType.playlist):
                 await initSearchParam(Get.arguments[1]);
+                break;
+              default:
                 break;
             }
           }
         }
       }
+
+      switch(itemlist.type) {
+        case ItemlistType.readlist:
+          searchType = MediaSearchType.book;
+        case ItemlistType.playlist:
+        case ItemlistType.podcast:
+          searchType = MediaSearchType.song;
+        default:
+          searchType = MediaSearchType.song;
+      }
+
     } catch (e) {
       AppUtilities.logger.e(e.toString());
     }
@@ -97,7 +112,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
   void onReady() async {
     super.onReady();
     isLoading.value = false;
-    update([AppPageIdConstants.spotifySearch]);
+    update([AppPageIdConstants.mediaItemSearch]);
   }
 
 
@@ -118,7 +133,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
       AppUtilities.logger.e(e.toString());
     }
 
-    update([AppPageIdConstants.spotifySearch]);
+    update([AppPageIdConstants.mediaItemSearch]);
   }
 
 
@@ -132,7 +147,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
     } catch (e) {
       AppUtilities.logger.e(e.toString());
     }
-    update([AppPageIdConstants.spotifySearch]);
+    update([AppPageIdConstants.mediaItemSearch]);
   }
 
 
@@ -143,18 +158,23 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
     AppUtilities.logger.d(searchParam);
     clear();
     try {
-      switch(spotifySearchType) {
-        case(SpotifySearchType.song):
+      switch(searchType) {
+        case(MediaSearchType.song):
 
-          if(appReleaseItems.isEmpty) {
-            appReleaseItems.value = await AppReleaseItemFirestore().retrieveAll();
+          if(AppFlavour.appInUse != AppInUse.e) {
+            if(appReleaseItems.isEmpty) {
+              appReleaseItems.value = await AppReleaseItemFirestore().retrieveAll();
+            }
+            for (var value in appReleaseItems.value.values) {
+              if(value.name.toLowerCase().contains(searchParam.value)
+                  || (value.ownerName.toLowerCase().contains(searchParam.value))) {
+                appMediaItems[value.id] = AppMediaItem.fromAppReleaseItem(value);
+              }
+            }
           }
 
-          for (var value in appReleaseItems.value.values) {
-            if(value.name.toLowerCase().contains(searchParam.value)
-                || (value.ownerName.toLowerCase().contains(searchParam.value))) {
-              appMediaItems[value.id] = AppMediaItem.fromAppReleaseItem(value);
-            }
+          if(appMediaItems.isEmpty) {
+            appMediaItems.value = await AppMediaItemFirestore().fetchAll(excludeTypes: [MediaItemType.pdf, MediaItemType.neomPreset]);
           }
 
           switch(AppFlavour.appInUse){
@@ -164,11 +184,6 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
               // appMediaItems.addAll(spotifySongs);
               break;
             case AppInUse.e:
-              List<GoogleBook> googleBooks = await GoogleBooksApi.searchBooks(searchParam.value);
-              for (var googleBook in googleBooks) {
-                AppMediaItem book = AppMediaItem.fromGoogleBook(googleBook);
-                appMediaItems[book.id] = book;
-              }
               break;
             case AppInUse.c:
               break;
@@ -176,7 +191,7 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
           AppUtilities.logger.d("${appMediaItems.length} appMediaItems retrieved");
           break;
-        case(SpotifySearchType.playlist):
+        case(MediaSearchType.playlist):
           itemlists.value = await SpotifySearch().searchPlaylists(searchParam.value);
 
           itemlists.value.forEach((playlistId, itemlist) async {
@@ -186,12 +201,32 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
           AppUtilities.logger.d("${itemlists.length} playlists retrieved");
           break;
+
+        case(MediaSearchType.book):
+          if(appReleaseItems.isEmpty) {
+            appReleaseItems.value = await AppReleaseItemFirestore().retrieveAll();
+          }
+          for (var value in appReleaseItems.value.values) {
+            if(value.name.toLowerCase().contains(searchParam.value)
+                || (value.ownerName.toLowerCase().contains(searchParam.value))) {
+              appMediaItems[value.id] = AppMediaItem.fromAppReleaseItem(value, itemType: MediaItemType.pdf);
+            }
+          }
+
+          List<GoogleBook> googleBooks = await GoogleBooksApi.searchBooks(searchParam.value);
+          for (var googleBook in googleBooks) {
+            AppMediaItem book = AppMediaItem.fromGoogleBook(googleBook);
+            appMediaItems[book.id] = book;
+          }
+          break;
+        default:
+          break;
       }
     } catch (e) {
       AppUtilities.logger.e(e.toString());
     }
 
-    update([AppPageIdConstants.spotifySearch]);
+    update([AppPageIdConstants.mediaItemSearch]);
   }
 
 
@@ -481,6 +516,16 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
 
     AppUtilities.logger.d("Item already exists in itemlists: $itemAlreadyInList");
     return itemAlreadyInList;
+  }
+
+  Future<Itemlist> createBasicItemlist() async {
+    Itemlist newItemlist = Itemlist.createBasic(AppTranslationConstants.myFirstPlaylist.tr, AppTranslationConstants.myFirstPlaylistDesc.tr,
+        profile.id, profile.name, ItemlistType.playlist);
+
+    String listId = await ItemlistFirestore().insert(newItemlist);
+    newItemlist.id = listId;
+
+    return newItemlist;
   }
 
 }
