@@ -143,7 +143,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
         if (itemlistOwner == OwnerType.profile) {
           if (await ProfileFirestore().addFavoriteItem(
               profileId, appMediaItem.id)) {
-            if (userController.profile.itemlists!.isNotEmpty) {
+            if (userController.profile.itemlists?.isNotEmpty ?? false) {
               AppUtilities.logger.d("Adding item to global itemlist from userController");
               userController.profile.itemlists![itemlistId]!.appMediaItems!.add(appMediaItem);
               //TODO Verify unmodifiable list

@@ -162,20 +162,19 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
         case(MediaSearchType.song):
 
           if(AppFlavour.appInUse != AppInUse.e) {
-            if(appReleaseItems.isEmpty) {
-              appReleaseItems.value = await AppReleaseItemFirestore().retrieveAll();
+
+            if(appMediaItems.isEmpty) {
+              appMediaItems.value.addAll(await AppMediaItemFirestore().fetchAll(excludeTypes: [MediaItemType.pdf, MediaItemType.neomPreset]));
             }
+            if(appReleaseItems.isEmpty) appReleaseItems.value = await AppReleaseItemFirestore().retrieveAll();
+
             for (var value in appReleaseItems.value.values) {
-              if(value.name.toLowerCase().contains(searchParam.value)
-                  || (value.ownerName.toLowerCase().contains(searchParam.value))) {
-                appMediaItems[value.id] = AppMediaItem.fromAppReleaseItem(value);
-              }
+              appMediaItems[value.id] = AppMediaItem.fromAppReleaseItem(value);
             }
           }
 
-          if(appMediaItems.isEmpty) {
-            appMediaItems.value = await AppMediaItemFirestore().fetchAll(excludeTypes: [MediaItemType.pdf, MediaItemType.neomPreset]);
-          }
+          appMediaItems.value.removeWhere((key, item) => !item.name.toLowerCase().contains(searchParam.value.toLowerCase())
+              && !item.artist.toLowerCase().contains(searchParam.value.toLowerCase()));
 
           switch(AppFlavour.appInUse){
             case AppInUse.g:

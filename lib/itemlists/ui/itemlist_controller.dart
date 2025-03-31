@@ -65,7 +65,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   int totalItemsToSync = 0;
 
   @override
-  void onInit() async {
+  void onInit() {
     super.onInit();
     AppUtilities.logger.t("onInit Itemlist Controller");
 
@@ -99,31 +99,29 @@ class ItemlistController extends GetxController implements ItemlistService {
         itemlists.value = Map.from(band.itemlists ?? {});
       }
 
-      if(itemlists.isEmpty) {
-        itemlists.value = await ItemlistFirestore().getByOwnerId(ownerId, ownerType: ownerType,
-            itemlistType: AppFlavour.appInUse == AppInUse.e ? ItemlistType.readlist : null
-        );
-      } else {
-        if(itemlistType == ItemlistType.readlist) {
-          itemlists.removeWhere((id, itemlist) {
-            return AppFlavour.appInUse == AppInUse.e &&
-                (itemlist.type != ItemlistType.readlist
-                    && itemlist.type != ItemlistType.publication);
-          });
-        } else {
-          itemlists.removeWhere((id,list) => list.type == ItemlistType.readlist || list.type == ItemlistType.publication);
-        }
-
-
-      }
+      setItemlists();
     } catch (e) {
       AppUtilities.logger.e(e.toString());
     }
 
   }
 
+  Future<void> setItemlists() async {
+    if(itemlists.isEmpty) {
+      itemlists.value = await ItemlistFirestore().getByOwnerId(ownerId, ownerType: ownerType,
+          itemlistType: itemlistType
+      );
+    } else {
+      itemlists.removeWhere((id, itemlist) {
+        return itemlist.type != itemlistType;
+      });
+    }
+
+    update([AppPageIdConstants.itemlist]);
+  }
+
   @override
-  void onReady() async {
+  void onReady() {
     super.onReady();
     ///NOT USEFUL RIGHT NOW - IS IT USEFUL TO GET SONGS FROM SPOTIFY???
     // try {
@@ -149,7 +147,6 @@ class ItemlistController extends GetxController implements ItemlistService {
     //   spotifyAvailable = false;
     // }
     isLoading.value = false;
-    update([AppPageIdConstants.itemlist]);
   }
 
 
@@ -171,7 +168,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
     try {
       errorMsg.value = '';
-      if((isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty && newItemlistDescController.text.isNotEmpty)
+      if((isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty)
           || (!isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty)) {
         Itemlist newItemlist = Itemlist(
           name: newItemlistNameController.text,

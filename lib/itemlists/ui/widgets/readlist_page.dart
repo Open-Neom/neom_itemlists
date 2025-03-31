@@ -116,7 +116,7 @@ class ReadlistPage extends StatelessWidget {
                 minLines: 1,
                 maxLines: 5,
                 decoration: InputDecoration(
-                  labelText: AppTranslationConstants.description.tr,
+                  labelText: '${AppTranslationConstants.description.tr} (${AppTranslationConstants.optional})',
                 ),
               ),
               AppTheme.heightSpace5,
