@@ -1,7 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
@@ -122,6 +121,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           ),
           )) ?? false;
 
+          ///DEPRECATED
           // Alert(
           //     context: context,
           //     title: AppTranslationConstants.itemlistName.tr,
@@ -195,90 +195,5 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
         },
       );
     },
-  );
-}
-
-Widget buildSyncPlaylistList(BuildContext context, ItemlistController _) {
-  return ListView.separated(
-    separatorBuilder: (context, index) => const Divider(),
-    itemCount: _.spotifyItemlists.length,
-    itemBuilder: (context, index) {
-      Itemlist  spotifyItemlist = _.spotifyItemlists.values.elementAt(index);
-      return ListTile(
-          leading: HandledCachedNetworkImage(
-            spotifyItemlist.imgUrl.isNotEmpty ? spotifyItemlist.imgUrl : AppFlavour.getNoImageUrl(),
-          ),
-          title: Text((spotifyItemlist.name.isEmpty) ? ""
-              : spotifyItemlist.name.length > AppConstants.maxAppItemNameLength
-              ? "${spotifyItemlist.name.substring(0,AppConstants.maxAppItemNameLength)}..."
-              : spotifyItemlist.name),
-          subtitle: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text((spotifyItemlist.description.isEmpty) ? ""
-                      : spotifyItemlist.description.length > AppConstants.maxArtistNameLength
-                      ? "${spotifyItemlist.description.substring(0,AppConstants.maxArtistNameLength)}..."
-                      : spotifyItemlist.description),
-                ),
-                AppTheme.widthSpace5,
-              ]),
-          trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Chip(
-                  backgroundColor: AppColor.main50,
-                  avatar: CircleAvatar(
-                    backgroundColor: AppColor.white80,
-                    child: Obx(()=>_.isLoading.value && _.currentItemlist.href == spotifyItemlist.href
-                        ? const Center(child: CircularProgressIndicator())
-                        : Text(("${(spotifyItemlist.appMediaItems?.isEmpty ?? true)
-                        ? _.spotifyPlaylistSimples.value.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total
-                        : spotifyItemlist.appMediaItems?.length ?? 0
-                    }")
-                    ),
-                    ),
-                  ),
-                  label: Icon(Icons.music_note, color: AppColor.white80),
-                  labelPadding: const EdgeInsets.all(5),
-                ),
-              ]
-          ),
-          tileColor: _.addedItemlists.contains(spotifyItemlist) ? AppColor.getMain() : Colors.transparent,
-          onTap: () => {
-            _.handlePlaylistList(spotifyItemlist),
-          },
-          onLongPress: () => {
-            _.gotoPlaylistSongs(spotifyItemlist)
-          },
-      );
-    },
-  );
-}
-
-Widget buildSyncPlaylistsButton(BuildContext context, ItemlistController _) {
-  return Center(
-    child: SizedBox(
-      width: AppTheme.fullWidth(context) * 0.5,
-      height: AppTheme.fullHeight(context) * 0.06,
-      child: TextButton(
-        style: TextButton.styleFrom(
-          backgroundColor: AppColor.bondiBlue,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
-        ),
-        onPressed: () async {
-          if(!_.isButtonDisabled.value) await _.synchronizeItemlists();
-        },
-        child: Obx(()=>_.isLoading.value ? const Center(child: CircularProgressIndicator())
-            : Text(AppTranslationConstants.synchronizePlaylists.tr,
-          style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 15
-          ),
-        ),
-        ),
-      ),
-    ),
   );
 }

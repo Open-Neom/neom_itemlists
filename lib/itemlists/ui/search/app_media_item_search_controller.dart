@@ -27,7 +27,6 @@ import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import 'package:neom_events/events/ui/event_details_controller.dart';
 import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
 
-import '../../data/api_services/spotify/spotify_search.dart';
 import '../../domain/use_cases/app_media_item_search_search_service.dart';
 import '../app_media_item/app_media_item_controller.dart';
 
@@ -191,13 +190,8 @@ class AppMediaItemSearchController extends GetxController implements AppMediaIte
           AppUtilities.logger.d("${appMediaItems.length} appMediaItems retrieved");
           break;
         case(MediaSearchType.playlist):
-          itemlists.value = await SpotifySearch().searchPlaylists(searchParam.value);
-
-          itemlists.value.forEach((playlistId, itemlist) async {
-            itemlist.appMediaItems = await SpotifySearch().loadSongsFromPlaylist(playlistId);
-            itemlists[playlistId] = itemlist;
-          });
-
+          ///NOT IN USE
+          // itemlists.value = await NeomSpotifyController().searchPlaylists(searchParam.value);
           AppUtilities.logger.d("${itemlists.length} playlists retrieved");
           break;
 

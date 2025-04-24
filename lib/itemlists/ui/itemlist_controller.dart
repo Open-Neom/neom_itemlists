@@ -3,12 +3,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/auth/ui/login/login_controller.dart';
 import 'package:neom_commons/core/app_flavour.dart';
-import 'package:neom_commons/core/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
-import 'package:neom_commons/core/data/firestore/user_firestore.dart';
 import 'package:neom_commons/core/data/implementations/user_controller.dart';
-import 'package:neom_commons/core/domain/model/app_media_item.dart';
 import 'package:neom_commons/core/domain/model/app_profile.dart';
 import 'package:neom_commons/core/domain/model/app_release_item.dart';
 import 'package:neom_commons/core/domain/model/band.dart';
@@ -22,9 +19,7 @@ import 'package:neom_commons/core/utils/constants/message_translation_constants.
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/itemlist_type.dart';
 import 'package:neom_commons/core/utils/enums/owner_type.dart';
-import 'package:spotify/spotify.dart' as spotify;
 
-import '../data/api_services/spotify/spotify_api_calls.dart';
 import 'app_media_item/app_media_item_controller.dart';
 
 class ItemlistController extends GetxController implements ItemlistService {
@@ -38,9 +33,6 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   final RxMap<String, Itemlist> itemlists = <String, Itemlist>{}.obs;
   final RxList<Itemlist> addedItemlists = <Itemlist>[].obs;
-  final RxMap<String, Itemlist> spotifyItemlists = <String, Itemlist>{}.obs;
-  final RxList<spotify.Playlist> spotifyPlaylists = <spotify.Playlist>[].obs;
-  final RxList<spotify.PlaylistSimple> spotifyPlaylistSimples = <spotify.PlaylistSimple>[].obs;
 
   ///DEPRECATED
   // Itemlist _favItemlist = Itemlist();
@@ -117,36 +109,14 @@ class ItemlistController extends GetxController implements ItemlistService {
       });
     }
 
-    update([AppPageIdConstants.itemlist]);
+    AppUtilities.logger.d('${itemlists.length} Itemlists Type: ${itemlistType.name} were loaded from OwnerType: ${ownerType.name}');
   }
 
   @override
   void onReady() {
     super.onReady();
-    ///NOT USEFUL RIGHT NOW - IS IT USEFUL TO GET SONGS FROM SPOTIFY???
-    // try {
-    //   if(AppFlavour.appInUse == AppInUse.g && !Platform.isIOS) {
-    //     getSpotifyToken();
-    //     if (userController.user.spotifyToken.isNotEmpty
-    //         && userController.profile.lastSpotifySync < DateTime
-    //             .now().subtract(const Duration(days: 30))
-    //             .millisecondsSinceEpoch
-    //     ) {
-    //       AppUtilities.logger.d("Spotify Last Sync was more than 30 days");
-    //       outOfSync = true;
-    //     } else {
-    //       AppUtilities.logger.i("Spotify Last Sync in scope");
-    //     }
-    //   }
-    // } catch (e) {
-    //   AppUtilities.logger.e(e.toString());
-    //   AppUtilities.showSnackBar(
-    //     title: MessageTranslationConstants.spotifySynchronization.tr,
-    //     message: e.toString(),
-    //   );
-    //   spotifyAvailable = false;
-    // }
     isLoading.value = false;
+    update([AppPageIdConstants.itemlist]);
   }
 
 
@@ -423,104 +393,6 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   }
 
-  @override
-  Future<bool> synchronizeItemlist(Itemlist itemlist) async {
-    AppUtilities.logger.i("Synchronizing Itemlist ${itemlist.name}");
-    isButtonDisabled.value = true;
-    isLoading.value = true;
-    bool wasSync = false;
-    try {
-
-      String itemlistId = "";
-      Itemlist? existingItemlist;
-      List<Itemlist>? existingItemlists;
-      if(ownerType == OwnerType.profile) {
-        existingItemlists = userController.profile.itemlists?.values
-            .where((element) => element.name == itemlist.name).toList();
-      } else {
-        existingItemlists = userController.band.itemlists?.values
-            .where((element) => element.name == itemlist.name).toList();
-      }
-
-      if(existingItemlists?.isNotEmpty ?? false) {
-        existingItemlist = existingItemlists?.first;
-      }
-
-      if(existingItemlist?.id.isNotEmpty ?? false) {
-
-        List<AppMediaItem> currentItems = [];
-        itemlistId = existingItemlist?.id ?? "";
-
-        itemlist.appMediaItems?.forEach((appItem) {
-          List<AppMediaItem>? itemlistItems = existingItemlist?.appMediaItems?.where((element) => element.id == appItem.id).toList();
-          if(itemlistItems?.isNotEmpty ?? false) {
-            currentItems.add(appItem);
-          }
-        });
-
-        for (AppMediaItem currentItem in currentItems) {
-          itemlist.appMediaItems?.removeWhere((appItem) => appItem.id == currentItem.id);
-          AppUtilities.logger.d("Removing item ${currentItem.name} from being synchronized");
-        }
-
-        totalItemsToSync -= currentItems.length;
-      }
-
-      if(itemlistId.isEmpty) {
-        itemlist.ownerId = ownerId;
-        itemlist.ownerType = ownerType;
-        itemlist.ownerName = ownerName;
-
-        itemlistId = await ItemlistFirestore().insert(itemlist);
-        AppUtilities.logger.i("Itemlist inserted with id $itemlistId");
-      }
-
-      if(itemlistId.isNotEmpty && (itemlist.appMediaItems?.isNotEmpty ?? false)) {
-        itemlist.id = itemlistId;
-
-        if(ownerType == OwnerType.profile) {
-          userController.profile.itemlists![itemlist.id] = itemlist;
-          currentItemlist = itemlist;
-
-          List<String> appMediaItemsIds = itemlist.appMediaItems!.map((e) => e.id).toList();
-          if(await ProfileFirestore().addFavoriteItems(profile.id, appMediaItemsIds)) {
-
-          }
-          for (AppMediaItem appItem in itemlist.appMediaItems ?? []) {
-            itemName.value = appItem.name;
-            itemNumber++;
-            update([AppPageIdConstants.itemlist, AppPageIdConstants.playlistSong]);
-            if (userController.profile.itemlists!.isNotEmpty) {
-              AppUtilities.logger.d("Adding item to global itemlist from userController");
-              userController.profile.favoriteItems!.add(appItem.id);
-            }
-            AppMediaItemFirestore().existsOrInsert(appItem);
-          }
-        } else if(ownerType == OwnerType.band) {
-          userController.band.itemlists![itemlist.id] = itemlist;
-          for (var appItem in itemlist.appMediaItems ?? []) {
-            AppMediaItemFirestore().existsOrInsert(appItem);
-            //TODO Add sync for band itemlist
-          }
-        }
-        AppUtilities.logger.d("Items added successfully from Itemlist");
-        wasSync = true;
-      } else {
-        Get.snackbar(
-            MessageTranslationConstants.spotifySynchronization.tr,
-            "Playlist ${itemlist.name} ${MessageTranslationConstants.upToDate.tr}",
-            snackPosition: SnackPosition.bottom,
-            duration: const Duration(seconds: 1)
-        );
-      }
-      isButtonDisabled.value = false;
-    } catch (e) {
-      AppUtilities.logger.e(e.toString());
-    }
-
-    update();
-    return wasSync;
-  }
 
   Future<void> gotoSuggestedItem() async {
     AppReleaseItem suggestedItem = AppReleaseItem(
@@ -531,155 +403,10 @@ class ItemlistController extends GetxController implements ItemlistService {
     Get.toNamed(AppRouteConstants.pdfViewer, arguments: [suggestedItem, true, true]);
   }
 
-  @override
-  Future<void> getSpotifyToken() async {
-    AppUtilities.logger.d("Getting SpotifyToken");
-    AppUtilities.logger.w("DEPRECATED - spotify_sdk was working for android and not allowing to build on ios");
-
-    String spotifyToken = await SpotifyApiCalls.getSpotifyToken();
-    // String spotifyToken = '';
-
-    if(spotifyToken.isNotEmpty) {
-      AppUtilities.logger.t("Spotify access token is: $spotifyToken");
-      userController.user.spotifyToken = spotifyToken;
-      await UserFirestore().updateSpotifyToken(userController.user.id, spotifyToken);
-    }
-    update([AppPageIdConstants.itemlist]);
-  }
-
-  ///DEPRECATED
-  // @override
-  // Future<void> synchronizeSpotifyPlaylists() async {
-  //   AppUtilities.logger.i("Getting Spotify Information with token: ${userController.user.spotifyToken}");
-  //
-  //   isLoading.value = true;
-  //   update([AppPageIdConstants.itemlist]);
-  //
-  //   spotify.User spotifyUser = await SpotifyApiCalls.getUserProfile(spotifyToken: userController.user.spotifyToken);
-  //
-  //   try {
-  //     if(spotifyUser.id?.isNotEmpty ?? false) {
-  //       spotifyPlaylistSimples.value =  await SpotifyApiCalls.getUserPlaylistSimples(spotifyToken: userController.user.spotifyToken, userId: spotifyUser.id!);
-  //
-  //       for (var playlist in spotifyPlaylistSimples.value) {
-  //         if(playlist.id?.isNotEmpty ?? false) {
-  //           spotifyItemlists[playlist.id!] = Itemlist.mapPlaylistSimpleToItemlist(playlist);
-  //         }
-  //       }
-  //
-  //       Get.to(() => const SpotifyPlaylistsPage(), transition: Transition.rightToLeft);
-  //       ///DEPRECATED
-  //       // Get.toNamed(AppRouteConstants.spotifyPlaylists);
-  //     }
-  //   } catch(e) {
-  //     AppUtilities.logger.e(e.toString());
-  //   }
-  //
-  //   isLoading.value = false;
-  //   update([AppPageIdConstants.itemlist]);
-  // }
-
-  @override
-  void handlePlaylistList(Itemlist spotifyItemlist) {
-
-    try {
-      if (addedItemlists.contains(spotifyItemlist)) {
-        AppUtilities.logger.d("Removing gigList ${spotifyItemlist.name}");
-        addedItemlists.remove(spotifyItemlist);
-        totalItemsToSync -= spotifyPlaylistSimples.value.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
-      } else {
-        AppUtilities.logger.d("Adding giglist with name ${spotifyItemlist.name}");
-        addedItemlists.add(spotifyItemlist);
-        totalItemsToSync += spotifyPlaylistSimples.value.where((element) => element.id == spotifyItemlist.id).first.tracksLink?.total ?? 0;
-      }
-    } catch (e) {
-      AppUtilities.logger.e(e.toString());
-    }
-
-    update([AppPageIdConstants.playlistSong]);
-  }
-
-  ///DEPRECATED TODO Verify if needed
-  // void loadSongsForPlaylist(spotify.PlaylistSimple playlist) {
-  //   itemlists.forEach((playlistId, giglist) async {
-  //     giglist.appMediaItems = await SpotifySearch().loadSongsFromPlaylist(playlistId);
-  //     AppUtilities.logger.i("Adding ${giglist.appMediaItems?.length} song to Giglist ${giglist.name}");
-  //     itemlists[playlistId] = giglist;
-  //   });
-  // }
 
   @override
   Future<void> gotoPlaylistSongs(Itemlist itemlist) async {
-
-    spotify.Playlist spotifyPlaylist = spotify.Playlist();
-
-    try {
-      spotify.PlaylistSimple playlistSimple = spotifyPlaylistSimples.value.where((element) => element.href == itemlist.href).first;
-
-      if(playlistSimple.id?.isNotEmpty ?? false) {
-        spotifyPlaylist = await SpotifyApiCalls.getPlaylist(spotifyToken: userController.user.spotifyToken, playlistId: playlistSimple.id!);
-      }
-
-      if(spotifyPlaylist.href?.isNotEmpty ?? false) {
-        itemlist.appMediaItems = AppMediaItem.mapTracksToSongs(spotifyPlaylist.tracks!);
-        AppUtilities.logger.d("${itemlist.appMediaItems?.length ?? 0} songs were mapped from ${spotifyPlaylist.name}");
-      }
-    } catch (e) {
-      AppUtilities.logger.e(e.toString());
-    }
-
-    await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist, true]);
-    update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
-
-  }
-
-  @override
-  Future<void> synchronizeItemlists() async {
-    AppUtilities.logger.i("Synchronizing ${addedItemlists.length} Giglists from Spotify Playlists");
-
-    Map<Itemlist, bool> wereSynchronized = {};
-    isLoading.value = true;
-    isButtonDisabled.value = true;
-    update([AppPageIdConstants.itemlist]);
-
-    try {
-      spotify.Playlist playlistToSync = spotify.Playlist();
-      for (var addedItemlist in addedItemlists) {
-        spotify.PlaylistSimple playlistSimple = spotifyPlaylistSimples.value.where((element) => element.href == addedItemlist.href).first;
-
-        if(playlistSimple.id?.isNotEmpty ?? false) {
-          playlistToSync = await SpotifyApiCalls.getPlaylist(spotifyToken: userController.user.spotifyToken, playlistId: playlistSimple.id!);
-        }
-
-        if(playlistToSync.href?.isNotEmpty ?? false) {
-          addedItemlist.appMediaItems = AppMediaItem.mapTracksToSongs(playlistToSync.tracks!);
-          AppUtilities.logger.i("${addedItemlist.appMediaItems?.length ?? 0} songs were mapped from ${playlistToSync.name}");
-          wereSynchronized[addedItemlist] = await synchronizeItemlist(addedItemlist);
-        }
-
-      }
-
-      if(wereSynchronized.values.firstWhere((element) => true)) {
-        ProfileFirestore().updateLastSpotifySync(userController.profile.id);
-        Get.toNamed(AppRouteConstants.finishingSpotifySync, arguments: [AppRouteConstants.finishingSpotifySync]);
-      } else {
-        AppUtilities.logger.i("No giglist was updated. Each one is up to date");
-      }
-    } catch(e) {
-      AppUtilities.logger.e(e.toString());
-    }
-
-
-    wereSynchronized.forEach((giglist, wasSync) {
-      if(!wasSync) {
-        AppUtilities.logger.d("Removing added Giglist ${giglist.name} as it's up to date");
-        addedItemlists.remove(giglist);
-      }
-    });
-
-    isLoading.value = false;
-    isButtonDisabled.value = false;
-    update();
+    ///GOTO NeomSpotifyControlleR().gotoPlaylistSongs(itemlist);
   }
 
   @override
