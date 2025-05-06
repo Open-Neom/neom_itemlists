@@ -9,7 +9,6 @@ import 'package:neom_audio_player/ui/widgets/download_button.dart';
 import 'package:neom_audio_player/ui/widgets/go_spotify_button.dart';
 import 'package:neom_audio_player/ui/widgets/like_button.dart';
 import 'package:neom_audio_player/ui/widgets/song_tile_trailing_menu.dart';
-import 'package:neom_audio_player/utils/helpers/media_item_mapper.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/implementations/app_hive_controller.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
@@ -28,6 +27,7 @@ import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/app_media_source.dart';
 import 'package:neom_commons/core/utils/enums/profile_type.dart';
+import 'package:neom_media_player/utils/helpers/media_item_mapper.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../app_media_item/app_media_item_controller.dart';
@@ -185,9 +185,9 @@ ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem
         } else {
           Get.put(MediaPlayerController()).setMediaItem(appItem: appMediaItem);
         }
-        NeomPlayerInvoker.updateNowPlaying([MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem)], 0);
+        NeomPlayerInvoker.updateNowPlaying([MediaItemMapper.fromAppMediaItem(appMediaItem:appMediaItem)], 0);
       } else {
-        NeomPlayerInvoker.updateNowPlaying([MediaItemMapper.appMediaItemToMediaItem(appMediaItem:appMediaItem)], 0);
+        NeomPlayerInvoker.updateNowPlaying([MediaItemMapper.fromAppMediaItem(appMediaItem:appMediaItem)], 0);
       }
 
       // Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);

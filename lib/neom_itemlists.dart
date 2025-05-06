@@ -1,4 +1,4 @@
-library neom_itemlists;
+library;
 
 //ITEMLISTS DATA
 export 'itemlists/itemlists_routes.dart';

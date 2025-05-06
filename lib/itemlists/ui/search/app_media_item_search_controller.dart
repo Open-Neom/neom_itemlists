@@ -25,7 +25,7 @@ import 'package:neom_commons/core/utils/enums/owner_type.dart';
 import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:neom_commons/core/utils/enums/upload_image_type.dart';
 import 'package:neom_events/events/ui/event_details_controller.dart';
-import 'package:neom_posts/posts/ui/add/post_upload_controller.dart';
+import 'package:neom_posts/posts/ui/upload/post_upload_controller.dart';
 
 import '../../domain/use_cases/app_media_item_search_search_service.dart';
 import '../app_media_item/app_media_item_controller.dart';
