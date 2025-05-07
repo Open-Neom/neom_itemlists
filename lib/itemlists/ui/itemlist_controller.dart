@@ -34,8 +34,6 @@ class ItemlistController extends GetxController implements ItemlistService {
   final RxMap<String, Itemlist> itemlists = <String, Itemlist>{}.obs;
   final RxList<Itemlist> addedItemlists = <Itemlist>[].obs;
 
-  ///DEPRECATED
-  // Itemlist _favItemlist = Itemlist();
   AppProfile profile = AppProfile();
   Band band = Band();
   String ownerId = '';
@@ -48,9 +46,6 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   final RxBool isPublicNewItemlist = true.obs;
   final RxString errorMsg = "".obs;
-
-  ///DEPRECATED bool outOfSync = false;
-  bool spotifyAvailable = true;
 
   RxString itemName = "".obs;
   RxInt itemNumber = 0.obs;
@@ -158,15 +153,6 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         newItemlistId = await ItemlistFirestore().insert(newItemlist);
 
-        ///DEPRECATED
-        // if(isPublicNewItemlist.value) {
-        //   AppUtilities.logger.i("Inserting Public Itemlist to Public collection");
-        //   newItemlistId = await ItemlistFirestore().insert(newItemlist);
-        // } else {
-        //   AppUtilities.logger.i("Inserting Private Itemlist to collection for profileId ${newItemlist.ownerId}");
-        //   newItemlistId = await ItemlistFirestore().insert(newItemlist);
-        // }
-
         AppUtilities.logger.i("Empty Itemlist created successfully for profile ${newItemlist.ownerId}");
         newItemlist.id = newItemlistId;
 
@@ -206,32 +192,6 @@ class ItemlistController extends GetxController implements ItemlistService {
     update([AppPageIdConstants.itemlist]);
   }
 
-  ///DEPRECATED Verify if in use
-  // Future<void> searchItemlist() async {
-  //
-  //   AppUtilities.logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
-  //
-  //   Get.back();
-  //
-  //   try {
-  //     if(newItemlistNameController.text.isNotEmpty) {
-  //       await Get.toNamed(AppRouteConstants.playlistSearch,
-  //           arguments: [MediaSearchType.playlist, newItemlistNameController.text]
-  //       );
-  //     } else {
-  //       AppUtilities.showSnackBar(
-  //         title: MessageTranslationConstants.searchPlaylist.tr,
-  //         message: MessageTranslationConstants.missingPlaylistName.tr,
-  //       );
-  //     }
-  //   } catch (e) {
-  //     AppUtilities.logger.e(e.toString());
-  //   }
-  //
-  //   update([AppPageIdConstants.itemlist]);
-  // }
-
-
   @override
   Future<void> deleteItemlist(Itemlist itemlist) async {
     AppUtilities.logger.d("Removing for $itemlist");
@@ -255,16 +215,6 @@ class ItemlistController extends GetxController implements ItemlistService {
             }
           }
 
-          ///DEPRECATED
-          // for(var appItem in itemlist.appMediaItems ?? []) {
-          //   if(await ProfileFirestore().removeFavoriteItem(profile.id, appItem.id)) {
-          //     if (userController.profile.favoriteItems != null &&
-          //         userController.profile.favoriteItems!.isNotEmpty) {
-          //       AppUtilities.logger.d("Removing item from global state items for profile from userController");
-          //       userController.profile.favoriteItems!.remove(appItem.id);
-          //     }
-          //   }
-          // }
         }
         itemlists.remove(itemlist.id);
         AppUtilities.showSnackBar(
@@ -285,35 +235,6 @@ class ItemlistController extends GetxController implements ItemlistService {
     isLoading.value = false;
     update([AppPageIdConstants.itemlist]);
   }
-
-
-  ///DEPRECATED
-  // @override
-  // Future<void> setAsFavorite(Itemlist itemlist) async {
-  //   AppUtilities.logger.d("Making favorite for $itemlist");
-  //
-  //   try {
-  //     if(await ItemlistFirestore().setAsFavorite(profile.id, itemlist)){
-  //       itemlist.isFav = true;
-  //       itemlists[itemlist.id] = itemlist;
-  //       AppUtilities.logger.i("Itemlist ${itemlist.id} set as favorite");
-  //       if(await ItemlistFirestore().unsetOfFavorite(profile.id, _favItemlist)) {
-  //         AppUtilities.logger.i("Itemlist ${profile.id} unset from favorite");
-  //         _favItemlist.isFav = false;
-  //         itemlists[_favItemlist.id] = _favItemlist;
-  //       }
-  //       _favItemlist = itemlist;
-  //     } else {
-  //       AppUtilities.logger.e("Something happens trying to remove itemlist");
-  //     }
-  //   } catch (e) {
-  //     AppUtilities.logger.e(e.toString());
-  //   }
-  //
-  //   Get.back();
-  //   update([AppPageIdConstants.itemlist]);
-  // }
-
 
   @override
   Future<void> updateItemlist(String itemlistId, Itemlist itemlist) async {
@@ -392,7 +313,6 @@ class ItemlistController extends GetxController implements ItemlistService {
     }
 
   }
-
 
   Future<void> gotoSuggestedItem() async {
     AppReleaseItem suggestedItem = AppReleaseItem(
