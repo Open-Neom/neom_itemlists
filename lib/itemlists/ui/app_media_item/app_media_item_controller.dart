@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:neom_audio_player/ui/player/media_player_controller.dart';
+import 'package:neom_audio_player/ui/player/audio_player_controller.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/api_services/push_notification/firebase_messaging_calls.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
@@ -258,8 +258,8 @@ class AppMediaItemController extends GetxController implements AppItemService {
     ///DELETE SWITCH WHEN READLIST IS APART
     switch(AppFlavour.appInUse) {
       case AppInUse.c:
-        if (Get.isRegistered<MediaPlayerController>()) {
-          Get.delete<MediaPlayerController>();
+        if (Get.isRegistered<AudioPlayerController>()) {
+          Get.delete<AudioPlayerController>();
           Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
         } else {
           Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
@@ -267,8 +267,8 @@ class AppMediaItemController extends GetxController implements AppItemService {
         break;
       case AppInUse.g:
         ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
-        if (Get.isRegistered<MediaPlayerController>()) {
-          Get.delete<MediaPlayerController>();
+        if (Get.isRegistered<AudioPlayerController>()) {
+          Get.delete<AudioPlayerController>();
           Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
         } else {
           Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);

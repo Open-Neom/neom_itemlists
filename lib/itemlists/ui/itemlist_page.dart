@@ -11,8 +11,8 @@ import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
+import 'package:neom_commons/core/utils/enums/media_search_type.dart';
 import 'package:neom_commons/core/utils/enums/owner_type.dart';
-import 'package:neom_commons/core/utils/enums/spotify_search_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import 'itemlist_controller.dart';

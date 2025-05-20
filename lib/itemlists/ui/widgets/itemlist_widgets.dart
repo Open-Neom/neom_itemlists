@@ -1,9 +1,15 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:enum_to_string/enum_to_string.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/core/domain/model/app_media_item.dart';
+import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import '../app_media_item/app_media_item_controller.dart';
 import '../itemlist_controller.dart';
 
 Widget buildItemlistList(BuildContext context, ItemlistController _) {
@@ -120,79 +126,114 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
             ],
           ),
           )) ?? false;
-
-          ///DEPRECATED
-          // Alert(
-          //     context: context,
-          //     title: AppTranslationConstants.itemlistName.tr,
-          //     style: AlertStyle(
-          //         backgroundColor: AppColor.main50,
-          //         titleStyle: const TextStyle(color: Colors.white)
-          //     ),
-          //     content: Obx(()=> _.isLoading.value ? const Center(child: CircularProgressIndicator())
-          //     : Column(
-          //         children: <Widget>[
-          //           TextField(
-          //             controller: _.newItemlistNameController,
-          //             decoration: InputDecoration(
-          //               labelText: '${AppTranslationConstants.changeName.tr}: ',
-          //               hintText: itemlist.name,
-          //             ),
-          //           ),
-          //           TextField(
-          //             controller: _.newItemlistDescController,
-          //             decoration: InputDecoration(
-          //               labelText: '${AppTranslationConstants.changeDesc.tr}: ',
-          //               hintText: itemlist.description,
-          //             ),
-          //           ),
-          //         ]),
-          //     ),
-          //     buttons: [
-          //       DialogButton(
-          //         color: AppColor.bondiBlue75,
-          //         onPressed: () async {
-          //           // Navigator.of(context).pop();
-          //           await _.updateItemlist(itemlist.id, itemlist);
-          //           // Get.back();
-          //           // Get.toNamed(AppRouteConstants.musicPlayerHome);
-          //         },
-          //         child: Text(
-          //           AppTranslationConstants.update.tr,
-          //           style: const TextStyle(fontSize: 12),
-          //         ),
-          //       ),
-          //       DialogButton(
-          //         color: AppColor.bondiBlue75,
-          //         child: Text(AppTranslationConstants.remove.tr),
-          //         onPressed: () async {
-          //           if(_.itemlists.length == 1) {
-          //             AppUtilities.showAlert(context,
-          //                 title: AppTranslationConstants.itemlistPrefs.tr,
-          //                 message: AppTranslationConstants.cantRemoveMainItemlist.tr);
-          //           } else {
-          //             // Navigator.of(context).pop();
-          //             await _.deleteItemlist(itemlist);
-          //             AppUtilities.showAlert(context,
-          //                 title: AppTranslationConstants.itemlistPrefs.tr,
-          //                 message: AppTranslationConstants.itemlistRemoved.tr);
-          //             // Get.back();
-          //             // Get.toNamed(AppRouteConstants.musicPlayerHome);
-          //           }
-          //         },
-          //       ),
-          //       ///VERIFY IF DEPRECATED
-          //       // if(!itemlist.isFav) DialogButton(
-          //       //   color: AppColor.bondiBlue75,
-          //       //   onPressed: () => {
-          //       //     _.setAsFavorite(itemlist)
-          //       //   },
-          //       //   child: Text(AppTranslationConstants.setFav.tr,
-          //       //   ),
-          //       // ),
-          //     ]
-          // ).show();
         },
+      );
+    },
+  );
+}
+
+Widget buildItemList(BuildContext context, AppMediaItemController _) {
+  return ListView.separated(
+    separatorBuilder: (context, index) => const Divider(),
+    itemCount: _.itemlistItems.length,
+    itemBuilder: (context, index) {
+      AppMediaItem appMediaItem = _.itemlistItems.values.elementAt(index);
+      return ListTile(
+          leading: HandledCachedNetworkImage(appMediaItem.imgUrl.isNotEmpty
+              ? appMediaItem.imgUrl : _.itemlist.imgUrl, enableFullScreen: false,
+            width: 40,
+          ),
+          title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(
+                  width: AppTheme.fullWidth(context)*0.4,
+                  child: Text(appMediaItem.name, maxLines: 5, overflow: TextOverflow.ellipsis,),
+                ),
+                (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.appArtist && !_.isFixed)) ?
+                RatingHeartBar(state: appMediaItem.state.toDouble()) : const SizedBox.shrink(),
+              ]
+          ),
+          subtitle: SizedBox(
+            width: AppTheme.fullWidth(context)*0.4,
+            child: (AppFlavour.appInUse == AppInUse.c && (appMediaItem.description?.isNotEmpty ?? false)) ?
+            Text(appMediaItem.description ?? '', textAlign: TextAlign.justify,) :
+            Text(appMediaItem.artist, maxLines: 2, overflow: TextOverflow.ellipsis,),
+          ),
+          trailing: IconButton(
+              icon: const Icon(
+                  CupertinoIcons.forward
+              ),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () {
+                Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
+              }
+          ),
+          onTap: () => AppFlavour.appInUse == AppInUse.c || !_.isFixed ? _.getItemlistItemDetails(appMediaItem) : {},
+          onLongPress: () => _.itemlist.isModifiable && (AppFlavour.appInUse != AppInUse.c || !_.isFixed) ? Alert(
+              context: context,
+              title: AppTranslationConstants.appItemPrefs.tr,
+              style: AlertStyle(
+                  backgroundColor: AppColor.main50,
+                  titleStyle: const TextStyle(color: Colors.white)
+              ),
+              content: Column(
+                children: <Widget>[
+                  Obx(() =>
+                      DropdownButton<String>(
+                        items: AppItemState.values.map((AppItemState appItemState) {
+                          return DropdownMenuItem<String>(
+                              value: appItemState.name,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(appItemState.name.tr),
+                                  appItemState.value == 0 ? const SizedBox.shrink() : const Text(" - "),
+                                  appItemState.value == 0 ? const SizedBox.shrink() :
+                                  RatingHeartBar(state: appItemState.value.toDouble(),),
+                                ],
+                              )
+                          );
+                        }).toList(),
+                        onChanged: (String? newItemState) {
+                          _.setItemState(EnumToString.fromString(AppItemState.values, newItemState!) ?? AppItemState.noState);
+                        },
+                        value: CoreUtilities.getItemState(_.itemState.value).name,
+                        icon: const Icon(Icons.arrow_downward),
+                        iconSize: 15,
+                        elevation: 15,
+                        style: const TextStyle(color: Colors.white),
+                        dropdownColor: AppColor.getMain(),
+                        underline: Container(
+                          height: 1,
+                          color: Colors.grey,
+                        ),
+                      ),
+                  ),
+                ],
+              ),
+              buttons: [
+                DialogButton(
+                  color: AppColor.bondiBlue75,
+                  child: Text(AppTranslationConstants.update.tr,
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                  onPressed: () => {
+                    _.updateItemlistItem(appMediaItem)
+                  },
+                ),
+                DialogButton(
+                  color: AppColor.bondiBlue75,
+                  child: Text(AppTranslationConstants.remove.tr,
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                  onPressed: () async => {
+                    await _.removeItemFromList(appMediaItem)
+                  },
+                ),
+              ]
+          ).show() : {}
       );
     },
   );

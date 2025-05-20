@@ -104,6 +104,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       });
     }
 
+    update([AppPageIdConstants.itemlist]);
     AppUtilities.logger.d('${itemlists.length} Itemlists Type: ${itemlistType.name} were loaded from OwnerType: ${ownerType.name}');
   }
 
@@ -111,7 +112,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   void onReady() {
     super.onReady();
     isLoading.value = false;
-    update([AppPageIdConstants.itemlist]);
+    // update([AppPageIdConstants.itemlist]);
   }
 
 
