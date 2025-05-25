@@ -150,11 +150,11 @@ class AppMediaItemController extends GetxController implements AppItemService {
               loadItemsFromList();
             }
 
-            FirebaseMessagingCalls.sendGlobalPushNotification(
+            FirebaseMessagingCalls.sendPublicPushNotification(
                 fromProfile: userController.profile,
                 notificationType: PushNotificationType.appItemAdded,
                 referenceId: appMediaItem.id,
-                imgUrl: appMediaItem.imgUrl
+                imgUrl: appMediaItem.imgUrl,
             );
 
             return true;
