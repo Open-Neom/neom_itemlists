@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:neom_audio_player/ui/player/audio_player_controller.dart';
 import 'package:neom_commons/core/app_flavour.dart';
 import 'package:neom_commons/core/data/api_services/push_notification/firebase_messaging_calls.dart';
 import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
@@ -11,7 +10,6 @@ import 'package:neom_commons/core/domain/model/band.dart';
 import 'package:neom_commons/core/domain/model/item_list.dart';
 import 'package:neom_commons/core/utils/app_utilities.dart';
 import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
 import 'package:neom_commons/core/utils/enums/app_in_use.dart';
 import 'package:neom_commons/core/utils/enums/app_item_state.dart';
 import 'package:neom_commons/core/utils/enums/app_media_source.dart';
@@ -258,22 +256,24 @@ class AppMediaItemController extends GetxController implements AppItemService {
     ///DELETE SWITCH WHEN READLIST IS APART
     switch(AppFlavour.appInUse) {
       case AppInUse.c:
-        if (Get.isRegistered<AudioPlayerController>()) {
-          Get.delete<AudioPlayerController>();
-          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
-        } else {
-          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
-        }
+        ///DEPRECATED
+        // if (Get.isRegistered<AudioPlayerController>()) {
+        //   Get.delete<AudioPlayerController>();
+        //   Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+        // } else {
+        //   Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+        // }
+        Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
         break;
       case AppInUse.g:
-        ///DEPRECATED Get.to(() => MediaPlayerPage(appMediaItem: appMediaItem),transition: Transition.leftToRight);
-        if (Get.isRegistered<AudioPlayerController>()) {
-          Get.delete<AudioPlayerController>();
-          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
-        } else {
-          Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
-        }
-
+        ///DEPRECATED
+        // if (Get.isRegistered<AudioPlayerController>()) {
+        //   Get.delete<AudioPlayerController>();
+        //   Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+        // } else {
+        //   Get.toNamed(AppRouteConstants.audioPlayerMedia, arguments: [appMediaItem]);
+        // }
+        Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
         break;
       case AppInUse.e:
         if(itemlist.type == ItemlistType.readlist) {

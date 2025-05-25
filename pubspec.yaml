@@ -12,12 +12,12 @@ dependencies:
   flutter:
     sdk: flutter
 
-  neom_audio_player:
-    git:
-      url: https://github.com/Cyberneom/neom_audio_player.git
   neom_commons:
     git:
       url: git@github.com:Cyberneom/neom_commons.git
+  neom_events:
+    git:
+      url: git@github.com:Cyberneom/neom_events.git
   neom_media_player:
     git:
       url: https://github.com/Cyberneom/neom_media_player.git

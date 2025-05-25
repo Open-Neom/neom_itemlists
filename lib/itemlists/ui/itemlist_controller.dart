@@ -109,10 +109,6 @@ class ItemlistController extends GetxController implements ItemlistService {
     AppUtilities.logger.d('${itemlists.length} Itemlists Type: ${itemlistType.name} were loaded from OwnerType: ${ownerType.name}');
   }
 
-  @override
-  void onReady() {
-    super.onReady();
-  }
 
 
   void clear() {

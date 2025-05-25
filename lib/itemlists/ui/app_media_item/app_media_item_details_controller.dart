@@ -1,15 +1,13 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/core/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
 import 'package:neom_commons/core/domain/model/app_media_item.dart';
-
 import 'package:neom_commons/core/domain/model/app_release_item.dart';
 import 'package:neom_commons/neom_commons.dart';
 import 'package:neom_events/events/ui/event_details_controller.dart';
+
 import 'app_media_item_controller.dart';
 
 
