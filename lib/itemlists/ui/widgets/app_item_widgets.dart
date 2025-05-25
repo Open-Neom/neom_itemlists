@@ -1,13 +1,13 @@
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:neom_commons/core/app_flavour.dart';
-import 'package:neom_commons/core/data/implementations/app_hive_controller.dart';
-import 'package:neom_commons/core/domain/model/app_media_item.dart';
-import 'package:neom_commons/core/domain/model/item_list.dart';
-import 'package:neom_commons/core/ui/widgets/neom_image_card.dart';
-import 'package:neom_commons/core/utils/constants/app_assets.dart';
-import 'package:neom_commons/core/utils/core_utilities.dart';
-
+// import 'package:flutter/material.dart';
+// import 'package:get/get.dart';
+// import 'package:neom_commons/core/app_flavour.dart';
+// import 'package:neom_commons/core/data/implementations/app_hive_controller.dart';
+// import 'package:neom_commons/core/domain/model/app_media_item.dart';
+// import 'package:neom_commons/core/domain/model/item_list.dart';
+// import 'package:neom_commons/core/ui/widgets/neom_image_card.dart';
+// import 'package:neom_commons/core/utils/constants/app_assets.dart';
+// import 'package:neom_commons/core/utils/core_utilities.dart';
+//
 // ListTile createCoolMediaItemTile(BuildContext context, AppMediaItem appMediaItem, {Itemlist? itemlist,
 //   String query = '', bool downloadAllowed = false}) {
 //
@@ -61,29 +61,29 @@ import 'package:neom_commons/core/utils/core_utilities.dart';
 //     },
 //   );
 // }
-
-ListTile createMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
-    {Itemlist? itemlist, String query = ''}) {
-  return ListTile(
-    contentPadding: const EdgeInsets.only(left: 15.0,),
-    title: Text(appMediaItem.name,
-      style: const TextStyle(fontWeight: FontWeight.w500,),
-      overflow: TextOverflow.ellipsis,
-    ),
-    subtitle: Text(appMediaItem.artist,
-      overflow: TextOverflow.ellipsis,
-    ),
-    isThreeLine: false,
-    leading: NeomImageCard(
-        placeholderImage: const AssetImage(AppAssets.audioPlayerCover),
-        imageUrl: appMediaItem.imgUrl
-    ),
-    onLongPress: () {
-      CoreUtilities.copyToClipboard(text: appMediaItem.permaUrl,);
-    },
-    onTap: () {
-      AppHiveController().addQuery(appMediaItem.name);
-      Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
-    },
-  );
-}
+//
+// ListTile createMediaItemTile(BuildContext context, AppMediaItem appMediaItem,
+//     {Itemlist? itemlist, String query = ''}) {
+//   return ListTile(
+//     contentPadding: const EdgeInsets.only(left: 15.0,),
+//     title: Text(appMediaItem.name,
+//       style: const TextStyle(fontWeight: FontWeight.w500,),
+//       overflow: TextOverflow.ellipsis,
+//     ),
+//     subtitle: Text(appMediaItem.artist,
+//       overflow: TextOverflow.ellipsis,
+//     ),
+//     isThreeLine: false,
+//     leading: NeomImageCard(
+//         placeholderImage: const AssetImage(AppAssets.audioPlayerCover),
+//         imageUrl: appMediaItem.imgUrl
+//     ),
+//     onLongPress: () {
+//       CoreUtilities.copyToClipboard(text: appMediaItem.permaUrl,);
+//     },
+//     onTap: () {
+//       AppHiveController().addQuery(appMediaItem.name);
+//       Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
+//     },
+//   );
+// }
