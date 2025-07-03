@@ -3,10 +3,24 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/domain/model/app_media_item.dart';
-import 'package:neom_commons/core/ui/widgets/handled_cached_network_image.dart';
-import 'package:neom_commons/core/ui/widgets/rating_heart_bar.dart';
-import 'package:neom_commons/neom_commons.dart';
+import 'package:neom_commons/commons/app_flavour.dart';
+import 'package:neom_commons/commons/ui/theme/app_color.dart';
+import 'package:neom_commons/commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/commons/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/commons/ui/widgets/rating_heart_bar.dart';
+import 'package:neom_commons/commons/utils/app_alerts.dart';
+import 'package:neom_commons/commons/utils/app_utilities.dart';
+import 'package:neom_commons/commons/utils/constants/app_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_core/core/app_properties.dart';
+import 'package:neom_core/core/domain/model/app_media_item.dart';
+import 'package:neom_core/core/domain/model/item_list.dart';
+import 'package:neom_core/core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/core/utils/core_utilities.dart';
+import 'package:neom_core/core/utils/enums/app_in_use.dart';
+import 'package:neom_core/core/utils/enums/app_item_state.dart';
+import 'package:neom_core/core/utils/enums/media_search_type.dart';
+import 'package:neom_core/core/utils/enums/profile_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../app_media_item/app_media_item_controller.dart';
@@ -29,16 +43,16 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
                 ? CachedNetworkImage(imageUrl: itemlist.appMediaItems!.first.imgUrl)
                 : ((itemlist.appReleaseItems?.isNotEmpty ?? false) && (itemlist.appReleaseItems!.first.imgUrl.isNotEmpty))
                 ? CachedNetworkImage(imageUrl: itemlist.appReleaseItems!.first.imgUrl)
-                : CachedNetworkImage(imageUrl: AppFlavour.getAppLogoUrl())
+                : CachedNetworkImage(imageUrl: AppProperties.getAppLogoUrl())
         ),
         title: Row(
             children: <Widget>[
-              Text(CoreUtilities.capitalizeFirstLetter(itemlist.name.length > AppConstants.maxItemlistNameLength
+              Text(AppUtilities.capitalizeFirstLetter(itemlist.name.length > AppConstants.maxItemlistNameLength
                   ? "${itemlist.name.substring(0,AppConstants.maxItemlistNameLength)}..."
                   : itemlist.name)),
               ///DEPRECATE .isFav ? const Icon(Icons.favorite, size: 10,) : SizedBox.shrink()
             ]),
-        subtitle: itemlist.description.isNotEmpty ? Text(CoreUtilities.capitalizeFirstLetter(itemlist.description), maxLines: 3, overflow: TextOverflow.ellipsis,) : null,
+        subtitle: itemlist.description.isNotEmpty ? Text(AppUtilities.capitalizeFirstLetter(itemlist.description), maxLines: 3, overflow: TextOverflow.ellipsis,) : null,
         trailing: ActionChip(
           labelPadding: EdgeInsets.zero,
           backgroundColor: AppColor.main25,
@@ -50,8 +64,6 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           ),
           label: Icon(AppFlavour.getAppItemIcon(), color: AppColor.white80),
           onPressed: () async {
-            // await _.gotoItemlistItems(itemlist);
-
             if(AppFlavour.appInUse == AppInUse.c || !itemlist.isModifiable) {
               await _.gotoItemlistItems(itemlist);
             } else {
@@ -114,7 +126,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
                 ),
                 onPressed: () async {
                   if(_.itemlists.length == 1) {
-                    AppUtilities.showAlert(context,
+                    AppAlerts.showAlert(context,
                         title: AppTranslationConstants.itemlistPrefs.tr,
                         message: AppTranslationConstants.cantRemoveMainItemlist.tr);
                   } else {

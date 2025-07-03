@@ -1,19 +1,31 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/core/data/firestore/app_media_item_firestore.dart';
-import 'package:neom_commons/core/data/firestore/app_release_item_firestore.dart';
-import 'package:neom_commons/core/domain/model/app_media_item.dart';
-import 'package:neom_commons/core/domain/model/app_release_item.dart';
-import 'package:neom_commons/neom_commons.dart';
+import 'package:neom_commons/commons/utils/app_utilities.dart';
+import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/commons/utils/mappers/app_media_item_mapper.dart';
+import 'package:neom_core/core/app_config.dart';
+import 'package:neom_core/core/app_properties.dart';
+import 'package:neom_core/core/data/firestore/app_media_item_firestore.dart';
+import 'package:neom_core/core/data/firestore/app_release_item_firestore.dart';
+import 'package:neom_core/core/data/implementations/user_controller.dart';
+import 'package:neom_core/core/domain/model/app_media_item.dart';
+import 'package:neom_core/core/domain/model/app_profile.dart';
+import 'package:neom_core/core/domain/model/app_release_item.dart';
+import 'package:neom_core/core/domain/model/band.dart';
+import 'package:neom_core/core/domain/model/item_list.dart';
+import 'package:neom_core/core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/core/utils/enums/app_currency.dart';
+import 'package:neom_core/core/utils/enums/app_item_state.dart';
+import 'package:neom_core/core/utils/enums/owner_type.dart';
 import 'package:neom_events/events/ui/event_details_controller.dart';
 
 import 'app_media_item_controller.dart';
 
 
 class AppMediaItemDetailsController extends GetxController {
-
-  var logger = AppUtilities.logger;
+  
   final userController = Get.find<UserController>();
 
   AppProfile profile = AppProfile();
@@ -33,7 +45,7 @@ class AppMediaItemDetailsController extends GetxController {
   final RxBool wasAdded = false.obs;
 
   ///VerifY IF NEEDED with music player
-  final AudioPlayer audioPlayer = AudioPlayer(playerId: AppFlavour.getAppName());
+  final AudioPlayer audioPlayer = AudioPlayer(playerId: AppProperties.getAppName());
 
   AppReleaseItem releasedItem = AppReleaseItem();
   String releasedItemId = "";
@@ -47,7 +59,7 @@ class AppMediaItemDetailsController extends GetxController {
   @override
   void onInit() async {
     super.onInit();
-    logger.d("AppMediaItem Details Controller init");
+    AppConfig.logger.d("AppMediaItem Details Controller init");
 
     try {
       profile = userController.profile;
@@ -85,7 +97,7 @@ class AppMediaItemDetailsController extends GetxController {
       }
 
     } catch (e) {
-      logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
   }
@@ -94,7 +106,7 @@ class AppMediaItemDetailsController extends GetxController {
   @override
   void onReady() async {
     super.onReady();
-    logger.i("AppMediaItem ${appMediaItem.id} Details Controller Ready");
+    AppConfig.logger.i("AppMediaItem ${appMediaItem.id} Details Controller Ready");
 
     try {
 
@@ -102,7 +114,7 @@ class AppMediaItemDetailsController extends GetxController {
         releasedItem = await AppReleaseItemFirestore().retrieve(releasedItemId);
         if(releasedItem.id.isNotEmpty) {
           isReleaseItem = true;
-          appMediaItem = AppMediaItem.fromAppReleaseItem(releasedItem);
+          appMediaItem = AppMediaItemMapper.fromAppReleaseItem(releasedItem);
           digitalAmount = releasedItem.digitalPrice!.amount;
           physicalAmount = releasedItem.physicalPrice?.amount ?? 0;
           currentCurrency = releasedItem.digitalPrice!.currency;
@@ -120,7 +132,7 @@ class AppMediaItemDetailsController extends GetxController {
         AppUtilities.showSnackBar(title: AppTranslationConstants.noItemlistsMsg, message: AppTranslationConstants.noItemlistsMsg2);
       }
     } catch(e) {
-      logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     isLoading.value = false;
@@ -142,26 +154,26 @@ class AppMediaItemDetailsController extends GetxController {
   }
 
   void setAppItemState(AppItemState newState){
-    logger.d("Setting new appItemState $newState");
+    AppConfig.logger.d("Setting new appItemState $newState");
     appItemState.value = newState.value;
     update([AppPageIdConstants.appItemDetails]);
   }
 
   void setSelectedItemlist(String selectedItemlist){
-    logger.d("Setting selectedItemlist $selectedItemlist");
+    AppConfig.logger.d("Setting selectedItemlist $selectedItemlist");
     itemlistId.value  = selectedItemlist;
     existsInItemlist.value = itemAlreadyInList();
     update([AppPageIdConstants.appItemDetails]);
   }
 
   void getAppItemDetails(String itemId) async {
-    logger.d("");
+    AppConfig.logger.d("");
 
     try {
       appMediaItem = await AppMediaItemFirestore().retrieve(itemId);
       durationMinutes.value = AppUtilities.getDurationInMinutes(appMediaItem.duration);
     } catch (e) {
-      logger.d(e.toString());
+      AppConfig.logger.d(e.toString());
     }
     update([AppPageIdConstants.appItemDetails]);
   }
@@ -175,7 +187,7 @@ class AppMediaItemDetailsController extends GetxController {
       isLoading.value = true;
       update([AppPageIdConstants.appItemDetails]);
 
-      logger.i("AppMediaItem ${appMediaItem.name} would be added as $appItemState for Itemlist $itemlistId");
+      AppConfig.logger.i("AppMediaItem ${appMediaItem.name} would be added as $appItemState for Itemlist $itemlistId");
 
       if(fanItemState > 0) appItemState.value = fanItemState;
       if(itemlistId.isEmpty) itemlistId.value = itemlists.values.first.id;
@@ -197,7 +209,7 @@ class AppMediaItemDetailsController extends GetxController {
           appMediaItem.state = appItemState.value;
 
           if(await appMediaItemController.addItemToItemlist(appMediaItem, itemlistId.value)){
-            logger.d("Setting existsInItemlist and wasAdded true");
+            AppConfig.logger.d("Setting existsInItemlist and wasAdded true");
             existsInItemlist.value = true;
             wasAdded.value = true;
           }
@@ -205,7 +217,7 @@ class AppMediaItemDetailsController extends GetxController {
 
 
       } catch (e) {
-        logger.d(e.toString());
+        AppConfig.logger.d(e.toString());
       }
 
       update([AppPageIdConstants.itemlistItem,
@@ -237,7 +249,7 @@ class AppMediaItemDetailsController extends GetxController {
   }
 
   Future<void> removeItem() async {
-    logger.d("removing Item ${appMediaItem.toString()} from itemlist");
+    AppConfig.logger.d("removing Item ${appMediaItem.toString()} from itemlist");
 
     await audioPlayer.stop();
     isPlaying.value = false;
@@ -252,12 +264,12 @@ class AppMediaItemDetailsController extends GetxController {
 
     try {
       if(await appMediaItemController.removeItemFromList(appMediaItem)) {
-        logger.d("YEAH");
+        AppConfig.logger.d("YEAH");
       } else {
-        logger.d("Item not removed from Itemlist");
+        AppConfig.logger.d("Item not removed from Itemlist");
       }
     } catch (e) {
-      logger.d(e.toString());
+      AppConfig.logger.d(e.toString());
     }
 
     Get.back();
@@ -265,7 +277,7 @@ class AppMediaItemDetailsController extends GetxController {
   }
 
   bool itemAlreadyInList() {
-    logger.d("Verifying if item already exists in itemlists");
+    AppConfig.logger.d("Verifying if item already exists in itemlists");
     bool itemAlreadyInList = false;
 
     itemlists.forEach((key, iList) {
@@ -278,17 +290,17 @@ class AppMediaItemDetailsController extends GetxController {
       }
     });
 
-    logger.d("Item already exists in itemlists: $itemAlreadyInList");
+    AppConfig.logger.d("Item already exists in itemlists: $itemAlreadyInList");
     return itemAlreadyInList;
   }
 
   Future<void> playPreview() async {
 
-    logger.d("Previewing appMediaItem ${appMediaItem.name}");
+    AppConfig.logger.d("Previewing appMediaItem ${appMediaItem.name}");
 
     try {
       audioPlayer.onDurationChanged.listen((duration) {
-        AppUtilities.logger.i(duration);
+        AppConfig.logger.i(duration);
         durationMinutes.value = AppUtilities.getDurationInMinutes(duration.inMilliseconds);
       });
 
@@ -297,7 +309,7 @@ class AppMediaItemDetailsController extends GetxController {
 
       isPlaying.value = true;
     } catch(e) {
-      logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.appItemDetails]);
@@ -308,7 +320,7 @@ class AppMediaItemDetailsController extends GetxController {
       await audioPlayer.pause();
       isPlaying.value = false;
     } catch(e) {
-      logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.appItemDetails]);
@@ -316,14 +328,14 @@ class AppMediaItemDetailsController extends GetxController {
 
 
   Future<void> stopPreview() async {
-    logger.d("Stopping appMediaItem ${appMediaItem.name}");
+    AppConfig.logger.d("Stopping appMediaItem ${appMediaItem.name}");
 
     try {
       await audioPlayer.stop();
       await audioPlayer.release();
       isPlaying.value = false;
     } catch(e) {
-      logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.appItemDetails]);

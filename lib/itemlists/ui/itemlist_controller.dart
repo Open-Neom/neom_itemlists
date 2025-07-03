@@ -1,24 +1,24 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/auth/ui/login/login_controller.dart';
-import 'package:neom_commons/core/app_flavour.dart';
-import 'package:neom_commons/core/data/firestore/itemlist_firestore.dart';
-import 'package:neom_commons/core/data/firestore/profile_firestore.dart';
-import 'package:neom_commons/core/data/implementations/user_controller.dart';
-import 'package:neom_commons/core/domain/model/app_profile.dart';
-import 'package:neom_commons/core/domain/model/app_release_item.dart';
-import 'package:neom_commons/core/domain/model/band.dart';
-import 'package:neom_commons/core/domain/model/item_list.dart';
-import 'package:neom_commons/core/domain/use_cases/itemlist_service.dart';
-import 'package:neom_commons/core/utils/app_utilities.dart';
-import 'package:neom_commons/core/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_route_constants.dart';
-import 'package:neom_commons/core/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/core/utils/constants/message_translation_constants.dart';
-import 'package:neom_commons/core/utils/enums/app_in_use.dart';
-import 'package:neom_commons/core/utils/enums/itemlist_type.dart';
-import 'package:neom_commons/core/utils/enums/owner_type.dart';
+import 'package:neom_commons/commons/app_flavour.dart';
+import 'package:neom_commons/commons/utils/app_utilities.dart';
+import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
+import 'package:neom_commons/commons/utils/constants/message_translation_constants.dart';
+import 'package:neom_core/core/app_config.dart';
+import 'package:neom_core/core/data/firestore/itemlist_firestore.dart';
+import 'package:neom_core/core/data/firestore/profile_firestore.dart';
+import 'package:neom_core/core/data/implementations/user_controller.dart';
+import 'package:neom_core/core/domain/model/app_profile.dart';
+import 'package:neom_core/core/domain/model/app_release_item.dart';
+import 'package:neom_core/core/domain/model/band.dart';
+import 'package:neom_core/core/domain/model/item_list.dart';
+import 'package:neom_core/core/domain/use_cases/itemlist_service.dart';
+import 'package:neom_core/core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/core/utils/enums/app_in_use.dart';
+import 'package:neom_core/core/utils/enums/itemlist_type.dart';
+import 'package:neom_core/core/utils/enums/owner_type.dart';
 
 import 'app_media_item/app_media_item_controller.dart';
 
@@ -54,7 +54,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   @override
   void onInit() {
     super.onInit();
-    AppUtilities.logger.t("onInit Itemlist Controller");
+    AppConfig.logger.t("onInit Itemlist Controller");
 
     try {
       userController.itemlistOwner = OwnerType.profile;
@@ -79,7 +79,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         }
       }
 
-      AppUtilities.logger.t('Itemlists being loaded from ${ownerType.name}');
+      AppConfig.logger.t('Itemlists being loaded from ${ownerType.name}');
       if(ownerType == OwnerType.profile) {
         itemlists.value = Map.from(profile.itemlists ?? {});
       } else if(ownerType == OwnerType.band){
@@ -88,7 +88,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
       setItemlists();
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
   }
@@ -106,7 +106,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
     isLoading.value = false;
     update([AppPageIdConstants.itemlist]);
-    AppUtilities.logger.d('${itemlists.length} Itemlists Type: ${itemlistType.name} were loaded from OwnerType: ${ownerType.name}');
+    AppConfig.logger.d('${itemlists.length} Itemlists Type: ${itemlistType.name} were loaded from OwnerType: ${ownerType.name}');
   }
 
 
@@ -125,7 +125,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   Future<void> createItemlist({ItemlistType? type}) async {
-    AppUtilities.logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
+    AppConfig.logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
 
     try {
       errorMsg.value = '';
@@ -149,7 +149,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         newItemlistId = await ItemlistFirestore().insert(newItemlist);
 
-        AppUtilities.logger.i("Empty Itemlist created successfully for profile ${newItemlist.ownerId}");
+        AppConfig.logger.i("Empty Itemlist created successfully for profile ${newItemlist.ownerId}");
         newItemlist.id = newItemlistId;
 
         if(newItemlistId.isNotEmpty){
@@ -161,7 +161,7 @@ class ItemlistController extends GetxController implements ItemlistService {
             userController.profile.itemlists![newItemlistId] = newItemlist;
           }
 
-          AppUtilities.logger.t("Itemlists $itemlists");
+          AppConfig.logger.t("Itemlists $itemlists");
 
           clearNewItemlist();
           AppUtilities.showSnackBar(
@@ -169,10 +169,10 @@ class ItemlistController extends GetxController implements ItemlistService {
               message: AppTranslationConstants.itemlistCreated.tr
           );
         } else {
-          AppUtilities.logger.d("Something happens trying to insert itemlist");
+          AppConfig.logger.d("Something happens trying to insert itemlist");
         }
       } else {
-        AppUtilities.logger.d(MessageTranslationConstants.pleaseFillItemlistInfo.tr);
+        AppConfig.logger.d(MessageTranslationConstants.pleaseFillItemlistInfo.tr);
         errorMsg.value = newItemlistNameController.text.isEmpty ? MessageTranslationConstants.pleaseAddName
             : MessageTranslationConstants.pleaseAddDescription;
 
@@ -182,7 +182,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         );
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     update([AppPageIdConstants.itemlist]);
@@ -190,14 +190,14 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   Future<void> deleteItemlist(Itemlist itemlist) async {
-    AppUtilities.logger.d("Removing for $itemlist");
+    AppConfig.logger.d("Removing for $itemlist");
 
     try {
       isLoading.value = true;
       update([AppPageIdConstants.itemlist]);
 
       if(await ItemlistFirestore().delete(itemlist.id)) {
-        AppUtilities.logger.d("Itemlist ${itemlist.id} removed");
+        AppConfig.logger.d("Itemlist ${itemlist.id} removed");
 
         if((itemlist.appMediaItems?.isNotEmpty ?? false) && ownerType == OwnerType.profile) {
           List<String> appMediaItemsIds = itemlist.appMediaItems!.map((e) => e.id).toList();
@@ -205,7 +205,7 @@ class ItemlistController extends GetxController implements ItemlistService {
           if(await ProfileFirestore().removeFavoriteItems(profile.id, appMediaItemsIds)) {
             for (var itemId in appMediaItemsIds) {
               if (userController.profile.favoriteItems != null && userController.profile.favoriteItems!.isNotEmpty) {
-                AppUtilities.logger.d("Removing item from global state items for profile from userController");
+                AppConfig.logger.d("Removing item from global state items for profile from userController");
                 userController.profile.favoriteItems!.remove(itemId);
               }
             }
@@ -222,10 +222,10 @@ class ItemlistController extends GetxController implements ItemlistService {
             title: AppTranslationConstants.itemlistPrefs.tr,
             message: AppTranslationConstants.itemlistRemovedErrorMsg.tr
         );
-        AppUtilities.logger.e("Something happens trying to remove itemlist");
+        AppConfig.logger.e("Something happens trying to remove itemlist");
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
     }
 
     isLoading.value = false;
@@ -235,7 +235,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   @override
   Future<void> updateItemlist(String itemlistId, Itemlist itemlist) async {
 
-    AppUtilities.logger.d("Updating to $itemlist");
+    AppConfig.logger.d("Updating to $itemlist");
 
     try {
       isLoading.value = true;
@@ -255,7 +255,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         }
 
         if(await ItemlistFirestore().update(itemlist)){
-          AppUtilities.logger.d("Itemlist $itemlistId updated");
+          AppConfig.logger.d("Itemlist $itemlistId updated");
           itemlists[itemlist.id] = itemlist;
           clearNewItemlist();
           AppUtilities.showSnackBar(
@@ -263,7 +263,7 @@ class ItemlistController extends GetxController implements ItemlistService {
               message: AppTranslationConstants.itemlistUpdated.tr
           );
         } else {
-          AppUtilities.logger.i("Something happens trying to update itemlist");
+          AppConfig.logger.i("Something happens trying to update itemlist");
           AppUtilities.showSnackBar(
               title: AppTranslationConstants.itemlistPrefs.tr,
               message: AppTranslationConstants.itemlistUpdatedErrorMsg.tr
@@ -276,7 +276,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         );
       }
     } catch (e) {
-      AppUtilities.logger.e(e.toString());
+      AppConfig.logger.e(e.toString());
       AppUtilities.showSnackBar(
           title: AppTranslationConstants.itemlistPrefs.tr,
           message: AppTranslationConstants.itemlistUpdatedErrorMsg.tr
@@ -300,8 +300,8 @@ class ItemlistController extends GetxController implements ItemlistService {
         appItemController.itemlist = itemlist;
         appItemController.loadItemsFromList();
       } catch (e) {
-        AppUtilities.logger.w(e.toString());
-        AppUtilities.logger.i("Controller is not active");
+        AppConfig.logger.w(e.toString());
+        AppConfig.logger.i("Controller is not active");
       }
 
       await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
@@ -312,7 +312,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   Future<void> gotoSuggestedItem() async {
     AppReleaseItem suggestedItem = AppReleaseItem(
-      previewUrl: Get.find<LoginController>().appInfo.value.suggestedUrl,
+      previewUrl: AppConfig.instance.appInfo.suggestedUrl,
       duration: 107,
     );
 
@@ -327,9 +327,9 @@ class ItemlistController extends GetxController implements ItemlistService {
 
   @override
   Future<void> setPrivacyOption() async {
-    AppUtilities.logger.t('setPrivacyOption for Playlist');
+    AppConfig.logger.t('setPrivacyOption for Playlist');
     isPublicNewItemlist.value = !isPublicNewItemlist.value;
-    AppUtilities.logger.d("New Itemlist would be ${isPublicNewItemlist.value ? 'Public':'Private'}");
+    AppConfig.logger.d("New Itemlist would be ${isPublicNewItemlist.value ? 'Public':'Private'}");
     update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
   }
 
