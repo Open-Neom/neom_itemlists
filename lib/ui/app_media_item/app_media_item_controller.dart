@@ -1,25 +1,25 @@
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/app_flavour.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/commons/utils/mappers/app_media_item_mapper.dart';
-import 'package:neom_core/core/app_config.dart';
-import 'package:neom_core/core/data/api_services/push_notification/firebase_messaging_calls.dart';
-import 'package:neom_core/core/data/firestore/itemlist_firestore.dart';
-import 'package:neom_core/core/data/firestore/profile_firestore.dart';
-import 'package:neom_core/core/data/implementations/user_controller.dart';
-import 'package:neom_core/core/domain/model/app_media_item.dart';
-import 'package:neom_core/core/domain/model/app_release_item.dart';
-import 'package:neom_core/core/domain/model/band.dart';
-import 'package:neom_core/core/domain/model/item_list.dart';
-import 'package:neom_core/core/utils/enums/app_in_use.dart';
-import 'package:neom_core/core/utils/enums/app_item_state.dart';
-import 'package:neom_core/core/utils/enums/app_media_source.dart';
-import 'package:neom_core/core/utils/enums/itemlist_type.dart';
-import 'package:neom_core/core/utils/enums/owner_type.dart';
-import 'package:neom_core/core/utils/enums/push_notification_type.dart';
+import 'package:neom_commons/app_flavour.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/mappers/app_media_item_mapper.dart';
+import 'package:neom_core/app_config.dart';
+import 'package:neom_core/data/api_services/push_notification/firebase_messaging_calls.dart';
+import 'package:neom_core/data/firestore/itemlist_firestore.dart';
+import 'package:neom_core/data/firestore/profile_firestore.dart';
+import 'package:neom_core/data/implementations/user_controller.dart';
+import 'package:neom_core/domain/model/app_media_item.dart';
+import 'package:neom_core/domain/model/app_release_item.dart';
+import 'package:neom_core/domain/model/band.dart';
+import 'package:neom_core/domain/model/item_list.dart';
+import 'package:neom_core/utils/enums/app_in_use.dart';
+import 'package:neom_core/utils/enums/app_item_state.dart';
+import 'package:neom_core/utils/enums/app_media_source.dart';
+import 'package:neom_core/utils/enums/itemlist_type.dart';
+import 'package:neom_core/utils/enums/owner_type.dart';
+import 'package:neom_core/utils/enums/push_notification_type.dart';
 
 import '../../domain/use_cases/app_item_service.dart';
+import '../../utils/constants/itemlist_translation_constants.dart';
 import '../itemlist_controller.dart';
 
 class AppMediaItemController extends GetxController implements AppItemService {
@@ -76,7 +76,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
         AppConfig.logger.i("ItemlistItemController Init ready with no itemlist");
       }
 
-      if(AppFlavour.appInUse == AppInUse.c) {
+      if(AppConfig.instance.appInUse == AppInUse.c) {
         isFixed = true;
       }
     } catch (e) {
@@ -156,7 +156,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
                 fromProfile: userController.profile,
                 toProfileId: '',
                 notificationType: PushNotificationType.appItemAdded,
-                title: AppTranslationConstants.addedAppItemToList,
+                title: ItemlistTranslationConstants.addedAppItemToList,
                 referenceId: appMediaItem.id,
                 imgUrl: appMediaItem.imgUrl,
             );
@@ -258,7 +258,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
     if(appMediaItem.imgUrl.isEmpty && itemlist.imgUrl.isNotEmpty) appMediaItem.imgUrl = itemlist.imgUrl;
 
     ///DELETE SWITCH WHEN READLIST IS APART
-    switch(AppFlavour.appInUse) {
+    switch(AppConfig.instance.appInUse) {
       case AppInUse.c:
         Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
         break;

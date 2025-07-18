@@ -5,8 +5,8 @@ homepage: https://github.com/Cyberneom/neom_itemlists
 publish_to: 'none'
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=1.17.0"
+  sdk: ">=3.4.0 <4.0.0"
+  flutter: ">=3.19.0"
 
 dependencies:
   flutter:
@@ -18,13 +18,6 @@ dependencies:
   neom_commons:
     git:
       url: git@github.com:Cyberneom/neom_commons.git
-  neom_events:
-    git:
-      url: git@github.com:Cyberneom/neom_events.git
-  neom_media_player:
-    git:
-      url: https://github.com/Cyberneom/neom_media_player.git
-
 
 dev_dependencies:
   flutter_test:

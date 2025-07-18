@@ -1,5 +1,5 @@
-import 'package:neom_core/core/domain/model/app_media_item.dart';
-import 'package:neom_core/core/utils/enums/app_item_state.dart';
+import 'package:neom_core/domain/model/app_media_item.dart';
+import 'package:neom_core/utils/enums/app_item_state.dart';
 
 abstract class AppItemService {
 

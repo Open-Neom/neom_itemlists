@@ -1,26 +1,27 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/utils/app_utilities.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/commons/utils/mappers/app_media_item_mapper.dart';
-import 'package:neom_core/core/app_config.dart';
-import 'package:neom_core/core/app_properties.dart';
-import 'package:neom_core/core/data/firestore/app_media_item_firestore.dart';
-import 'package:neom_core/core/data/firestore/app_release_item_firestore.dart';
-import 'package:neom_core/core/data/implementations/user_controller.dart';
-import 'package:neom_core/core/domain/model/app_media_item.dart';
-import 'package:neom_core/core/domain/model/app_profile.dart';
-import 'package:neom_core/core/domain/model/app_release_item.dart';
-import 'package:neom_core/core/domain/model/band.dart';
-import 'package:neom_core/core/domain/model/item_list.dart';
-import 'package:neom_core/core/utils/constants/app_route_constants.dart';
-import 'package:neom_core/core/utils/enums/app_currency.dart';
-import 'package:neom_core/core/utils/enums/app_item_state.dart';
-import 'package:neom_core/core/utils/enums/owner_type.dart';
-import 'package:neom_events/events/ui/event_details_controller.dart';
+import 'package:neom_commons/utils/app_utilities.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/datetime_utilities.dart';
+import 'package:neom_commons/utils/mappers/app_media_item_mapper.dart';
+import 'package:neom_core/app_config.dart';
 
+import 'package:neom_core/data/firestore/app_media_item_firestore.dart';
+import 'package:neom_core/data/firestore/app_release_item_firestore.dart';
+import 'package:neom_core/data/implementations/user_controller.dart';
+import 'package:neom_core/domain/model/app_media_item.dart';
+import 'package:neom_core/domain/model/app_profile.dart';
+import 'package:neom_core/domain/model/app_release_item.dart';
+import 'package:neom_core/domain/model/band.dart';
+import 'package:neom_core/domain/model/item_found_in_list.dart';
+import 'package:neom_core/domain/model/item_list.dart';
+import 'package:neom_core/domain/use_cases/event_details_service.dart';
+import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/utils/enums/app_currency.dart';
+import 'package:neom_core/utils/enums/app_item_state.dart';
+import 'package:neom_core/utils/enums/owner_type.dart';
+
+import '../../utils/constants/itemlist_translation_constants.dart';
 import 'app_media_item_controller.dart';
 
 
@@ -39,13 +40,9 @@ class AppMediaItemDetailsController extends GetxController {
   final RxMap<String, Itemlist> itemlists = <String, Itemlist>{}.obs;
 
   final RxBool isLoading = true.obs;
-  final RxBool isButtonDisabled = false.obs;
   final RxBool existsInItemlist = false.obs;
   final RxBool isPlaying = false.obs;
   final RxBool wasAdded = false.obs;
-
-  ///VerifY IF NEEDED with music player
-  final AudioPlayer audioPlayer = AudioPlayer(playerId: AppProperties.getAppName());
 
   AppReleaseItem releasedItem = AppReleaseItem();
   String releasedItemId = "";
@@ -66,9 +63,6 @@ class AppMediaItemDetailsController extends GetxController {
       band = userController.band;
       itemlistOwner = userController.itemlistOwner;
 
-      audioPlayer.setReleaseMode(ReleaseMode.stop);
-      audioPlayer.stop();
-      audioPlayer.release();
       if(itemlistOwner == OwnerType.profile) {
         itemlists.assignAll(profile.itemlists ?? {});
       } else if(itemlistOwner == OwnerType.band) {
@@ -129,7 +123,7 @@ class AppMediaItemDetailsController extends GetxController {
 
       if(itemlists.isEmpty) {
         Get.offAllNamed(AppRouteConstants.home);
-        AppUtilities.showSnackBar(title: AppTranslationConstants.noItemlistsMsg, message: AppTranslationConstants.noItemlistsMsg2);
+        AppUtilities.showSnackBar(title: ItemlistTranslationConstants.noItemlistsMsg, message: ItemlistTranslationConstants.noItemlistsMsg2);
       }
     } catch(e) {
       AppConfig.logger.e(e.toString());
@@ -143,8 +137,6 @@ class AppMediaItemDetailsController extends GetxController {
   void dispose() {
     super.dispose();
     clear();
-    audioPlayer.stop();
-    audioPlayer.release();
     isPlaying.value = false;
   }
 
@@ -171,7 +163,7 @@ class AppMediaItemDetailsController extends GetxController {
 
     try {
       appMediaItem = await AppMediaItemFirestore().retrieve(itemId);
-      durationMinutes.value = AppUtilities.getDurationInMinutes(appMediaItem.duration);
+      durationMinutes.value = DateTimeUtilities.getDurationInMinutes(appMediaItem.duration);
     } catch (e) {
       AppConfig.logger.d(e.toString());
     }
@@ -181,77 +173,68 @@ class AppMediaItemDetailsController extends GetxController {
 
   Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0}) async {
 
-    if(!isButtonDisabled.value) {
+    isLoading.value = true;
+    update([AppPageIdConstants.appItemDetails]);
 
-      isButtonDisabled.value = true;
-      isLoading.value = true;
-      update([AppPageIdConstants.appItemDetails]);
+    AppConfig.logger.i("AppMediaItem ${appMediaItem.name} would be added as $appItemState for Itemlist $itemlistId");
 
-      AppConfig.logger.i("AppMediaItem ${appMediaItem.name} would be added as $appItemState for Itemlist $itemlistId");
+    if(fanItemState > 0) appItemState.value = fanItemState;
+    if(itemlistId.isEmpty) itemlistId.value = itemlists.values.first.id;
 
-      if(fanItemState > 0) appItemState.value = fanItemState;
-      if(itemlistId.isEmpty) itemlistId.value = itemlists.values.first.id;
+    isPlaying.value = false;
 
-      await audioPlayer.stop();
-      isPlaying.value = false;
+    AppMediaItemController appMediaItemController;
 
-      AppMediaItemController appMediaItemController;
-
-      try {
-        appMediaItemController = Get.find<AppMediaItemController>();
-      } catch (e) {
-        appMediaItemController = Get.put(AppMediaItemController());
-      }
-
-      try {
-        AppMediaItemFirestore().existsOrInsert(appMediaItem);
-        if(!existsInItemlist.value) {
-          appMediaItem.state = appItemState.value;
-
-          if(await appMediaItemController.addItemToItemlist(appMediaItem, itemlistId.value)){
-            AppConfig.logger.d("Setting existsInItemlist and wasAdded true");
-            existsInItemlist.value = true;
-            wasAdded.value = true;
-          }
-        }
-
-
-      } catch (e) {
-        AppConfig.logger.d(e.toString());
-      }
-
-      update([AppPageIdConstants.itemlistItem,
-        AppPageIdConstants.itemlist,
-        AppPageIdConstants.appItemDetails,
-        AppPageIdConstants.profile]);
-
-      try {
-        if(itemlistOwner == OwnerType.profile) {
-          if(Get.find<EventDetailsController>().initialized) {
-            Get.find<EventDetailsController>().addToMatchedItems(appMediaItem);
-            Navigator.of(context).popUntil(ModalRoute.withName(AppRouteConstants.eventDetails));
-          } else {
-            Get.offAllNamed(AppRouteConstants.home);
-            Get.toNamed(AppRouteConstants.listItems);
-          }
-        } else {
-          Get.offAllNamed(AppRouteConstants.home);
-          Get.toNamed(AppRouteConstants.bandsRoom);
-          Get.toNamed(AppRouteConstants.bandLists);
-        }
-
-      } catch (e) {
-        Get.offAllNamed(AppRouteConstants.home);
-        Get.toNamed(AppRouteConstants.listItems);
-      }
+    if(Get.isRegistered<AppMediaItemController>()) {
+      appMediaItemController = Get.find<AppMediaItemController>();
+    } else {
+      appMediaItemController = Get.put(AppMediaItemController());
     }
 
-  }
+    try {
+      AppMediaItemFirestore().existsOrInsert(appMediaItem);
+      if(!existsInItemlist.value) {
+        appMediaItem.state = appItemState.value;
+        if(await appMediaItemController.addItemToItemlist(appMediaItem, itemlistId.value)){
+          AppConfig.logger.d("Setting existsInItemlist and wasAdded true");
+          existsInItemlist.value = true;
+          wasAdded.value = true;
+        }
+      }
+
+
+    } catch (e) {
+      AppConfig.logger.d(e.toString());
+    }
+
+    update([AppPageIdConstants.itemlistItem, AppPageIdConstants.itemlist,
+      AppPageIdConstants.appItemDetails, AppPageIdConstants.profile]);
+
+    try {
+      if(itemlistOwner == OwnerType.profile) {
+        EventDetailsService? eventDetailsService = Get.find<EventDetailsService?>();
+        if(eventDetailsService != null) {
+          eventDetailsService.addToMatchedItems(appMediaItem);
+          Navigator.of(context).popUntil(ModalRoute.withName(AppRouteConstants.eventDetails));
+        } else {
+          Get.offAllNamed(AppRouteConstants.home);
+          Get.toNamed(AppRouteConstants.listItems);
+        }
+      } else {
+        Get.offAllNamed(AppRouteConstants.home);
+        Get.toNamed(AppRouteConstants.bandsRoom);
+        Get.toNamed(AppRouteConstants.bandLists);
+      }
+    } catch (e) {
+      Get.offAllNamed(AppRouteConstants.home);
+      Get.toNamed(AppRouteConstants.listItems);
+    }
+
+}
 
   Future<void> removeItem() async {
     AppConfig.logger.d("removing Item ${appMediaItem.toString()} from itemlist");
 
-    await audioPlayer.stop();
     isPlaying.value = false;
 
     AppMediaItemController appMediaItemController;
@@ -280,31 +263,32 @@ class AppMediaItemDetailsController extends GetxController {
     AppConfig.logger.d("Verifying if item already exists in itemlists");
     bool itemAlreadyInList = false;
 
-    itemlists.forEach((key, iList) {
-      for (var item in iList.appMediaItems!) {
-        if (item.id == appMediaItem.id) {
-          itemAlreadyInList = true;
-          appMediaItem.state = item.state;
-          itemlistId.value = iList.id;
-        }
-      }
-    });
+    ItemFoundInList? itemFoundInList = AppUtilities.getItemFoundInList(itemlists.values.toList(), appMediaItem.id);
+
+    if(itemFoundInList != null) {
+      itemAlreadyInList = true;
+      itemlistId.value = itemFoundInList.listId;
+      appMediaItem.state = itemFoundInList.itemState;
+      AppConfig.logger.d("Item already exists in itemlist: ${itemlistId.value} with state: ${appMediaItem.state}");
+    }
 
     AppConfig.logger.d("Item already exists in itemlists: $itemAlreadyInList");
     return itemAlreadyInList;
   }
 
+  //TODO
   Future<void> playPreview() async {
 
     AppConfig.logger.d("Previewing appMediaItem ${appMediaItem.name}");
 
     try {
-      audioPlayer.onDurationChanged.listen((duration) {
-        AppConfig.logger.i(duration);
-        durationMinutes.value = AppUtilities.getDurationInMinutes(duration.inMilliseconds);
-      });
-
-      await audioPlayer.play(UrlSource(appMediaItem.url));
+      ///DEPRECATED - INTEGRATE WITH NEOM AUDIO PLAYER SERVICE AS CONTRACT
+      // audioPlayer.onDurationChanged.listen((duration) {
+      //   AppConfig.logger.i(duration);
+      //   durationMinutes.value = AppUtilities.getDurationInMinutes(duration.inMilliseconds);
+      // });
+      //
+      // await audioPlayer.play(UrlSource(appMediaItem.url));
 
 
       isPlaying.value = true;
@@ -317,7 +301,8 @@ class AppMediaItemDetailsController extends GetxController {
 
   Future<void> pausePreview() async {
     try {
-      await audioPlayer.pause();
+      ///DEPRECATED - INTEGRATE WITH NEOM AUDIO PLAYER SERVICE AS CONTRACT
+      // await audioPlayer.pause();
       isPlaying.value = false;
     } catch(e) {
       AppConfig.logger.e(e.toString());
@@ -331,8 +316,9 @@ class AppMediaItemDetailsController extends GetxController {
     AppConfig.logger.d("Stopping appMediaItem ${appMediaItem.name}");
 
     try {
-      await audioPlayer.stop();
-      await audioPlayer.release();
+      ///DEPRECATED - INTEGRATE WITH NEOM AUDIO PLAYER SERVICE AS CONTRACT
+      // await audioPlayer.stop();
+      // await audioPlayer.release();
       isPlaying.value = false;
     } catch(e) {
       AppConfig.logger.e(e.toString());

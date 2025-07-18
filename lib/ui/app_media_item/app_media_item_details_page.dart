@@ -1,22 +1,25 @@
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/ui/theme/app_color.dart';
-import 'package:neom_commons/commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/commons/ui/widgets/appbar_child.dart';
-import 'package:neom_commons/commons/ui/widgets/handled_cached_network_image.dart';
-import 'package:neom_commons/commons/ui/widgets/rating_heart_bar.dart';
-import 'package:neom_commons/commons/utils/app_utilities.dart';
-import 'package:neom_commons/commons/utils/constants/app_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/commons/utils/constants/message_translation_constants.dart';
-import 'package:neom_core/core/utils/constants/core_constants.dart';
-import 'package:neom_core/core/utils/core_utilities.dart';
-import 'package:neom_core/core/utils/enums/app_item_state.dart';
-import 'package:neom_core/core/utils/enums/profile_type.dart';
+import 'package:neom_commons/ui/theme/app_color.dart';
+import 'package:neom_commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/ui/widgets/appbar_child.dart';
+import 'package:neom_commons/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
+import 'package:neom_commons/utils/app_utilities.dart';
+import 'package:neom_commons/utils/constants/app_constants.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
+import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/utils/constants/core_constants.dart';
+import 'package:neom_core/utils/core_utilities.dart';
+import 'package:neom_core/utils/enums/app_item_state.dart';
+import 'package:neom_core/utils/enums/profile_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import '../../utils/constants/itemlist_translation_constants.dart';
 import 'app_media_item_details_controller.dart';
 
 class AppMediaItemDetailsPage extends StatelessWidget {
@@ -104,8 +107,8 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                               _.isPlaying.value ? await _.pausePreview() : await _.playPreview();
                             } else {
                               AppUtilities.showSnackBar(
-                                  title: AppTranslationConstants.noAvailablePreviewUrl,
-                                  message: AppTranslationConstants.noAvailablePreviewUrlMsg
+                                  title: CommonTranslationConstants.noAvailablePreviewUrl,
+                                  message: ItemlistTranslationConstants.noAvailablePreviewUrlMsg
                               );
                             }
                           }
@@ -124,7 +127,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                         child: Row(
                           children: [
                             const Icon(Icons.add, color: Colors.grey, size: 25),
-                            _.existsInItemlist.value ? Text(AppTranslationConstants.removeFromItemlist.tr)
+                            _.existsInItemlist.value ? Text(CommonTranslationConstants.removeFromItemlist.tr)
                                 : Text(AppTranslationConstants.releaseItem.tr)],
                         ),
                       onPressed: () async => {
@@ -137,7 +140,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                               backgroundColor: AppColor.main50,
                               titleStyle: const TextStyle(color: Colors.white)
                             ),
-                            title: AppTranslationConstants.appItemPrefs.tr,
+                            title: CommonTranslationConstants.appItemPrefs.tr,
                             content: Column(
                               children: <Widget>[
                                 _.userController.profile.type == ProfileType.appArtist ?
@@ -212,7 +215,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                   _.userController.profile.type == ProfileType.appArtist ?
                                   (_.appItemState > 0 ? await _.addItemlistItem(context, fanItemState: _.appItemState.value) :
                                     AppUtilities.showSnackBar(
-                                      title: AppTranslationConstants.appItemPrefs.tr,
+                                      title: CommonTranslationConstants.appItemPrefs.tr,
                                       message: MessageTranslationConstants.selectItemStateMsg.tr,
                                     )
                                   ) : await _.addItemlistItem(context,
@@ -241,7 +244,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                           Text(AppTranslationConstants.goHome.tr),]
                         ),
                       ),
-                      onPressed: () => AppUtilities.goHome()
+                      onPressed: () => Get.offAllNamed(AppRouteConstants.home)
                   )
                 ) : const SizedBox.shrink()),
               ]

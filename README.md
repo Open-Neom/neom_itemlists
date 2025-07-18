@@ -1,2 +1,2 @@
 # neom_itemlists
-Itemlists for Cyberneom
+Itemlists for Open Neom

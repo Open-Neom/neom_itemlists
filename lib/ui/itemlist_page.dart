@@ -2,19 +2,21 @@
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/app_flavour.dart';
-import 'package:neom_commons/commons/ui/theme/app_color.dart';
-import 'package:neom_commons/commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/commons/utils/app_utilities.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_core/core/app_config.dart';
-import 'package:neom_core/core/utils/constants/app_route_constants.dart';
-import 'package:neom_core/core/utils/enums/app_in_use.dart';
-import 'package:neom_core/core/utils/enums/media_search_type.dart';
-import 'package:neom_core/core/utils/enums/owner_type.dart';
+import 'package:neom_commons/app_flavour.dart';
+import 'package:neom_commons/ui/theme/app_color.dart';
+import 'package:neom_commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/utils/app_utilities.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
+import 'package:neom_core/app_config.dart';
+import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/utils/enums/app_in_use.dart';
+import 'package:neom_core/utils/enums/media_search_type.dart';
+import 'package:neom_core/utils/enums/owner_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import '../utils/constants/itemlist_translation_constants.dart';
 import 'itemlist_controller.dart';
 import 'widgets/itemlist_widgets.dart';
 
@@ -41,15 +43,15 @@ class ItemlistPage extends StatelessWidget {
                       );
                     } else {
                       AppUtilities.showSnackBar(
-                          title: AppTranslationConstants.noItemlistsMsg,
-                          message: AppTranslationConstants.noItemlistsMsg2
+                          title: ItemlistTranslationConstants.noItemlistsMsg,
+                          message: ItemlistTranslationConstants.noItemlistsMsg2
                       );
                     }
                   },
                 ),
               ),
             ],
-            title: Text(AppTranslationConstants.myItemlists.tr,
+            title: Text(ItemlistTranslationConstants.myItemlists.tr,
               style: TextStyle(
                 fontSize: 18,
                 color: Theme.of(context).textTheme.bodyLarge!.color,
@@ -83,7 +85,7 @@ class ItemlistPage extends StatelessWidget {
             : Column(
               children: [
                 ListTile(
-                  title: Text(AppTranslationConstants.createItemlist.tr),
+                  title: Text(ItemlistTranslationConstants.createItemlist.tr),
                   leading: SizedBox.square(
                     dimension: 40,
                     child: Center(
@@ -109,11 +111,11 @@ class ItemlistPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                AppFlavour.appInUse == AppInUse.e ?
+                AppConfig.instance.appInUse == AppInUse.e ?
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    AppFlavour.appInUse == AppInUse.e
+                    AppConfig.instance.appInUse == AppInUse.e
                     ///DEPRECATED || _.outOfSync
                         ? SizedBox(
                       child: DefaultTextStyle(
@@ -124,7 +126,7 @@ class ItemlistPage extends StatelessWidget {
                           repeatForever: true,
                           animatedTexts: [
                             FlickerAnimatedText(
-                                AppTranslationConstants.suggestedReading.tr)
+                                CommonTranslationConstants.suggestedReading.tr)
                           ],
                           onTap: () {
                             Get.toNamed(AppRouteConstants.pdfViewer,
@@ -144,7 +146,7 @@ class ItemlistPage extends StatelessWidget {
                     ),
                   ],
                 ) : const SizedBox.shrink(),
-                if(_.ownerType == OwnerType.profile && AppFlavour.appInUse == AppInUse.g) AppTheme.heightSpace75,
+                if(_.ownerType == OwnerType.profile && AppConfig.instance.appInUse == AppInUse.g) AppTheme.heightSpace75,
               ]
           ),),
         )
@@ -156,7 +158,7 @@ class ItemlistPage extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColor.main75,
-        title: Text(AppTranslationConstants.addNewItemlist.tr,),
+        title: Text(CommonTranslationConstants.addNewItemlist.tr,),
         content: Obx(() => SizedBox(
           height: AppTheme.fullHeight(context)*0.3,
           child: Column(
@@ -166,7 +168,7 @@ class ItemlistPage extends StatelessWidget {
               TextField(
                 controller: _.newItemlistNameController,
                 decoration: InputDecoration(
-                  labelText: AppTranslationConstants.itemlistName.tr,
+                  labelText: CommonTranslationConstants.itemlistName.tr,
                 ),
               ),
               TextField(

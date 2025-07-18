@@ -3,24 +3,26 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/app_flavour.dart';
-import 'package:neom_commons/commons/ui/theme/app_color.dart';
-import 'package:neom_commons/commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/commons/ui/widgets/handled_cached_network_image.dart';
-import 'package:neom_commons/commons/ui/widgets/rating_heart_bar.dart';
-import 'package:neom_commons/commons/utils/app_alerts.dart';
-import 'package:neom_commons/commons/utils/app_utilities.dart';
-import 'package:neom_commons/commons/utils/constants/app_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_core/core/app_properties.dart';
-import 'package:neom_core/core/domain/model/app_media_item.dart';
-import 'package:neom_core/core/domain/model/item_list.dart';
-import 'package:neom_core/core/utils/constants/app_route_constants.dart';
-import 'package:neom_core/core/utils/core_utilities.dart';
-import 'package:neom_core/core/utils/enums/app_in_use.dart';
-import 'package:neom_core/core/utils/enums/app_item_state.dart';
-import 'package:neom_core/core/utils/enums/media_search_type.dart';
-import 'package:neom_core/core/utils/enums/profile_type.dart';
+import 'package:neom_commons/app_flavour.dart';
+import 'package:neom_commons/ui/theme/app_color.dart';
+import 'package:neom_commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
+import 'package:neom_commons/utils/app_alerts.dart';
+import 'package:neom_commons/utils/constants/app_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
+import 'package:neom_commons/utils/text_utilities.dart';
+import 'package:neom_core/app_config.dart';
+import 'package:neom_core/app_properties.dart';
+import 'package:neom_core/domain/model/app_media_item.dart';
+import 'package:neom_core/domain/model/item_list.dart';
+import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/utils/core_utilities.dart';
+import 'package:neom_core/utils/enums/app_in_use.dart';
+import 'package:neom_core/utils/enums/app_item_state.dart';
+import 'package:neom_core/utils/enums/media_search_type.dart';
+import 'package:neom_core/utils/enums/profile_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../app_media_item/app_media_item_controller.dart';
@@ -47,12 +49,12 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
         ),
         title: Row(
             children: <Widget>[
-              Text(AppUtilities.capitalizeFirstLetter(itemlist.name.length > AppConstants.maxItemlistNameLength
+              Text(TextUtilities.capitalizeFirstLetter(itemlist.name.length > AppConstants.maxItemlistNameLength
                   ? "${itemlist.name.substring(0,AppConstants.maxItemlistNameLength)}..."
                   : itemlist.name)),
               ///DEPRECATE .isFav ? const Icon(Icons.favorite, size: 10,) : SizedBox.shrink()
             ]),
-        subtitle: itemlist.description.isNotEmpty ? Text(AppUtilities.capitalizeFirstLetter(itemlist.description), maxLines: 3, overflow: TextOverflow.ellipsis,) : null,
+        subtitle: itemlist.description.isNotEmpty ? Text(TextUtilities.capitalizeFirstLetter(itemlist.description), maxLines: 3, overflow: TextOverflow.ellipsis,) : null,
         trailing: ActionChip(
           labelPadding: EdgeInsets.zero,
           backgroundColor: AppColor.main25,
@@ -64,7 +66,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           ),
           label: Icon(AppFlavour.getAppItemIcon(), color: AppColor.white80),
           onPressed: () async {
-            if(AppFlavour.appInUse == AppInUse.c || !itemlist.isModifiable) {
+            if(AppConfig.instance.appInUse == AppInUse.c || !itemlist.isModifiable) {
               await _.gotoItemlistItems(itemlist);
             } else {
               Get.toNamed(AppRouteConstants.itemSearch,
@@ -81,7 +83,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
               context: context,
               builder: (ctx) => AlertDialog(
             backgroundColor: AppColor.main75,
-            title: Text(AppTranslationConstants.itemlistName.tr,),
+            title: Text(CommonTranslationConstants.itemlistName.tr,),
             content: SizedBox(
               height: AppTheme.fullHeight(context)*0.25,
               child: Obx(()=> _.isLoading.value ? const Center(child: CircularProgressIndicator())
@@ -127,8 +129,8 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
                 onPressed: () async {
                   if(_.itemlists.length == 1) {
                     AppAlerts.showAlert(context,
-                        title: AppTranslationConstants.itemlistPrefs.tr,
-                        message: AppTranslationConstants.cantRemoveMainItemlist.tr);
+                        title: CommonTranslationConstants.itemlistPrefs.tr,
+                        message: CommonTranslationConstants.cantRemoveMainItemlist.tr);
                   } else {
                     await _.deleteItemlist(itemlist);
                     Navigator.pop(ctx);
@@ -162,13 +164,13 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                   width: AppTheme.fullWidth(context)*0.4,
                   child: Text(appMediaItem.name, maxLines: 5, overflow: TextOverflow.ellipsis,),
                 ),
-                (AppFlavour.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.appArtist && !_.isFixed)) ?
+                (AppConfig.instance.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.appArtist && !_.isFixed)) ?
                 RatingHeartBar(state: appMediaItem.state.toDouble()) : const SizedBox.shrink(),
               ]
           ),
           subtitle: SizedBox(
             width: AppTheme.fullWidth(context)*0.4,
-            child: (AppFlavour.appInUse == AppInUse.c && (appMediaItem.description?.isNotEmpty ?? false)) ?
+            child: (AppConfig.instance.appInUse == AppInUse.c && (appMediaItem.description?.isNotEmpty ?? false)) ?
             Text(appMediaItem.description ?? '', textAlign: TextAlign.justify,) :
             Text(appMediaItem.artist, maxLines: 2, overflow: TextOverflow.ellipsis,),
           ),
@@ -182,10 +184,10 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                 Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
               }
           ),
-          onTap: () => AppFlavour.appInUse == AppInUse.c || !_.isFixed ? _.getItemlistItemDetails(appMediaItem) : {},
-          onLongPress: () => _.itemlist.isModifiable && (AppFlavour.appInUse != AppInUse.c || !_.isFixed) ? Alert(
+          onTap: () => AppConfig.instance.appInUse == AppInUse.c || !_.isFixed ? _.getItemlistItemDetails(appMediaItem) : {},
+          onLongPress: () => _.itemlist.isModifiable && (AppConfig.instance.appInUse != AppInUse.c || !_.isFixed) ? Alert(
               context: context,
-              title: AppTranslationConstants.appItemPrefs.tr,
+              title: CommonTranslationConstants.appItemPrefs.tr,
               style: AlertStyle(
                   backgroundColor: AppColor.main50,
                   titleStyle: const TextStyle(color: Colors.white)

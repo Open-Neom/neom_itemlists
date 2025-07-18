@@ -1,16 +1,17 @@
-
 import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/app_flavour.dart';
-import 'package:neom_commons/commons/ui/theme/app_color.dart';
-import 'package:neom_commons/commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_core/core/utils/enums/itemlist_type.dart';
-import 'package:neom_core/core/utils/enums/owner_type.dart';
+import 'package:neom_commons/app_flavour.dart';
+import 'package:neom_commons/ui/theme/app_color.dart';
+import 'package:neom_commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
+import 'package:neom_core/utils/enums/itemlist_type.dart';
+import 'package:neom_core/utils/enums/owner_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
+import '../../utils/constants/itemlist_translation_constants.dart';
 import '../itemlist_controller.dart';
 import 'itemlist_widgets.dart';
 
@@ -31,7 +32,7 @@ class ReadlistPage extends StatelessWidget {
             : Column(
               children: [
                 ListTile(
-                  title: Text(AppTranslationConstants.createReadlist.tr),
+                  title: Text(ItemlistTranslationConstants.createReadlist.tr),
                   leading: SizedBox.square(
                     dimension: 40,
                     child: Center(
@@ -68,7 +69,7 @@ class ReadlistPage extends StatelessWidget {
                         child: AnimatedTextKit(
                           repeatForever: true,
                           animatedTexts: [
-                            FlickerAnimatedText(AppTranslationConstants.suggestedReading.tr)
+                            FlickerAnimatedText(CommonTranslationConstants.suggestedReading.tr)
                           ],
                           onTap: () {
                             _.gotoSuggestedItem();
@@ -98,7 +99,7 @@ class ReadlistPage extends StatelessWidget {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColor.main75,
-        title: Text(AppTranslationConstants.addNewItemlist.tr,),
+        title: Text(CommonTranslationConstants.addNewItemlist.tr,),
         content: Obx(() => SizedBox(
           height: AppTheme.fullHeight(context)*0.3,
           child: Column(
@@ -108,7 +109,7 @@ class ReadlistPage extends StatelessWidget {
               TextField(
                 controller: _.newItemlistNameController,
                 decoration: InputDecoration(
-                  labelText: AppTranslationConstants.itemlistName.tr,
+                  labelText: CommonTranslationConstants.itemlistName.tr,
                 ),
               ),
               TextField(

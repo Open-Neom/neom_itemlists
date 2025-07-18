@@ -1,25 +1,29 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/commons/app_flavour.dart';
-import 'package:neom_commons/commons/utils/app_utilities.dart';
-import 'package:neom_commons/commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/commons/utils/constants/app_translation_constants.dart';
-import 'package:neom_commons/commons/utils/constants/message_translation_constants.dart';
-import 'package:neom_core/core/app_config.dart';
-import 'package:neom_core/core/data/firestore/itemlist_firestore.dart';
-import 'package:neom_core/core/data/firestore/profile_firestore.dart';
-import 'package:neom_core/core/data/implementations/user_controller.dart';
-import 'package:neom_core/core/domain/model/app_profile.dart';
-import 'package:neom_core/core/domain/model/app_release_item.dart';
-import 'package:neom_core/core/domain/model/band.dart';
-import 'package:neom_core/core/domain/model/item_list.dart';
-import 'package:neom_core/core/domain/use_cases/itemlist_service.dart';
-import 'package:neom_core/core/utils/constants/app_route_constants.dart';
-import 'package:neom_core/core/utils/enums/app_in_use.dart';
-import 'package:neom_core/core/utils/enums/itemlist_type.dart';
-import 'package:neom_core/core/utils/enums/owner_type.dart';
+import 'package:neom_commons/utils/app_utilities.dart';
+import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
+import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
+import 'package:neom_core/app_config.dart';
+import 'package:neom_core/data/firestore/app_media_item_firestore.dart';
+import 'package:neom_core/data/firestore/itemlist_firestore.dart';
+import 'package:neom_core/data/firestore/profile_firestore.dart';
+import 'package:neom_core/data/implementations/user_controller.dart';
+import 'package:neom_core/domain/model/app_media_item.dart';
+import 'package:neom_core/domain/model/app_profile.dart';
+import 'package:neom_core/domain/model/app_release_item.dart';
+import 'package:neom_core/domain/model/band.dart';
+import 'package:neom_core/domain/model/item_found_in_list.dart';
+import 'package:neom_core/domain/model/item_list.dart';
+import 'package:neom_core/domain/use_cases/itemlist_service.dart';
+import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/utils/enums/app_in_use.dart';
+import 'package:neom_core/utils/enums/app_item_state.dart';
+import 'package:neom_core/utils/enums/itemlist_type.dart';
+import 'package:neom_core/utils/enums/owner_type.dart';
 
+import '../utils/constants/itemlist_translation_constants.dart';
 import 'app_media_item/app_media_item_controller.dart';
 
 class ItemlistController extends GetxController implements ItemlistService {
@@ -165,8 +169,8 @@ class ItemlistController extends GetxController implements ItemlistService {
 
           clearNewItemlist();
           AppUtilities.showSnackBar(
-              title: AppTranslationConstants.itemlistPrefs.tr,
-              message: AppTranslationConstants.itemlistCreated.tr
+              title: CommonTranslationConstants.itemlistPrefs.tr,
+              message: ItemlistTranslationConstants.itemlistCreated.tr
           );
         } else {
           AppConfig.logger.d("Something happens trying to insert itemlist");
@@ -177,7 +181,7 @@ class ItemlistController extends GetxController implements ItemlistService {
             : MessageTranslationConstants.pleaseAddDescription;
 
         AppUtilities.showSnackBar(
-          title: MessageTranslationConstants.addNewItemlist.tr,
+          title: CommonTranslationConstants.addNewItemlist.tr,
           message: MessageTranslationConstants.pleaseFillItemlistInfo.tr,
         );
       }
@@ -214,13 +218,13 @@ class ItemlistController extends GetxController implements ItemlistService {
         }
         itemlists.remove(itemlist.id);
         AppUtilities.showSnackBar(
-            title: AppTranslationConstants.itemlistPrefs.tr,
-            message: AppTranslationConstants.itemlistRemoved.tr
+            title: CommonTranslationConstants.itemlistPrefs.tr,
+            message: CommonTranslationConstants.itemlistRemoved.tr
         );
       } else {
         AppUtilities.showSnackBar(
-            title: AppTranslationConstants.itemlistPrefs.tr,
-            message: AppTranslationConstants.itemlistRemovedErrorMsg.tr
+            title: CommonTranslationConstants.itemlistPrefs.tr,
+            message: CommonTranslationConstants.itemlistRemovedErrorMsg.tr
         );
         AppConfig.logger.e("Something happens trying to remove itemlist");
       }
@@ -259,27 +263,27 @@ class ItemlistController extends GetxController implements ItemlistService {
           itemlists[itemlist.id] = itemlist;
           clearNewItemlist();
           AppUtilities.showSnackBar(
-              title: AppTranslationConstants.itemlistPrefs.tr,
-              message: AppTranslationConstants.itemlistUpdated.tr
+              title: CommonTranslationConstants.itemlistPrefs.tr,
+              message: CommonTranslationConstants.itemlistUpdated.tr
           );
         } else {
           AppConfig.logger.i("Something happens trying to update itemlist");
           AppUtilities.showSnackBar(
-              title: AppTranslationConstants.itemlistPrefs.tr,
-              message: AppTranslationConstants.itemlistUpdatedErrorMsg.tr
+              title: CommonTranslationConstants.itemlistPrefs.tr,
+              message: CommonTranslationConstants.itemlistUpdatedErrorMsg.tr
           );
         }
       } else {
         AppUtilities.showSnackBar(
-            title: AppTranslationConstants.itemlistPrefs.tr,
-            message: AppTranslationConstants.itemlistUpdateSameInfo.tr
+            title: CommonTranslationConstants.itemlistPrefs.tr,
+            message: CommonTranslationConstants.itemlistUpdateSameInfo.tr
         );
       }
     } catch (e) {
       AppConfig.logger.e(e.toString());
       AppUtilities.showSnackBar(
-          title: AppTranslationConstants.itemlistPrefs.tr,
-          message: AppTranslationConstants.itemlistUpdatedErrorMsg.tr
+          title: CommonTranslationConstants.itemlistPrefs.tr,
+          message: CommonTranslationConstants.itemlistUpdatedErrorMsg.tr
       );
     }
 
@@ -291,7 +295,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   @override
   Future<void> gotoItemlistItems(Itemlist itemlist) async {
 
-    if(AppFlavour.appInUse == AppInUse.c) {
+    if(AppConfig.instance.appInUse == AppInUse.c) {
       await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
     } else {
       AppMediaItemController appItemController;
@@ -331,6 +335,133 @@ class ItemlistController extends GetxController implements ItemlistService {
     isPublicNewItemlist.value = !isPublicNewItemlist.value;
     AppConfig.logger.d("New Itemlist would be ${isPublicNewItemlist.value ? 'Public':'Private'}");
     update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
+  }
+
+  ///NEW
+  ///
+  AppMediaItem appMediaItem = AppMediaItem();
+  final RxString itemlistId = "".obs;
+  final RxInt appItemState = 0.obs;
+  final RxBool existsInItemlist = false.obs;
+  final RxBool wasAdded = false.obs;
+  ItemFoundInList? itemFoundInList;
+
+  @override
+  Future<Itemlist> createBasicItemlist() async {
+    Itemlist newItemlist = Itemlist.createBasic(ItemlistTranslationConstants.myFirstPlaylist.tr, ItemlistTranslationConstants.myFirstPlaylistDesc.tr,
+        profile.id, profile.name, ItemlistType.playlist);
+
+    String listId = await ItemlistFirestore().insert(newItemlist);
+    newItemlist.id = listId;
+
+    return newItemlist;
+  }
+
+  @override
+  void setSelectedItemlist(String selectedItemlist){
+    AppConfig.logger.d("Setting selectedItemlist $selectedItemlist");
+    itemlistId.value  = selectedItemlist;
+    itemFoundInList = AppUtilities.getItemFoundInList(itemlists.values.toList(), appMediaItem.id);
+    existsInItemlist.value = itemFoundInList != null;
+    update([AppPageIdConstants.appItemDetails]);
+  }
+
+  @override
+  Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0, bool goHome = true}) async {
+    AppConfig.logger.t("addItemlistItem ${appMediaItem.id}");
+
+
+    if(existsInItemlist.value) {
+      AppUtilities.showSnackBar(message: '"${appMediaItem.name}" ${ItemlistTranslationConstants.isAlreadyInPlaylist.tr} ${itemFoundInList?.listName}');
+    } else {
+      isLoading.value = true;
+      update([AppPageIdConstants.appItemDetails]);
+      AppConfig.logger.i("AppMediaItem ${appMediaItem.name} would be added as $appItemState for Itemlist $itemlistId");
+
+      try {
+
+        if(fanItemState > 0) appItemState.value = fanItemState;
+        if(itemlistId.isEmpty) itemlistId.value = itemlists.values.first.id;
+
+        AppMediaItemController appMediaItemController;
+        if (Get.isRegistered<AppMediaItemController>()) {
+          appMediaItemController = Get.find<AppMediaItemController>();
+        } else {
+          appMediaItemController = Get.put(AppMediaItemController());
+        }
+
+        AppMediaItemFirestore().existsOrInsert(appMediaItem);
+
+        if(!existsInItemlist.value) {
+          appMediaItem.state = appItemState.value;
+          if(await appMediaItemController.addItemToItemlist(appMediaItem, itemlistId.value)){
+            AppConfig.logger.d("Setting existsInItemlist and wasAdded true");
+            existsInItemlist.value = true;
+            wasAdded.value = true;
+          }
+        }
+
+      } catch (e) {
+        AppConfig.logger.d(e.toString());
+      }
+
+      update([AppPageIdConstants.itemlistItem,
+        AppPageIdConstants.itemlist,
+        AppPageIdConstants.appItemDetails,
+        AppPageIdConstants.profile]);
+
+      try {
+        if(goHome) {
+          Get.offAllNamed(AppRouteConstants.home);
+        } else {
+          Navigator.pop(context);
+        }
+        AppUtilities.showSnackBar(
+            message: '"${appMediaItem.name}" ${ItemlistTranslationConstants.wasAddedToItemList.tr}.'
+        );
+      } catch (e) {
+        Get.offAllNamed(AppRouteConstants.home);
+        Get.toNamed(AppRouteConstants.listItems);
+      }
+    }
+
+  }
+
+  @override
+  int getItemState() {
+  AppConfig.logger.d("Getting appItemState $appItemState");
+    return appItemState.value;
+  }
+
+  @override
+  bool checkIsLoading() {
+    return isLoading.value;
+  }
+
+  @override
+  void setAppMediaItem(AppMediaItem item) {
+    AppConfig.logger.d("Setting appMediaItem $item");
+    appMediaItem = item;
+    update([AppPageIdConstants.appItemDetails]);
+  }
+
+  @override
+  String getSelectedItemlist() {
+    AppConfig.logger.d("Getting selectedItemlist $itemlistId");
+    return itemlistId.value;
+  }
+
+  @override
+  List<Itemlist> getItemlists() {
+    return itemlists.values.toList();
+  }
+
+  @override
+  void setAppItemState(AppItemState newState) {
+    appItemState.value = newState.value;
+    AppConfig.logger.d("Setting new appItemState $newState");
+    appItemState.value = newState.value;
+    update([AppPageIdConstants.appItemDetails]);
   }
 
 }
