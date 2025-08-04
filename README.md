@@ -28,7 +28,7 @@ Add to your `pubspec.yaml`:
 dependencies:
   neom_itemlists:
     git:
-      url: https://github.com/Cyberneom/neom_itemlists.git
+      url: https://github.com/Open-Neom/neom_itemlists.git
 
 Then, run flutter pub get in your project's root directory.
 

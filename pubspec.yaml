@@ -1,7 +1,7 @@
 name: neom_itemlists
 description: Itemlists for Open Neom.
 version: 1.4.0
-homepage: https://github.com/Cyberneom/neom_itemlists
+homepage: https://github.com/Open-Neom/neom_itemlists
 publish_to: 'none'
 
 environment:
@@ -14,10 +14,10 @@ dependencies:
 
   neom_core:
     git:
-      url: git@github.com:Cyberneom/neom_core.git
+      url: git@github.com:Open-Neom/neom_core.git
   neom_commons:
     git:
-      url: git@github.com:Cyberneom/neom_commons.git
+      url: git@github.com:Open-Neom/neom_commons.git
 
 dev_dependencies:
   flutter_test:
