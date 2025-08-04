@@ -6,7 +6,7 @@ import 'ui/itemlist_items_page.dart';
 import 'ui/itemlist_page.dart';
 import 'ui/widgets/readlist_page.dart';
 
-class ItemlistsRoutes {
+class ItemlistRoutes {
 
   static final List<GetPage<dynamic>> routes = [
     GetPage(

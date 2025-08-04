@@ -9,7 +9,6 @@ import 'package:neom_core/app_config.dart';
 import 'package:neom_core/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
-import 'package:neom_core/data/implementations/user_controller.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
 import 'package:neom_core/domain/model/app_release_item.dart';
@@ -17,6 +16,7 @@ import 'package:neom_core/domain/model/band.dart';
 import 'package:neom_core/domain/model/item_found_in_list.dart';
 import 'package:neom_core/domain/model/item_list.dart';
 import 'package:neom_core/domain/use_cases/itemlist_service.dart';
+import 'package:neom_core/domain/use_cases/user_service.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/app_item_state.dart';
@@ -28,7 +28,7 @@ import 'app_media_item/app_media_item_controller.dart';
 
 class ItemlistController extends GetxController implements ItemlistService {
 
-  final userController = Get.find<UserController>();
+  final userServiceImpl = Get.find<UserService>();
 
   Itemlist currentItemlist = Itemlist();
 
@@ -61,11 +61,11 @@ class ItemlistController extends GetxController implements ItemlistService {
     AppConfig.logger.t("onInit Itemlist Controller");
 
     try {
-      userController.itemlistOwner = OwnerType.profile;
-      profile = userController.profile;
+      userServiceImpl.itemlistOwnerType = OwnerType.profile;
+      profile = userServiceImpl.profile;
       ownerId = profile.id;
       ownerName = profile.name;
-      itemlistType = userController.defaultItemlistType;
+      itemlistType = ItemlistType.playlist;
 
       if(Get.arguments != null) {
         if(Get.arguments.isNotEmpty && Get.arguments[0] is Band) {
@@ -75,8 +75,8 @@ class ItemlistController extends GetxController implements ItemlistService {
             ownerName = band.name;
             ownerType = OwnerType.band;
 
-            userController.band = band;
-            userController.itemlistOwner = OwnerType.band;
+            userServiceImpl.band = band;
+            userServiceImpl.itemlistOwnerType = OwnerType.band;
           } else if(Get.arguments[0] is ItemlistType) {
             itemlistType = Get.arguments[0];
           }
@@ -158,11 +158,11 @@ class ItemlistController extends GetxController implements ItemlistService {
 
         if(newItemlistId.isNotEmpty){
           itemlists[newItemlistId] = newItemlist;
-          if(userController.profile.itemlists == null) {
-            userController.profile.itemlists = {};
-            userController.profile.itemlists![newItemlistId] = newItemlist;
+          if(userServiceImpl.profile.itemlists == null) {
+            userServiceImpl.profile.itemlists = {};
+            userServiceImpl.profile.itemlists![newItemlistId] = newItemlist;
           } else {
-            userController.profile.itemlists![newItemlistId] = newItemlist;
+            userServiceImpl.profile.itemlists![newItemlistId] = newItemlist;
           }
 
           AppConfig.logger.t("Itemlists $itemlists");
@@ -208,9 +208,9 @@ class ItemlistController extends GetxController implements ItemlistService {
 
           if(await ProfileFirestore().removeFavoriteItems(profile.id, appMediaItemsIds)) {
             for (var itemId in appMediaItemsIds) {
-              if (userController.profile.favoriteItems != null && userController.profile.favoriteItems!.isNotEmpty) {
+              if (userServiceImpl.profile.favoriteItems != null && userServiceImpl.profile.favoriteItems!.isNotEmpty) {
                 AppConfig.logger.d("Removing item from global state items for profile from userController");
-                userController.profile.favoriteItems!.remove(itemId);
+                userServiceImpl.profile.favoriteItems!.remove(itemId);
               }
             }
           }
@@ -224,7 +224,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       } else {
         AppUtilities.showSnackBar(
             title: CommonTranslationConstants.itemlistPrefs.tr,
-            message: CommonTranslationConstants.itemlistRemovedErrorMsg.tr
+            message: MessageTranslationConstants.itemlistRemovedErrorMsg.tr
         );
         AppConfig.logger.e("Something happens trying to remove itemlist");
       }
@@ -270,7 +270,7 @@ class ItemlistController extends GetxController implements ItemlistService {
           AppConfig.logger.i("Something happens trying to update itemlist");
           AppUtilities.showSnackBar(
               title: CommonTranslationConstants.itemlistPrefs.tr,
-              message: CommonTranslationConstants.itemlistUpdatedErrorMsg.tr
+              message: MessageTranslationConstants.itemlistUpdatedErrorMsg.tr
           );
         }
       } else {
@@ -283,7 +283,7 @@ class ItemlistController extends GetxController implements ItemlistService {
       AppConfig.logger.e(e.toString());
       AppUtilities.showSnackBar(
           title: CommonTranslationConstants.itemlistPrefs.tr,
-          message: CommonTranslationConstants.itemlistUpdatedErrorMsg.tr
+          message: MessageTranslationConstants.itemlistUpdatedErrorMsg.tr
       );
     }
 

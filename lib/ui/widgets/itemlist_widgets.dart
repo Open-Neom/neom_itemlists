@@ -6,7 +6,7 @@ import 'package:get/get.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/ui/widgets/images/handled_cached_network_image.dart';
 import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/utils/app_alerts.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
@@ -164,7 +164,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                   width: AppTheme.fullWidth(context)*0.4,
                   child: Text(appMediaItem.name, maxLines: 5, overflow: TextOverflow.ellipsis,),
                 ),
-                (AppConfig.instance.appInUse == AppInUse.c || (_.userController.profile.type == ProfileType.appArtist && !_.isFixed)) ?
+                (AppConfig.instance.appInUse == AppInUse.c || (_.userServiceImpl.profile.type == ProfileType.appArtist && !_.isFixed)) ?
                 RatingHeartBar(state: appMediaItem.state.toDouble()) : const SizedBox.shrink(),
               ]
           ),

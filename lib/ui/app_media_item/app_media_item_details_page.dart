@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/appbar_child.dart';
-import 'package:neom_commons/ui/widgets/handled_cached_network_image.dart';
+import 'package:neom_commons/ui/widgets/images/handled_cached_network_image.dart';
 import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
@@ -143,7 +143,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                             title: CommonTranslationConstants.appItemPrefs.tr,
                             content: Column(
                               children: <Widget>[
-                                _.userController.profile.type == ProfileType.appArtist ?
+                                _.userServiceImpl.profile.type == ProfileType.appArtist ?
                                 Obx(()=>
                                   DropdownButton<String>(
                                     items: AppItemState.values.map((AppItemState itemState) {
@@ -212,7 +212,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                     : Text(AppTranslationConstants.add.tr,
                                 )),
                                 onPressed: () async => {
-                                  _.userController.profile.type == ProfileType.appArtist ?
+                                  _.userServiceImpl.profile.type == ProfileType.appArtist ?
                                   (_.appItemState > 0 ? await _.addItemlistItem(context, fanItemState: _.appItemState.value) :
                                     AppUtilities.showSnackBar(
                                       title: CommonTranslationConstants.appItemPrefs.tr,

@@ -8,26 +8,28 @@ import 'package:neom_core/app_config.dart';
 
 import 'package:neom_core/data/firestore/app_media_item_firestore.dart';
 import 'package:neom_core/data/firestore/app_release_item_firestore.dart';
-import 'package:neom_core/data/implementations/user_controller.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
 import 'package:neom_core/domain/model/app_release_item.dart';
 import 'package:neom_core/domain/model/band.dart';
 import 'package:neom_core/domain/model/item_found_in_list.dart';
 import 'package:neom_core/domain/model/item_list.dart';
+import 'package:neom_core/domain/use_cases/audio_player_invoker_service.dart';
 import 'package:neom_core/domain/use_cases/event_details_service.dart';
+import 'package:neom_core/domain/use_cases/user_service.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/enums/app_currency.dart';
 import 'package:neom_core/utils/enums/app_item_state.dart';
 import 'package:neom_core/utils/enums/owner_type.dart';
 
+import '../../domain/use_cases/app_media_item_details_service.dart';
 import '../../utils/constants/itemlist_translation_constants.dart';
 import 'app_media_item_controller.dart';
 
 
-class AppMediaItemDetailsController extends GetxController {
+class AppMediaItemDetailsController extends GetxController implements AppMediaItemDetailsService {
   
-  final userController = Get.find<UserController>();
+  final userServiceImpl = Get.find<UserService>();
 
   AppProfile profile = AppProfile();
   Band band = Band();
@@ -59,9 +61,9 @@ class AppMediaItemDetailsController extends GetxController {
     AppConfig.logger.d("AppMediaItem Details Controller init");
 
     try {
-      profile = userController.profile;
-      band = userController.band;
-      itemlistOwner = userController.itemlistOwner;
+      profile = userServiceImpl.profile;
+      band = userServiceImpl.band;
+      itemlistOwner = userServiceImpl.itemlistOwnerType;
 
       if(itemlistOwner == OwnerType.profile) {
         itemlists.assignAll(profile.itemlists ?? {});
@@ -96,7 +98,6 @@ class AppMediaItemDetailsController extends GetxController {
 
   }
 
-
   @override
   void onReady() async {
     super.onReady();
@@ -112,9 +113,9 @@ class AppMediaItemDetailsController extends GetxController {
           digitalAmount = releasedItem.digitalPrice!.amount;
           physicalAmount = releasedItem.physicalPrice?.amount ?? 0;
           currentCurrency = releasedItem.digitalPrice!.currency;
-          if((releasedItem.boughtUsers?.contains(userController.user.id) ?? false)
-              || (userController.user.releaseItemIds?.contains(releasedItem.id) ?? false)
-              || (userController.user.boughtItems?.contains(releasedItem.id) ?? false)
+          if((releasedItem.boughtUsers?.contains(userServiceImpl.user.id) ?? false)
+              || (userServiceImpl.user.releaseItemIds?.contains(releasedItem.id) ?? false)
+              || (userServiceImpl.user.boughtItems?.contains(releasedItem.id) ?? false)
           ) {
             allowFullAccess = true;
           }
@@ -140,17 +141,20 @@ class AppMediaItemDetailsController extends GetxController {
     isPlaying.value = false;
   }
 
+  @override
   void clear() {
     appMediaItem = AppMediaItem();
     itemlistId.value = "";
   }
 
+  @override
   void setAppItemState(AppItemState newState){
     AppConfig.logger.d("Setting new appItemState $newState");
     appItemState.value = newState.value;
     update([AppPageIdConstants.appItemDetails]);
   }
 
+  @override
   void setSelectedItemlist(String selectedItemlist){
     AppConfig.logger.d("Setting selectedItemlist $selectedItemlist");
     itemlistId.value  = selectedItemlist;
@@ -158,6 +162,7 @@ class AppMediaItemDetailsController extends GetxController {
     update([AppPageIdConstants.appItemDetails]);
   }
 
+  @override
   void getAppItemDetails(String itemId) async {
     AppConfig.logger.d("");
 
@@ -170,7 +175,7 @@ class AppMediaItemDetailsController extends GetxController {
     update([AppPageIdConstants.appItemDetails]);
   }
 
-
+  @override
   Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0}) async {
 
     isLoading.value = true;
@@ -230,8 +235,9 @@ class AppMediaItemDetailsController extends GetxController {
       Get.toNamed(AppRouteConstants.listItems);
     }
 
-}
+  }
 
+  @override
   Future<void> removeItem() async {
     AppConfig.logger.d("removing Item ${appMediaItem.toString()} from itemlist");
 
@@ -259,6 +265,7 @@ class AppMediaItemDetailsController extends GetxController {
     update([AppPageIdConstants.appItemDetails]);
   }
 
+  @override
   bool itemAlreadyInList() {
     AppConfig.logger.d("Verifying if item already exists in itemlists");
     bool itemAlreadyInList = false;
@@ -276,21 +283,12 @@ class AppMediaItemDetailsController extends GetxController {
     return itemAlreadyInList;
   }
 
-  //TODO
   Future<void> playPreview() async {
 
     AppConfig.logger.d("Previewing appMediaItem ${appMediaItem.name}");
 
     try {
-      ///DEPRECATED - INTEGRATE WITH NEOM AUDIO PLAYER SERVICE AS CONTRACT
-      // audioPlayer.onDurationChanged.listen((duration) {
-      //   AppConfig.logger.i(duration);
-      //   durationMinutes.value = AppUtilities.getDurationInMinutes(duration.inMilliseconds);
-      // });
-      //
-      // await audioPlayer.play(UrlSource(appMediaItem.url));
-
-
+      await Get.find<AudioPlayerInvokerService>().updateNowPlaying([appMediaItem], 1);
       isPlaying.value = true;
     } catch(e) {
       AppConfig.logger.e(e.toString());
@@ -302,7 +300,7 @@ class AppMediaItemDetailsController extends GetxController {
   Future<void> pausePreview() async {
     try {
       ///DEPRECATED - INTEGRATE WITH NEOM AUDIO PLAYER SERVICE AS CONTRACT
-      // await audioPlayer.pause();
+      Get.find<AudioPlayerInvokerService>().pause();
       isPlaying.value = false;
     } catch(e) {
       AppConfig.logger.e(e.toString());
@@ -311,20 +309,5 @@ class AppMediaItemDetailsController extends GetxController {
     update([AppPageIdConstants.appItemDetails]);
   }
 
-
-  Future<void> stopPreview() async {
-    AppConfig.logger.d("Stopping appMediaItem ${appMediaItem.name}");
-
-    try {
-      ///DEPRECATED - INTEGRATE WITH NEOM AUDIO PLAYER SERVICE AS CONTRACT
-      // await audioPlayer.stop();
-      // await audioPlayer.release();
-      isPlaying.value = false;
-    } catch(e) {
-      AppConfig.logger.e(e.toString());
-    }
-
-    update([AppPageIdConstants.appItemDetails]);
-  }
 
 }
