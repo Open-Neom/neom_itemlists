@@ -28,13 +28,13 @@ import 'package:rflutter_alert/rflutter_alert.dart';
 import '../app_media_item/app_media_item_controller.dart';
 import '../itemlist_controller.dart';
 
-Widget buildItemlistList(BuildContext context, ItemlistController _) {
+Widget buildItemlistList(BuildContext context, ItemlistController controller) {
   return ListView.separated(
     separatorBuilder: (context, index) => const Divider(),
-    itemCount: _.itemlists.length,
+    itemCount: controller.itemlists.length,
     shrinkWrap: true,
     itemBuilder: (context, index) {
-      Itemlist itemlist = _.itemlists.values.elementAt(index);
+      Itemlist itemlist = controller.itemlists.values.elementAt(index);
       return ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 10),
         leading: SizedBox(
@@ -67,7 +67,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           label: Icon(AppFlavour.getAppItemIcon(), color: AppColor.white80),
           onPressed: () async {
             if(AppConfig.instance.appInUse == AppInUse.c || !itemlist.isModifiable) {
-              await _.gotoItemlistItems(itemlist);
+              await controller.gotoItemlistItems(itemlist);
             } else {
               Get.toNamed(AppRouteConstants.itemSearch,
                   arguments: [MediaSearchType.song, itemlist]
@@ -76,7 +76,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
           },
         ),
         onTap: () async {
-          await _.gotoItemlistItems(itemlist);
+          await controller.gotoItemlistItems(itemlist);
         },
         onLongPress: () async {
           (await showDialog(
@@ -86,19 +86,19 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
             title: Text(CommonTranslationConstants.itemlistName.tr,),
             content: SizedBox(
               height: AppTheme.fullHeight(context)*0.25,
-              child: Obx(()=> _.isLoading.value ? const Center(child: CircularProgressIndicator())
+              child: Obx(()=> controller.isLoading.value ? const Center(child: CircularProgressIndicator())
                 : Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
                     TextField(
-                      controller: _.newItemlistNameController,
+                      controller: controller.newItemlistNameController,
                       decoration: InputDecoration(
                         labelText: '${AppTranslationConstants.changeName.tr}: ',
                         hintText: itemlist.name,
                       ),
                     ),
                     TextField(
-                      controller: _.newItemlistDescController,
+                      controller: controller.newItemlistDescController,
                       minLines: 2,
                       maxLines: 5,
                       decoration: InputDecoration(
@@ -114,7 +114,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
               DialogButton(
                 color: AppColor.bondiBlue75,
                 onPressed: () async {
-                  await _.updateItemlist(itemlist.id, itemlist);
+                  await controller.updateItemlist(itemlist.id, itemlist);
                   Navigator.pop(ctx);
                 },
                 child: Text(AppTranslationConstants.update.tr,
@@ -127,12 +127,12 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
                   style: const TextStyle(fontSize: 14),
                 ),
                 onPressed: () async {
-                  if(_.itemlists.length == 1) {
+                  if(controller.itemlists.length == 1) {
                     AppAlerts.showAlert(context,
                         title: CommonTranslationConstants.itemlistPrefs.tr,
                         message: CommonTranslationConstants.cantRemoveMainItemlist.tr);
                   } else {
-                    await _.deleteItemlist(itemlist);
+                    await controller.deleteItemlist(itemlist);
                     Navigator.pop(ctx);
                   }
                 },
@@ -146,15 +146,15 @@ Widget buildItemlistList(BuildContext context, ItemlistController _) {
   );
 }
 
-Widget buildItemList(BuildContext context, AppMediaItemController _) {
+Widget buildItemList(BuildContext context, AppMediaItemController controller) {
   return ListView.separated(
     separatorBuilder: (context, index) => const Divider(),
-    itemCount: _.itemlistItems.length,
+    itemCount: controller.itemlistItems.length,
     itemBuilder: (context, index) {
-      AppMediaItem appMediaItem = _.itemlistItems.values.elementAt(index);
+      AppMediaItem appMediaItem = controller.itemlistItems.values.elementAt(index);
       return ListTile(
           leading: HandledCachedNetworkImage(appMediaItem.imgUrl.isNotEmpty
-              ? appMediaItem.imgUrl : _.itemlist.imgUrl, enableFullScreen: false,
+              ? appMediaItem.imgUrl : controller.itemlist.imgUrl, enableFullScreen: false,
             width: 40,
           ),
           title: Row(
@@ -164,7 +164,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                   width: AppTheme.fullWidth(context)*0.4,
                   child: Text(appMediaItem.name, maxLines: 5, overflow: TextOverflow.ellipsis,),
                 ),
-                (AppConfig.instance.appInUse == AppInUse.c || (_.userServiceImpl.profile.type == ProfileType.appArtist && !_.isFixed)) ?
+                (AppConfig.instance.appInUse == AppInUse.c || (controller.userServiceImpl.profile.type == ProfileType.appArtist && !controller.isFixed)) ?
                 RatingHeartBar(state: appMediaItem.state.toDouble()) : const SizedBox.shrink(),
               ]
           ),
@@ -184,8 +184,8 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                 Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
               }
           ),
-          onTap: () => AppConfig.instance.appInUse == AppInUse.c || !_.isFixed ? _.getItemlistItemDetails(appMediaItem) : {},
-          onLongPress: () => _.itemlist.isModifiable && (AppConfig.instance.appInUse != AppInUse.c || !_.isFixed) ? Alert(
+          onTap: () => AppConfig.instance.appInUse == AppInUse.c || !controller.isFixed ? controller.getItemlistItemDetails(appMediaItem) : {},
+          onLongPress: () => controller.itemlist.isModifiable && (AppConfig.instance.appInUse != AppInUse.c || !controller.isFixed) ? Alert(
               context: context,
               title: CommonTranslationConstants.appItemPrefs.tr,
               style: AlertStyle(
@@ -211,9 +211,9 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                           );
                         }).toList(),
                         onChanged: (String? newItemState) {
-                          _.setItemState(EnumToString.fromString(AppItemState.values, newItemState!) ?? AppItemState.noState);
+                          controller.setItemState(EnumToString.fromString(AppItemState.values, newItemState!) ?? AppItemState.noState);
                         },
-                        value: CoreUtilities.getItemState(_.itemState.value).name,
+                        value: CoreUtilities.getItemState(controller.itemState.value).name,
                         icon: const Icon(Icons.arrow_downward),
                         iconSize: 15,
                         elevation: 15,
@@ -234,7 +234,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                     style: const TextStyle(fontSize: 15),
                   ),
                   onPressed: () => {
-                    _.updateItemlistItem(appMediaItem)
+                    controller.updateItemlistItem(appMediaItem)
                   },
                 ),
                 DialogButton(
@@ -243,7 +243,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController _) {
                     style: const TextStyle(fontSize: 15),
                   ),
                   onPressed: () async => {
-                    await _.removeItemFromList(appMediaItem)
+                    await controller.removeItemFromList(appMediaItem)
                   },
                 ),
               ]

@@ -1,11 +1,11 @@
 name: neom_itemlists
 description: Itemlists for Open Neom.
-version: 1.4.0
+version: 1.4.1
 homepage: https://github.com/Open-Neom/neom_itemlists
 publish_to: 'none'
 
 environment:
-  sdk: ">=3.4.0 <4.0.0"
+  sdk: ">=3.8.0 <4.0.0"
   flutter: ">=3.19.0"
 
 dependencies:

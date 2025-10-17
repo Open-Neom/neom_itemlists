@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:neom_commons/ui/theme/app_color.dart';
+import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/appbar_child.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
@@ -21,23 +21,23 @@ class ItemlistItemsPage extends StatelessWidget {
     return GetBuilder<AppMediaItemController>(
       id: AppPageIdConstants.itemlistItem,
       init: AppMediaItemController(),
-      builder: (_) => Scaffold(
-        backgroundColor: AppColor.main50,
-        appBar: AppBarChild(title: _.itemlist.name.length > AppConstants.maxItemlistNameLength
-            ? "${_.itemlist.name.substring(0,AppConstants.maxItemlistNameLength)}..."
-            : _.itemlist.name),
+      builder: (controller) => Scaffold(
+        backgroundColor: AppFlavour.getBackgroundColor(),
+        appBar: AppBarChild(title: controller.itemlist.name.length > AppConstants.maxItemlistNameLength
+            ? "${controller.itemlist.name.substring(0,AppConstants.maxItemlistNameLength)}..."
+            : controller.itemlist.name),
         body: Container(
           width: AppTheme.fullWidth(context),
           height: AppTheme.fullHeight(context),
           decoration: AppTheme.appBoxDecoration, 
-          child: _.isLoading.value ? const Center(child: CircularProgressIndicator())
-              : Obx(()=> buildItemList(context, _)),
+          child: controller.isLoading.value ? const Center(child: CircularProgressIndicator())
+              : Obx(()=> buildItemList(context, controller)),
         ),
-        floatingActionButton: _.isFixed || !_.itemlist.isModifiable ? const SizedBox.shrink()
+        floatingActionButton: controller.isFixed || !controller.itemlist.isModifiable ? const SizedBox.shrink()
             : FloatingActionButton(
           tooltip: CommonTranslationConstants.addItem.tr,
           ///IMPROVE FILTER TO ADD ITEM TO DIFFERENT LISTS
-          onPressed: ()=> Get.toNamed(AppRouteConstants.itemSearch, arguments: [_.itemlist.type == ItemlistType.readlist ? MediaSearchType.book : MediaSearchType.song, _.itemlist]),
+          onPressed: ()=> Get.toNamed(AppRouteConstants.itemSearch, arguments: [controller.itemlist.type == ItemlistType.readlist ? MediaSearchType.book : MediaSearchType.song, controller.itemlist]),
           child: const Icon(Icons.playlist_add),
         ),
       ),

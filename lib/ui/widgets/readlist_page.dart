@@ -23,12 +23,12 @@ class ReadlistPage extends StatelessWidget {
     return GetBuilder<ItemlistController>(
         id: AppPageIdConstants.itemlist,
         init: ItemlistController(),
-        builder: (_) => Scaffold(
+        builder: (controller) => Scaffold(
           backgroundColor: AppColor.main50,
           body: Container(
             decoration: AppTheme.appBoxDecoration,
-            padding: EdgeInsets.only(bottom: _.ownerType == OwnerType.profile ? 80 : 0),
-            child: _.isLoading.value ? const Center(child: CircularProgressIndicator())
+            padding: EdgeInsets.only(bottom: controller.ownerType == OwnerType.profile ? 80 : 0),
+            child: controller.isLoading.value ? const Center(child: CircularProgressIndicator())
             : Column(
               children: [
                 ListTile(
@@ -43,16 +43,16 @@ class ReadlistPage extends StatelessWidget {
                     ),
                   ),
                   onTap: () async {
-                    await showAddItemlistDialog(context, _);
+                    await showAddItemlistDialog(context, controller);
                   },
                 ),
                 Expanded(
-                  child: buildItemlistList(context, _),
+                  child: buildItemlistList(context, controller),
                 ),
               ],
             )
           ),
-          floatingActionButton: _.isLoading.value ? const SizedBox.shrink() : Container(
+          floatingActionButton: controller.isLoading.value ? const SizedBox.shrink() : Container(
             margin: const EdgeInsets.only(bottom: 0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -72,7 +72,7 @@ class ReadlistPage extends StatelessWidget {
                             FlickerAnimatedText(CommonTranslationConstants.suggestedReading.tr)
                           ],
                           onTap: () {
-                            _.gotoSuggestedItem();
+                            controller.gotoSuggestedItem();
                           },
                         ),
                       ),
@@ -82,7 +82,7 @@ class ReadlistPage extends StatelessWidget {
                       elevation: AppTheme.elevationFAB,
                       child: Icon(AppFlavour.getSyncIcon()),
                       onPressed: () => {
-                        _.gotoSuggestedItem()
+                        controller.gotoSuggestedItem()
                       },
                     ),
 
@@ -94,7 +94,7 @@ class ReadlistPage extends StatelessWidget {
     );
   }
 
-  Future<void> showAddItemlistDialog(BuildContext context, ItemlistController _) async {
+  Future<void> showAddItemlistDialog(BuildContext context, ItemlistController controller) async {
     (await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -107,13 +107,13 @@ class ReadlistPage extends StatelessWidget {
             children: <Widget>[
               //TODO Change lines colors to white.
               TextField(
-                controller: _.newItemlistNameController,
+                controller: controller.newItemlistNameController,
                 decoration: InputDecoration(
                   labelText: CommonTranslationConstants.itemlistName.tr,
                 ),
               ),
               TextField(
-                controller: _.newItemlistDescController,
+                controller: controller.newItemlistDescController,
                 minLines: 1,
                 maxLines: 5,
                 decoration: InputDecoration(
@@ -127,20 +127,20 @@ class ReadlistPage extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       Checkbox(
-                        value: _.isPublicNewItemlist.value,
-                        onChanged: (bool? newValue) => _.setPrivacyOption(),
+                        value: controller.isPublicNewItemlist.value,
+                        onChanged: (bool? newValue) => controller.setPrivacyOption(),
                       ),
                       Text(AppTranslationConstants.publicList.tr, style: const TextStyle(fontSize: 15)),
                     ],
                   ),
-                  onTap: () => _.setPrivacyOption(),
+                  onTap: () => controller.setPrivacyOption(),
                 ),
               ),
-              _.errorMsg.isNotEmpty ? Column(
+              controller.errorMsg.isNotEmpty ? Column(
                 children: [
                   Align(
                     alignment: Alignment.center,
-                    child: Text(_.errorMsg.value.tr, style: const TextStyle(fontSize: 12, color: AppColor.red)),
+                    child: Text(controller.errorMsg.value.tr, style: const TextStyle(fontSize: 12, color: AppColor.red)),
                   ),
                 ],) : const SizedBox.shrink()
             ],
@@ -151,8 +151,8 @@ class ReadlistPage extends StatelessWidget {
             height: 50,
             color: AppColor.bondiBlue75,
             onPressed: () async {
-              await _.createItemlist(type: ItemlistType.readlist);
-              if(_.errorMsg.value.isEmpty) Navigator.pop(ctx);
+              await controller.createItemlist(type: ItemlistType.readlist);
+              if(controller.errorMsg.value.isEmpty) Navigator.pop(ctx);
             },
             child: Text(
               AppTranslationConstants.add.tr,

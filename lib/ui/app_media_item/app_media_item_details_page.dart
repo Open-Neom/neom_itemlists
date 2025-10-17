@@ -31,28 +31,28 @@ class AppMediaItemDetailsPage extends StatelessWidget {
     return GetBuilder<AppMediaItemDetailsController>(
       id: AppPageIdConstants.appMediaItemDetails,
       init: AppMediaItemDetailsController(),
-      builder: (_) => Scaffold(
+      builder: (controller) => Scaffold(
         appBar: AppBarChild(),
         body: SingleChildScrollView(
           child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           height: AppTheme.fullHeight(context),
           decoration: AppTheme.appBoxDecoration,
-          child: _.isLoading.value ? const Center(child: CircularProgressIndicator())
+          child: controller.isLoading.value ? const Center(child: CircularProgressIndicator())
             : Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Column(
                     children: [
                       AppTheme.heightSpace20,
-                      SizedBox(width: 200, child: _.appMediaItem.imgUrl.isEmpty ? const Text("") : HandledCachedNetworkImage(_.appMediaItem.imgUrl, enableFullScreen: false,)),
+                      SizedBox(width: 200, child: controller.appMediaItem.imgUrl.isEmpty ? const Text("") : HandledCachedNetworkImage(controller.appMediaItem.imgUrl, enableFullScreen: false,)),
                       AppTheme.heightSpace20,
-                      Text(_.appMediaItem.name.isEmpty ? ""
-                          : _.appMediaItem.name.length > AppConstants.maxAppItemNameLength ?
-                      "${_.appMediaItem.name.substring(0,AppConstants.maxAppItemNameLength)}...": _.appMediaItem.name,
+                      Text(controller.appMediaItem.name.isEmpty ? ""
+                          : controller.appMediaItem.name.length > AppConstants.maxAppItemNameLength ?
+                      "${controller.appMediaItem.name.substring(0,AppConstants.maxAppItemNameLength)}...": controller.appMediaItem.name,
                           style: AppTheme.textStyle.merge(const TextStyle(fontSize: 24))),
                       AppTheme.heightSpace5,
-                      Text(_.appMediaItem.artist,
+                      Text(controller.appMediaItem.artist,
                         style: AppTheme.textStyle.merge(
                             const TextStyle(
                                 fontSize: 18,
@@ -86,7 +86,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                   fontSize: 12,
                                   color: Color.fromRGBO(250, 250, 250, 0.46))),
                             ),
-                            Text(_.durationMinutes.value,
+                            Text(controller.durationMinutes.value,
                               style: AppTheme.textStyle.merge(
                                 const TextStyle(
                                   fontSize: 12,
@@ -99,12 +99,12 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                         AppTheme.heightSpace10,
                         GestureDetector(
                           child: Icon(
-                            _.isPlaying.value ? Icons.pause_circle_filled : Icons.play_circle_filled,
+                            controller.isPlaying.value ? Icons.pause_circle_filled : Icons.play_circle_filled,
                             size: 100,
                           ),
                           onTap: () async {
-                            if(_.appMediaItem.url.isNotEmpty) {
-                              _.isPlaying.value ? await _.pausePreview() : await _.playPreview();
+                            if(controller.appMediaItem.url.isNotEmpty) {
+                              controller.isPlaying.value ? await controller.pausePreview() : await controller.playPreview();
                             } else {
                               AppUtilities.showSnackBar(
                                   title: CommonTranslationConstants.noAvailablePreviewUrl,
@@ -127,14 +127,14 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                         child: Row(
                           children: [
                             const Icon(Icons.add, color: Colors.grey, size: 25),
-                            _.existsInItemlist.value ? Text(CommonTranslationConstants.removeFromItemlist.tr)
+                            controller.existsInItemlist.value ? Text(CommonTranslationConstants.removeFromItemlist.tr)
                                 : Text(AppTranslationConstants.releaseItem.tr)],
                         ),
                       onPressed: () async => {
-                        if (_.existsInItemlist.value) {
-                          await _.removeItem()
+                        if (controller.existsInItemlist.value) {
+                          await controller.removeItem()
                         } else {
-                          _.itemlists.isNotEmpty ? Alert(
+                          controller.itemlists.isNotEmpty ? Alert(
                             context: context,
                             style: AlertStyle(
                               backgroundColor: AppColor.main50,
@@ -143,7 +143,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                             title: CommonTranslationConstants.appItemPrefs.tr,
                             content: Column(
                               children: <Widget>[
-                                _.userServiceImpl.profile.type == ProfileType.appArtist ?
+                                controller.userServiceImpl.profile.type == ProfileType.appArtist ?
                                 Obx(()=>
                                   DropdownButton<String>(
                                     items: AppItemState.values.map((AppItemState itemState) {
@@ -161,9 +161,9 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                       );
                                     }).toList(),
                                     onChanged: (String? newState) {
-                                      _.setAppItemState(EnumToString.fromString(AppItemState.values, newState!) ?? AppItemState.noState);
+                                      controller.setAppItemState(EnumToString.fromString(AppItemState.values, newState!) ?? AppItemState.noState);
                                     },
-                                    value: CoreUtilities.getItemState(_.appItemState.value).name,
+                                    value: CoreUtilities.getItemState(controller.appItemState.value).name,
                                     alignment: Alignment.center,
                                     icon: const Icon(Icons.arrow_downward),
                                     iconSize: 20,
@@ -175,8 +175,8 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                       color: Colors.grey,
                                     ),
                                   )) : const SizedBox.shrink(),
-                                  _.itemlists.length > 1 ? Obx(()=> DropdownButton<String>(
-                                  items: _.itemlists.values.map((itemlist) =>
+                                  controller.itemlists.length > 1 ? Obx(()=> DropdownButton<String>(
+                                  items: controller.itemlists.values.map((itemlist) =>
                                     DropdownMenuItem<String>(
                                       value: itemlist.id,
                                       child: Center(
@@ -189,9 +189,9 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                     )
                                   ).toList(),
                                   onChanged: (String? selectedItemlist) {
-                                    _.setSelectedItemlist(selectedItemlist!);
+                                    controller.setSelectedItemlist(selectedItemlist!);
                                   },
-                                  value: _.itemlistId.value,
+                                  value: controller.itemlistId.value,
                                   icon: const Icon(Icons.arrow_downward),
                                   alignment: Alignment.center,
                                   iconSize: 20,
@@ -208,28 +208,28 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                               buttons: [
                               DialogButton(
                                 color: AppColor.bondiBlue75,
-                                child: Obx(()=>_.isLoading.value ? const Center(child: CircularProgressIndicator())
+                                child: Obx(()=>controller.isLoading.value ? const Center(child: CircularProgressIndicator())
                                     : Text(AppTranslationConstants.add.tr,
                                 )),
                                 onPressed: () async => {
-                                  _.userServiceImpl.profile.type == ProfileType.appArtist ?
-                                  (_.appItemState > 0 ? await _.addItemlistItem(context, fanItemState: _.appItemState.value) :
+                                  controller.userServiceImpl.profile.type == ProfileType.appArtist ?
+                                  (controller.appItemState > 0 ? await controller.addItemlistItem(context, fanItemState: controller.appItemState.value) :
                                     AppUtilities.showSnackBar(
                                       title: CommonTranslationConstants.appItemPrefs.tr,
                                       message: MessageTranslationConstants.selectItemStateMsg.tr,
                                     )
-                                  ) : await _.addItemlistItem(context,
+                                  ) : await controller.addItemlistItem(context,
                                       fanItemState: AppItemState.heardIt.value)
                                 },
                               )],
-                          ).show() : await _.addItemlistItem(context,
+                          ).show() : await controller.addItemlistItem(context,
                             fanItemState: AppItemState.heardIt.value)
                         }
                       }
                     ),
                   ],
                 ),
-                Obx(()=> _.wasAdded.value ? Padding(
+                Obx(()=> controller.wasAdded.value ? Padding(
                   padding: const EdgeInsets.only(top: 10),
                   child: ElevatedButton(
                     style: ButtonStyle(
