@@ -1,6 +1,7 @@
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
@@ -11,22 +12,30 @@ import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
-import 'package:neom_core/domain/model/app_release_item.dart';
 import 'package:neom_core/domain/model/band.dart';
 import 'package:neom_core/domain/model/item_found_in_list.dart';
 import 'package:neom_core/domain/model/item_list.dart';
 import 'package:neom_core/domain/use_cases/itemlist_service.dart';
 import 'package:neom_core/domain/use_cases/user_service.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
-import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/app_item_state.dart';
 import 'package:neom_core/utils/enums/itemlist_type.dart';
 import 'package:neom_core/utils/enums/owner_type.dart';
 
 import '../utils/constants/itemlist_translation_constants.dart';
-import 'app_media_item/app_media_item_controller.dart';
+import 'itemlist_items_controller.dart';
 
 class ItemlistController extends GetxController implements ItemlistService {
+
+  ItemlistController({ItemlistType? type}) :
+        itemlistType = type ?? AppFlavour.getDefaultItemlistType(),
+        super() {
+          if(Get.find<UserService>().currentItemlistType != null && type == null) {
+            itemlistType = Get.find<UserService>().currentItemlistType!;
+          } else {
+            Get.find<UserService>().setCurrentItemlistType(itemlistType);
+          }
+        }
 
   final userServiceImpl = Get.find<UserService>();
 
@@ -43,7 +52,7 @@ class ItemlistController extends GetxController implements ItemlistService {
   String ownerId = '';
   String ownerName = '';
   OwnerType ownerType = OwnerType.profile;
-  ItemlistType itemlistType = ItemlistType.playlist;
+  ItemlistType itemlistType;
 
   final RxBool isLoading = true.obs;
   final RxBool isButtonDisabled = false.obs;
@@ -65,7 +74,6 @@ class ItemlistController extends GetxController implements ItemlistService {
       profile = userServiceImpl.profile;
       ownerId = profile.id;
       ownerName = profile.name;
-      itemlistType = ItemlistType.playlist;
 
       if(Get.arguments != null) {
         if(Get.arguments.isNotEmpty && Get.arguments[0] is Band) {
@@ -83,22 +91,28 @@ class ItemlistController extends GetxController implements ItemlistService {
         }
       }
 
-      AppConfig.logger.t('Itemlists being loaded from ${ownerType.name}');
-      if(ownerType == OwnerType.profile) {
-        itemlists.value = Map.from(profile.itemlists ?? {});
-      } else if(ownerType == OwnerType.band){
-        itemlists.value = Map.from(band.itemlists ?? {});
-      }
 
-      setItemlists();
     } catch (e) {
       AppConfig.logger.e(e.toString());
     }
 
   }
 
+  @override
+  void onReady() async {
+    super.onReady();
+    AppConfig.logger.t('Itemlists being loaded from ${ownerType.name}');
+    if(ownerType == OwnerType.profile) {
+      itemlists.value = Map.from(profile.itemlists ?? {});
+    } else if(ownerType == OwnerType.band){
+      itemlists.value = Map.from(band.itemlists ?? {});
+    }
+
+    setItemlists();
+  }
+
   Future<void> setItemlists() async {
-    if(itemlists.isEmpty) {
+    if(itemlists.isEmpty || (itemlists.values.any((list) => list.type != itemlistType))) {
       itemlists.value = await ItemlistFirestore().getByOwnerId(ownerId, ownerType: ownerType,
           itemlistType: itemlistType
       );
@@ -113,8 +127,6 @@ class ItemlistController extends GetxController implements ItemlistService {
     AppConfig.logger.d('${itemlists.length} Itemlists Type: ${itemlistType.name} were loaded from OwnerType: ${ownerType.name}');
   }
 
-
-
   void clear() {
     itemlists.value = <String, Itemlist>{};
     currentItemlist = Itemlist();
@@ -126,6 +138,11 @@ class ItemlistController extends GetxController implements ItemlistService {
     newItemlistDescController.clear();
   }
 
+  void setItemlistType(ItemlistType type) {
+    AppConfig.logger.d("Setting itemlistType to $itemlistType");
+    itemlistType = type;
+    update([AppPageIdConstants.itemlist]);
+  }
 
   @override
   Future<void> createItemlist({ItemlistType? type}) async {
@@ -156,7 +173,7 @@ class ItemlistController extends GetxController implements ItemlistService {
         AppConfig.logger.i("Empty Itemlist created successfully for profile ${newItemlist.ownerId}");
         newItemlist.id = newItemlistId;
 
-        if(newItemlistId.isNotEmpty){
+        if(newItemlistId.isNotEmpty) {
           itemlists[newItemlistId] = newItemlist;
           if(userServiceImpl.profile.itemlists == null) {
             userServiceImpl.profile.itemlists = {};
@@ -293,43 +310,6 @@ class ItemlistController extends GetxController implements ItemlistService {
   }
 
   @override
-  Future<void> gotoItemlistItems(Itemlist itemlist) async {
-
-    if(AppConfig.instance.appInUse == AppInUse.c) {
-      await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
-    } else {
-      AppMediaItemController appItemController;
-      try {
-        appItemController = Get.find<AppMediaItemController>();
-        appItemController.itemlist = itemlist;
-        appItemController.loadItemsFromList();
-      } catch (e) {
-        AppConfig.logger.w(e.toString());
-        AppConfig.logger.i("Controller is not active");
-      }
-
-      await Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
-      update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
-    }
-
-  }
-
-  Future<void> gotoSuggestedItem() async {
-    AppReleaseItem suggestedItem = AppReleaseItem(
-      previewUrl: AppConfig.instance.appInfo.suggestedUrl,
-      duration: 107,
-    );
-
-    Get.toNamed(AppRouteConstants.pdfViewer, arguments: [suggestedItem, true, true]);
-  }
-
-
-  @override
-  Future<void> gotoPlaylistSongs(Itemlist itemlist) async {
-    ///GOTO NeomSpotifyControlleR().gotoPlaylistSongs(itemlist);
-  }
-
-  @override
   Future<void> setPrivacyOption() async {
     AppConfig.logger.t('setPrivacyOption for Playlist');
     isPublicNewItemlist.value = !isPublicNewItemlist.value;
@@ -383,18 +363,18 @@ class ItemlistController extends GetxController implements ItemlistService {
         if(fanItemState > 0) appItemState.value = fanItemState;
         if(itemlistId.isEmpty) itemlistId.value = itemlists.values.first.id;
 
-        AppMediaItemController appMediaItemController;
-        if (Get.isRegistered<AppMediaItemController>()) {
-          appMediaItemController = Get.find<AppMediaItemController>();
+        ItemlistItemsController itemController;
+        if (Get.isRegistered<ItemlistItemsController>()) {
+          itemController = Get.find<ItemlistItemsController>();
         } else {
-          appMediaItemController = Get.put(AppMediaItemController());
+          itemController = Get.put(ItemlistItemsController());
         }
 
         AppMediaItemFirestore().existsOrInsert(appMediaItem);
 
         if(!existsInItemlist.value) {
           appMediaItem.state = appItemState.value;
-          if(await appMediaItemController.addItemToItemlist(appMediaItem, itemlistId.value)){
+          if(await itemController.addItemToItemlist(appMediaItem, itemlistId.value)){
             AppConfig.logger.d("Setting existsInItemlist and wasAdded true");
             existsInItemlist.value = true;
             wasAdded.value = true;

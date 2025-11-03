@@ -52,7 +52,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                       "${controller.appMediaItem.name.substring(0,AppConstants.maxAppItemNameLength)}...": controller.appMediaItem.name,
                           style: AppTheme.textStyle.merge(const TextStyle(fontSize: 24))),
                       AppTheme.heightSpace5,
-                      Text(controller.appMediaItem.artist,
+                      Text(controller.appMediaItem.ownerName,
                         style: AppTheme.textStyle.merge(
                             const TextStyle(
                                 fontSize: 18,

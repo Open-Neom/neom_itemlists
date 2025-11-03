@@ -18,6 +18,7 @@ import 'package:neom_core/domain/use_cases/audio_player_invoker_service.dart';
 import 'package:neom_core/domain/use_cases/event_details_service.dart';
 import 'package:neom_core/domain/use_cases/user_service.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
+import 'package:neom_core/utils/core_utilities.dart';
 import 'package:neom_core/utils/enums/app_currency.dart';
 import 'package:neom_core/utils/enums/app_item_state.dart';
 import 'package:neom_core/utils/enums/owner_type.dart';
@@ -219,7 +220,7 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
       if(itemlistOwner == OwnerType.profile) {
         EventDetailsService? eventDetailsService = Get.find<EventDetailsService?>();
         if(eventDetailsService != null) {
-          eventDetailsService.addToMatchedItems(appMediaItem);
+          eventDetailsService.addToMatchedItems(appMediaItem.id, CoreUtilities.getItemState(appMediaItem.state));
           Navigator.of(context).popUntil(ModalRoute.withName(AppRouteConstants.eventDetails));
         } else {
           Get.offAllNamed(AppRouteConstants.home);
@@ -252,7 +253,7 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
 
 
     try {
-      if(await appMediaItemController.removeItemFromList(appMediaItem)) {
+      if(await appMediaItemController.removeItemFromList(appMediaItem.id)) {
         AppConfig.logger.d("YEAH");
       } else {
         AppConfig.logger.d("Item not removed from Itemlist");

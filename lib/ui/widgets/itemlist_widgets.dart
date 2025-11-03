@@ -1,6 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enum_to_string/enum_to_string.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/app_flavour.dart';
@@ -9,24 +8,26 @@ import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/images/handled_cached_network_image.dart';
 import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/utils/app_alerts.dart';
+import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
+import 'package:neom_commons/utils/mappers/base_item_mapper.dart';
 import 'package:neom_commons/utils/text_utilities.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/app_properties.dart';
-import 'package:neom_core/domain/model/app_media_item.dart';
+import 'package:neom_core/domain/model/base_item.dart';
 import 'package:neom_core/domain/model/item_list.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/core_utilities.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/app_item_state.dart';
-import 'package:neom_core/utils/enums/media_search_type.dart';
 import 'package:neom_core/utils/enums/profile_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-import '../app_media_item/app_media_item_controller.dart';
+import '../../utils/itemlist_utilities.dart';
 import '../itemlist_controller.dart';
+import '../itemlist_items_controller.dart';
 
 Widget buildItemlistList(BuildContext context, ItemlistController controller) {
   return ListView.separated(
@@ -35,24 +36,21 @@ Widget buildItemlistList(BuildContext context, ItemlistController controller) {
     shrinkWrap: true,
     itemBuilder: (context, index) {
       Itemlist itemlist = controller.itemlists.values.elementAt(index);
-      return ListTile(
+      return itemlist.type == controller.itemlistType ? ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 10),
         leading: SizedBox(
-            width: 50,
-            child: itemlist.imgUrl.isNotEmpty
-                ? CachedNetworkImage(imageUrl: itemlist.imgUrl)
-                : ((itemlist.appMediaItems?.isNotEmpty ?? false) && (itemlist.appMediaItems!.first.imgUrl.isNotEmpty))
-                ? CachedNetworkImage(imageUrl: itemlist.appMediaItems!.first.imgUrl)
-                : ((itemlist.appReleaseItems?.isNotEmpty ?? false) && (itemlist.appReleaseItems!.first.imgUrl.isNotEmpty))
-                ? CachedNetworkImage(imageUrl: itemlist.appReleaseItems!.first.imgUrl)
-                : CachedNetworkImage(imageUrl: AppProperties.getAppLogoUrl())
+          width: 50,
+          child: CachedNetworkImage(
+            imageUrl: itemlist.getImgUrls().isNotEmpty
+              ? itemlist.getImgUrls().first
+              : AppProperties.getAppLogoUrl()
+          )
         ),
         title: Row(
             children: <Widget>[
               Text(TextUtilities.capitalizeFirstLetter(itemlist.name.length > AppConstants.maxItemlistNameLength
                   ? "${itemlist.name.substring(0,AppConstants.maxItemlistNameLength)}..."
                   : itemlist.name)),
-              ///DEPRECATE .isFav ? const Icon(Icons.favorite, size: 10,) : SizedBox.shrink()
             ]),
         subtitle: itemlist.description.isNotEmpty ? Text(TextUtilities.capitalizeFirstLetter(itemlist.description), maxLines: 3, overflow: TextOverflow.ellipsis,) : null,
         trailing: ActionChip(
@@ -60,24 +58,22 @@ Widget buildItemlistList(BuildContext context, ItemlistController controller) {
           backgroundColor: AppColor.main25,
           avatar: CircleAvatar(
             backgroundColor: AppColor.white80,
-            child: Text(((itemlist.appMediaItems?.length ?? 0) + (itemlist.appReleaseItems?.length ?? 0)).toString(),
+            child: Text(itemlist.allItems.length.toString(),
                 style: const TextStyle(color: Colors.black87),
             ),
           ),
           label: Icon(AppFlavour.getAppItemIcon(), color: AppColor.white80),
           onPressed: () async {
             if(AppConfig.instance.appInUse == AppInUse.c || !itemlist.isModifiable) {
-              await controller.gotoItemlistItems(itemlist);
+              Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
             } else {
               Get.toNamed(AppRouteConstants.itemSearch,
-                  arguments: [MediaSearchType.song, itemlist]
+                  arguments: [ItemlistUtilities.getMediaSearchType(itemlist.type), itemlist]
               );
             }
           },
         ),
-        onTap: () async {
-          await controller.gotoItemlistItems(itemlist);
-        },
+        onTap: () => Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]),
         onLongPress: () async {
           (await showDialog(
               context: context,
@@ -141,20 +137,22 @@ Widget buildItemlistList(BuildContext context, ItemlistController controller) {
           ),
           )) ?? false;
         },
-      );
+      ) : const SizedBox.shrink();
     },
   );
 }
 
-Widget buildItemList(BuildContext context, AppMediaItemController controller) {
+Widget buildItemListItems(BuildContext context, ItemlistItemsController controller) {
   return ListView.separated(
     separatorBuilder: (context, index) => const Divider(),
-    itemCount: controller.itemlistItems.length,
+    itemCount: controller.itemlist.allItems.length,
     itemBuilder: (context, index) {
-      AppMediaItem appMediaItem = controller.itemlistItems.values.elementAt(index);
+      dynamic item = controller.itemlist.allItems.elementAt(index);
+      BaseItem baseItem = BaseItemMapper.fromDynamicItem(item);
+
       return ListTile(
-          leading: HandledCachedNetworkImage(appMediaItem.imgUrl.isNotEmpty
-              ? appMediaItem.imgUrl : controller.itemlist.imgUrl, enableFullScreen: false,
+          leading: HandledCachedNetworkImage(baseItem.imgUrl.isNotEmpty
+              ? baseItem.imgUrl : controller.itemlist.imgUrl, enableFullScreen: false,
             width: 40,
           ),
           title: Row(
@@ -162,29 +160,25 @@ Widget buildItemList(BuildContext context, AppMediaItemController controller) {
               children: [
                 SizedBox(
                   width: AppTheme.fullWidth(context)*0.4,
-                  child: Text(appMediaItem.name, maxLines: 5, overflow: TextOverflow.ellipsis,),
+                  child: Text(TextUtilities.getMediaName(baseItem.name), maxLines: 2, overflow: TextOverflow.ellipsis,),
                 ),
                 (AppConfig.instance.appInUse == AppInUse.c || (controller.userServiceImpl.profile.type == ProfileType.appArtist && !controller.isFixed)) ?
-                RatingHeartBar(state: appMediaItem.state.toDouble()) : const SizedBox.shrink(),
+                RatingHeartBar(state: baseItem.state.toDouble()) : const SizedBox.shrink(),
               ]
           ),
           subtitle: SizedBox(
             width: AppTheme.fullWidth(context)*0.4,
-            child: (AppConfig.instance.appInUse == AppInUse.c && (appMediaItem.description?.isNotEmpty ?? false)) ?
-            Text(appMediaItem.description ?? '', textAlign: TextAlign.justify,) :
-            Text(appMediaItem.artist, maxLines: 2, overflow: TextOverflow.ellipsis,),
+            child: (AppConfig.instance.appInUse == AppInUse.c && (baseItem.description?.isNotEmpty ?? false)) ?
+            Text(baseItem.description ?? '', textAlign: TextAlign.justify,) :
+            Text(baseItem.ownerName, maxLines: 2, overflow: TextOverflow.ellipsis,),
           ),
           trailing: IconButton(
-              icon: const Icon(
-                  CupertinoIcons.forward
-              ),
+              icon: const Icon(Icons.arrow_forward_ios),
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
-              onPressed: () {
-                Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [appMediaItem]);
-              }
+              onPressed: () => AppUtilities.gotoItemDetails(item),
           ),
-          onTap: () => AppConfig.instance.appInUse == AppInUse.c || !controller.isFixed ? controller.getItemlistItemDetails(appMediaItem) : {},
+          onTap: () => AppConfig.instance.appInUse == AppInUse.c || !controller.isFixed ? controller.getItemlistItemDetails(baseItem.id) : {},
           onLongPress: () => controller.itemlist.isModifiable && (AppConfig.instance.appInUse != AppInUse.c || !controller.isFixed) ? Alert(
               context: context,
               title: CommonTranslationConstants.appItemPrefs.tr,
@@ -233,9 +227,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController controller) {
                   child: Text(AppTranslationConstants.update.tr,
                     style: const TextStyle(fontSize: 15),
                   ),
-                  onPressed: () => {
-                    controller.updateItemlistItem(appMediaItem)
-                  },
+                  onPressed: () => controller.updateItemlistItem(item),
                 ),
                 DialogButton(
                   color: AppColor.bondiBlue75,
@@ -243,7 +235,7 @@ Widget buildItemList(BuildContext context, AppMediaItemController controller) {
                     style: const TextStyle(fontSize: 15),
                   ),
                   onPressed: () async => {
-                    await controller.removeItemFromList(appMediaItem)
+                    await controller.removeItemFromList(baseItem.id)
                   },
                 ),
               ]

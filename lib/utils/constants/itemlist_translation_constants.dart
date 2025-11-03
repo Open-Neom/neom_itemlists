@@ -21,5 +21,4 @@ class ItemlistTranslationConstants {
   static const String myFirstReadlist = 'myFirstReadlist';
   static const String myFirstReadlistDesc = 'myFirstReadlistDesc';
 
-
 }

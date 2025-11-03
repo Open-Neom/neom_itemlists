@@ -1,83 +1,37 @@
 
-import 'package:animated_text_kit/animated_text_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
-import 'package:neom_core/app_config.dart';
-import 'package:neom_core/utils/constants/app_route_constants.dart';
-import 'package:neom_core/utils/enums/app_in_use.dart';
-import 'package:neom_core/utils/enums/media_search_type.dart';
+import 'package:neom_core/utils/enums/itemlist_type.dart';
 import 'package:neom_core/utils/enums/owner_type.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
-import '../utils/constants/itemlist_translation_constants.dart';
 import 'itemlist_controller.dart';
+import 'widgets/itemlist_action_button.dart';
+import 'widgets/itemlist_appbar.dart';
 import 'widgets/itemlist_widgets.dart';
 
 class ItemlistPage extends StatelessWidget {
-  const ItemlistPage({super.key});
+
+  final ItemlistType? itemlistType;
+
+  const ItemlistPage({super.key, this.itemlistType,});
 
   @override
   Widget build(BuildContext context) {
     return GetBuilder<ItemlistController>(
         id: AppPageIdConstants.itemlist,
-        init: ItemlistController(),
-        builder: (controller) => Scaffold(
+        init: ItemlistController(type: itemlistType),
+        builder: (controller) {
+          return Scaffold(
           backgroundColor: AppFlavour.getBackgroundColor(),
-          appBar: AppBar(
-            actions: [
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () async {
-                    if(controller.itemlists.isNotEmpty) {
-                      Get.toNamed(AppRouteConstants.itemSearch,
-                          arguments: [MediaSearchType.song]
-                      );
-                    } else {
-                      AppUtilities.showSnackBar(
-                          title: ItemlistTranslationConstants.noItemlistsMsg,
-                          message: ItemlistTranslationConstants.noItemlistsMsg2
-                      );
-                    }
-                  },
-                ),
-              ),
-            ],
-            title: Text(ItemlistTranslationConstants.myItemlists.tr,
-              style: TextStyle(
-                fontSize: 18,
-                color: Theme.of(context).textTheme.bodyLarge!.color,
-              ),
-            ),
-            centerTitle: true,
-            backgroundColor: AppColor.main75,
-            elevation: 0,
-            automaticallyImplyLeading: false,
-            leading: Padding(
-              padding: EdgeInsets.zero,
-              child: Transform.rotate(
-                angle: 22 / 7 * 2,
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.horizontal_split_rounded,
-                  ),
-                  // color: Theme.of(context).iconTheme.color,
-                  onPressed: () {
-                    Scaffold.of(context).openDrawer();
-                  },
-                  tooltip: MaterialLocalizations.of(context).openAppDrawerTooltip,
-                ),
-              ),
-            ),
-          ),
+          //TODO Verify when needed
+          appBar: itemlistType != ItemlistType.readlist ? ItemlistAppBar(controller: controller) : null ,
           body: Container(
             decoration: AppTheme.appBoxDecoration,
             padding: EdgeInsets.only(bottom: controller.ownerType == OwnerType.profile ? 80 : 0),
@@ -85,7 +39,7 @@ class ItemlistPage extends StatelessWidget {
             : Column(
               children: [
                 ListTile(
-                  title: Text(ItemlistTranslationConstants.createItemlist.tr),
+                  title: Text('${AppTranslationConstants.toCreate.tr} ${itemlistType?.name.tr}'),
                   leading: SizedBox.square(
                     dimension: 40,
                     child: Center(
@@ -105,51 +59,10 @@ class ItemlistPage extends StatelessWidget {
               ],
             )
           ),
-          floatingActionButton: controller.isLoading.value ? const SizedBox.shrink() : Container(
-            margin: const EdgeInsets.only(bottom: 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                AppConfig.instance.appInUse == AppInUse.e ?
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    AppConfig.instance.appInUse == AppInUse.e
-                    ///DEPRECATED || controller.outOfSync
-                        ? SizedBox(
-                      child: DefaultTextStyle(
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                        child: AnimatedTextKit(
-                          repeatForever: true,
-                          animatedTexts: [
-                            FlickerAnimatedText(
-                                CommonTranslationConstants.suggestedReading.tr)
-                          ],
-                          onTap: () {
-                            Get.toNamed(AppRouteConstants.pdfViewer,
-                                arguments: [AppConfig.instance.appInfo.suggestedUrl, 0, 150]);
-                            },
-                        ),
-                      ),
-                    ) : const SizedBox.shrink(),
-                    const SizedBox(width: 5,),
-                    FloatingActionButton(
-                      heroTag: AppPageIdConstants.spotifySync,
-                      elevation: AppTheme.elevationFAB,
-                      child: Icon(AppFlavour.getSyncIcon()),
-                      onPressed: () => {
-                        controller.gotoSuggestedItem()
-                      },
-                    ),
-                  ],
-                ) : const SizedBox.shrink(),
-                if(controller.ownerType == OwnerType.profile && AppConfig.instance.appInUse == AppInUse.g) AppTheme.heightSpace75,
-              ]
-          ),),
-        )
+          floatingActionButton: controller.isLoading.value ? const SizedBox.shrink()
+              : ItemlistActionButton(itemlistType: itemlistType, ownerType: controller.ownerType,),
+        );
+      }
     );
   }
 
@@ -176,7 +89,7 @@ class ItemlistPage extends StatelessWidget {
                 minLines: 1,
                 maxLines: 5,
                 decoration: InputDecoration(
-                  labelText: AppTranslationConstants.description.tr,
+                  labelText: '${AppTranslationConstants.description.tr} (${AppTranslationConstants.optional})',
                 ),
               ),
               AppTheme.heightSpace5,
@@ -210,7 +123,7 @@ class ItemlistPage extends StatelessWidget {
             height: 50,
             color: AppColor.bondiBlue75,
             onPressed: () async {
-              await controller.createItemlist();
+              await controller.createItemlist(type: itemlistType);
               if(controller.errorMsg.value.isEmpty) Navigator.pop(ctx);
             },
             child: Text(

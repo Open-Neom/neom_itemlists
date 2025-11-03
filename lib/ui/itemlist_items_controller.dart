@@ -1,7 +1,6 @@
 import 'package:get/get.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
-import 'package:neom_commons/utils/mappers/app_media_item_mapper.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/data/api_services/push_notification/firebase_messaging_calls.dart';
 import 'package:neom_core/data/firestore/itemlist_firestore.dart';
@@ -14,16 +13,14 @@ import 'package:neom_core/domain/model/item_list.dart';
 import 'package:neom_core/domain/use_cases/user_service.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/app_item_state.dart';
-import 'package:neom_core/utils/enums/app_media_source.dart';
 import 'package:neom_core/utils/enums/itemlist_type.dart';
 import 'package:neom_core/utils/enums/owner_type.dart';
 import 'package:neom_core/utils/enums/push_notification_type.dart';
 
-import '../../domain/use_cases/app_item_service.dart';
 import '../../utils/constants/itemlist_translation_constants.dart';
-import '../itemlist_controller.dart';
+import 'itemlist_controller.dart';
 
-class AppMediaItemController extends GetxController implements AppItemService {
+class ItemlistItemsController extends GetxController {
 
   final userServiceImpl = Get.find<UserService>();
 
@@ -31,7 +28,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
   Itemlist itemlist = Itemlist();
 
   final RxInt itemState = 0.obs;
-  final RxMap<String, AppMediaItem> itemlistItems = <String, AppMediaItem>{}.obs;
+  final RxMap<String, dynamic> itemlistItems = <String, dynamic>{}.obs;
   final RxBool isLoading = true.obs;
 
   bool isFixed = false;
@@ -39,7 +36,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
   String profileId = "";
   String itemlistId = "";
   Band band = Band();
-  int _prevItemState = 0;
+
   OwnerType itemlistOwner = OwnerType.profile;
 
   @override
@@ -99,67 +96,54 @@ class AppMediaItemController extends GetxController implements AppItemService {
   }
 
   @override
-  Future<void> updateItemlistItem(AppMediaItem updatedItem) async {
-    AppConfig.logger.d("Preview state ${updatedItem.state}");
-    if(updatedItem.state == itemState.value) {
-      AppConfig.logger.d("Trying to set same status");
-    } else {
-      _prevItemState = updatedItem.state;
-      updatedItem.state = itemState.value;
-      AppConfig.logger.d("updating itemlistItem ${updatedItem.toString()}");
-      try {
-
-        if (await ItemlistFirestore().addMediaItem(itemlist.id, updatedItem)) {
-          itemlistItems.update(updatedItem.id, (itemlistItem) => itemlistItem);
-          userServiceImpl.profile.itemlists![itemlist.id]!
-              .appMediaItems!.add(updatedItem);
-          updatedItem.state = _prevItemState;
-          userServiceImpl.profile.itemlists![itemlist.id]!
-              .appMediaItems!.remove(updatedItem);
-          if(await ItemlistFirestore().deleteMediaItem(itemlistId: itemlist.id, itemId: updatedItem.id)){
-            AppConfig.logger.d("ItemlistItem was updated and old version deleted.");
-          } else {
-            AppConfig.logger.d("ItemlistItem was updated but old version remains.");
-          }
-          updatedItem.state = itemState.value;
-        } else {
-          AppConfig.logger.e("ItemlistItem not updated");
-        }
-      } catch (e) {
-        AppConfig.logger.e(e.toString());
-      }
-
-      Get.back();
-      update([AppPageIdConstants.itemlistItem]);
-    }
-  }
-
-  @override
-  Future<bool> addItemToItemlist(AppMediaItem appMediaItem, String itemlistId) async {
-
+  Future<bool> addItemToItemlist(dynamic item, String itemlistId) async {
     AppConfig.logger.d("Item ${appMediaItem.name} would be added as $itemState for Itemlist $itemlistId");
 
+    String itemId = '';
+    String itemImgUrl = '';
+    bool wasAdded = false;
+
     try {
-      if(await ItemlistFirestore().addMediaItem(itemlistId, appMediaItem)) {
+
+      if(item is AppReleaseItem) {
+        wasAdded = await ItemlistFirestore().addReleaseItem(itemlist.id, item);
+        itemId = item.id;
+        itemImgUrl = item.imgUrl;
+      } else if(item is AppMediaItem) {
+        wasAdded = await ItemlistFirestore().addMediaItem(itemlist.id, item);
+        itemId = item.id;
+        itemImgUrl = item.imgUrl;
+      } else if(item is ExternalItem) {
+        wasAdded = await ItemlistFirestore().addExternalItem(itemlist.id, item);
+        itemId = item.id;
+        itemImgUrl = item.imgUrl;
+      }
+
+      if(wasAdded) {
         if (itemlistOwner == OwnerType.profile) {
           if (await ProfileFirestore().addFavoriteItem(
               profileId, appMediaItem.id)) {
             if (userServiceImpl.profile.itemlists?.isNotEmpty ?? false) {
               AppConfig.logger.d("Adding item to global itemlist from userController");
-              userServiceImpl.profile.itemlists![itemlistId]!.appMediaItems!.add(appMediaItem);
-              //TODO Verify unmodifiable list
-              //userController.profile.items!.add(appMediaItem.id);
+              if(item is AppReleaseItem) {
+                userServiceImpl.profile.itemlists![itemlist.id]!.appReleaseItems!.add(item);
+              } else if(item is AppMediaItem) {
+                userServiceImpl.profile.itemlists![itemlist.id]!.appMediaItems!.add(item);
+              } else if(item is ExternalItem) {
+                userServiceImpl.profile.itemlists![itemlist.id]!.externalItems!.add(item);
+              }
+
               itemlist = userServiceImpl.profile.itemlists![itemlistId]!;
               loadItemsFromList();
             }
 
             FirebaseMessagingCalls.sendPublicPushNotification(
-                fromProfile: userServiceImpl.profile,
-                toProfileId: '',
-                notificationType: PushNotificationType.appItemAdded,
-                title: ItemlistTranslationConstants.addedAppItemToList,
-                referenceId: appMediaItem.id,
-                imgUrl: appMediaItem.imgUrl,
+              fromProfile: userServiceImpl.profile,
+              toProfileId: '',
+              notificationType: PushNotificationType.appItemAdded,
+              title: ItemlistTranslationConstants.addedAppItemToList,
+              referenceId: itemId,
+              imgUrl: itemImgUrl,
             );
 
             return true;
@@ -167,7 +151,14 @@ class AppMediaItemController extends GetxController implements AppItemService {
         } else if (itemlistOwner == OwnerType.band) {
           if (userServiceImpl.band.itemlists!.isNotEmpty) {
             AppConfig.logger.d("Adding item to global itemlist from userController");
-            userServiceImpl.band.itemlists![itemlistId]!.appMediaItems!.add(appMediaItem);
+            if(item is AppReleaseItem) {
+              userServiceImpl.band.itemlists![itemlistId]!.appReleaseItems!.add(item);
+            } else if(item is AppMediaItem) {
+              userServiceImpl.band.itemlists![itemlistId]!.appMediaItems!.add(item);
+            } else if(item is ExternalItem) {
+              userServiceImpl.band.itemlists![itemlistId]!.externalItems!.add(item);
+            }
+
             itemlist = userServiceImpl.band.itemlists![itemlistId]!;
             loadItemsFromList();
           }
@@ -183,45 +174,100 @@ class AppMediaItemController extends GetxController implements AppItemService {
   }
 
   @override
+  Future<void> updateItemlistItem(dynamic updatedItem) async {
+    AppConfig.logger.d("Preview state ${updatedItem.state}");
+    if(updatedItem.state == itemState.value) {
+      AppConfig.logger.d("Trying to set same status");
+    } else {
+      try {
+        bool oldVersionDeleted = false;
+
+        if(updatedItem is AppReleaseItem) {
+          oldVersionDeleted = await ItemlistFirestore().deleteReleaseItem(itemlistId: itemlist.id, itemId: updatedItem.id);
+          userServiceImpl.profile.itemlists![itemlist.id]!.appReleaseItems!.remove(updatedItem);
+        } else if(updatedItem is AppMediaItem) {
+          oldVersionDeleted = await ItemlistFirestore().deleteMediaItem(itemlistId: itemlist.id, itemId: updatedItem.id);
+          userServiceImpl.profile.itemlists![itemlist.id]!.appMediaItems!.remove(updatedItem);
+        } else if(updatedItem is ExternalItem) {
+          oldVersionDeleted = await ItemlistFirestore().deleteExternalItem(itemlistId: itemlist.id, itemId: updatedItem.id);
+          userServiceImpl.profile.itemlists![itemlist.id]!.externalItems!.remove(updatedItem);
+        }
+
+        if(oldVersionDeleted) {
+          AppConfig.logger.d("ItemlistItem old version was deleted.");
+          updatedItem.state = itemState.value;
+          AppConfig.logger.d("updating itemlistItem ${updatedItem.toString()}");
+
+          bool wasUpdated = false;
+          if(updatedItem is AppReleaseItem) {
+            wasUpdated = await ItemlistFirestore().addReleaseItem(itemlist.id, updatedItem);
+          } else if(updatedItem is AppMediaItem) {
+            wasUpdated = await ItemlistFirestore().addMediaItem(itemlist.id, updatedItem);
+          } else if(updatedItem is ExternalItem) {
+            wasUpdated = await ItemlistFirestore().addExternalItem(itemlist.id, updatedItem);
+          }
+
+          if(wasUpdated) {
+            if(userServiceImpl.profile.itemlists != null) {
+              if(updatedItem is AppReleaseItem) {
+                userServiceImpl.profile.itemlists![itemlist.id]!.appReleaseItems!.add(updatedItem);
+              } else if(updatedItem is AppMediaItem) {
+                userServiceImpl.profile.itemlists![itemlist.id]!.appMediaItems!.add(updatedItem);
+              } else if(updatedItem is ExternalItem) {
+                userServiceImpl.profile.itemlists![itemlist.id]!.externalItems!.add(updatedItem);
+              }
+            }
+
+            itemlistItems.update(updatedItem.id, (itemlistItem) => itemlistItem = updatedItem);
+          } else {
+            AppConfig.logger.e("ItemlistItem not updated");
+          }
+        } else {
+          AppConfig.logger.d("ItemlistItem old version was not deleted.");
+        }
+      } catch (e) {
+        AppConfig.logger.e(e.toString());
+      }
+
+      Get.back();
+      update([AppPageIdConstants.itemlistItem]);
+    }
+  }
+
+  @override
   Future<bool> removeItemFromList(String itemId) async {
     AppConfig.logger.d("removing itemlistItem ${appMediaItem.toString()}");
 
-    AppReleaseItem? releaseItem;
+    dynamic item = itemlistItems[itemId];
     bool wasRemoved = false;
     try {
 
-      if(appMediaItem.mediaSource == AppMediaSource.internal && (itemlist.appReleaseItems?.isNotEmpty ?? false)) {
-        releaseItem = itemlist.appReleaseItems!.firstWhereOrNull((item) => item.id == appMediaItem.id);
-      }
-
-      if(releaseItem != null && await ItemlistFirestore().deleteReleaseItem(itemlistId: itemlist.id, itemId: releaseItem.id)) {
-        AppConfig.logger.d("ReleaseItem was deleted from itemlist: ${itemlist.id}");
-        wasRemoved = true;
-      } else if(await ItemlistFirestore().deleteMediaItem(itemlistId: itemlist.id, itemId: appMediaItem.id)) {
-        AppConfig.logger.d("AppMediaItem was deleted from itemlist: ${itemlist.id}");
-        wasRemoved = true;
+      if(item is AppReleaseItem) {
+        wasRemoved = await ItemlistFirestore().deleteReleaseItem(itemlistId: itemlist.id, itemId: itemId);
+      } else if(item is AppMediaItem) {
+        wasRemoved = await ItemlistFirestore().deleteMediaItem(itemlistId: itemlist.id, itemId: itemId);
+      } else if(item is ExternalItem) {
+        wasRemoved = await ItemlistFirestore().deleteExternalItem(itemlistId: itemlist.id, itemId: itemId);
       }
 
       if(wasRemoved) {
+        AppConfig.logger.d("Item was deleted from itemlist: ${itemlist.id}");
+
         if(itemlistOwner == OwnerType.profile) {
-          if(await ProfileFirestore().removeFavoriteItem(profileId, appMediaItem.id)) {
-            if (userServiceImpl.profile.itemlists != null &&
-                userServiceImpl.profile.itemlists!.isNotEmpty) {
-              AppConfig.logger.d("Removing item from global itemlist from userController");
-              userServiceImpl.profile.itemlists = await ItemlistFirestore().fetchAll(ownerId: userServiceImpl.profile.id);
-              itemlistItems.remove(appMediaItem.id);
-            }
+          if(await ProfileFirestore().removeFavoriteItem(profileId, itemId)) {
+            userServiceImpl.profile.itemlists = await ItemlistFirestore().getByOwnerId(userServiceImpl.profile.id);
           }
         } else if(itemlistOwner == OwnerType.band) {
           if (userServiceImpl.band.itemlists != null && userServiceImpl.band.itemlists!.isNotEmpty) {
             AppConfig.logger.d("Removing item from global itemlist from userController");
-            if(releaseItem != null) {
-              userServiceImpl.band.itemlists![itemlist.id]!.appReleaseItems!.remove(releaseItem);
-            } else {
-              userServiceImpl.band.itemlists![itemlist.id]!.appMediaItems!.remove(appMediaItem);
+            if(item is AppReleaseItem) {
+              userServiceImpl.band.itemlists![itemlist.id]!.appReleaseItems!.remove(item);
+            } else if(item is AppMediaItem) {
+              userServiceImpl.band.itemlists![itemlist.id]!.appMediaItems!.remove(item);
+            } else if(item is ExternalItem) {
+              userServiceImpl.band.itemlists![itemlist.id]!.externalItems!.remove(item);
             }
 
-            itemlistItems.remove(appMediaItem.id);
           }
         }
 
@@ -229,8 +275,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
           Get.find<ItemlistController>().onInit();
         }
       } else {
-        AppConfig.logger.d("ItemlistItem not removed");
-        return false;
+        AppConfig.logger.d("Item was not deleted from itemlist: ${itemlist.id}");
       }
     } catch (e) {
       AppConfig.logger.e(e.toString());
@@ -257,6 +302,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
     //GET ITEM FROM ID
     AppReleaseItem? releaseItem;
     AppMediaItem? mediaItem;
+    ExternalItem? externalItem;
 
     dynamic itemlistItem = itemlist.getItem(itemId);
 
@@ -266,7 +312,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
       } else if(itemlistItem is AppMediaItem) {
         mediaItem = itemlistItem;
       } else if(itemlistItem is ExternalItem) {
-
+        externalItem = itemlistItem;
       }
 
       if(appMediaItem.imgUrl.isEmpty && itemlist.imgUrl.isNotEmpty) appMediaItem.imgUrl = itemlist.imgUrl;
@@ -280,7 +326,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
           break;
         case AppInUse.e:
           if(itemlist.type == ItemlistType.readlist) {
-            Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
+            Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem ?? externalItem]);
           } else {
             Get.toNamed(AppFlavour.getSecondaryItemDetailsRoute(), arguments: [mediaItem]);
           }
@@ -298,21 +344,22 @@ class AppMediaItemController extends GetxController implements AppItemService {
 
   @override
   void loadItemsFromList(){
-    Map<String, AppMediaItem> items = {};
+    Map<String, dynamic> items = {};
 
-    itemlist.appReleaseItems?.forEach((releaseItem) {
-      AppMediaItem item = AppMediaItemMapper.fromAppReleaseItem(releaseItem);
-      AppConfig.logger.d(releaseItem.name);
+    for (var item in itemlist.appReleaseItems ?? []) {
       items[item.id] = item;
-    });
+    }
 
-    itemlist.appMediaItems?.forEach((item) {
-      AppConfig.logger.d(item.name);
+    for (var item in itemlist.appMediaItems ?? []) {
       items[item.id] = item;
-    });
+    }
+
+    for (var item in itemlist.externalItems ?? []) {
+      items[item.id] = item;
+    }
 
     itemlistItems.value = items;
     update([AppPageIdConstants.itemlistItem]);
   }
-  
+
 }
