@@ -289,7 +289,7 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
     AppConfig.logger.d("Previewing appMediaItem ${appMediaItem.name}");
 
     try {
-      await Get.find<AudioPlayerInvokerService>().updateNowPlaying([appMediaItem], 1);
+      await Get.find<AudioPlayerInvokerService>().updateNowPlaying(items: [appMediaItem], index: 1);
       isPlaying.value = true;
     } catch(e) {
       AppConfig.logger.e(e.toString());

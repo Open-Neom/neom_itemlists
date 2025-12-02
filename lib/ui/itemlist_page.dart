@@ -39,7 +39,7 @@ class ItemlistPage extends StatelessWidget {
             : Column(
               children: [
                 ListTile(
-                  title: Text('${AppTranslationConstants.toCreate.tr} ${itemlistType?.name.tr}'),
+                  title: Text('${AppTranslationConstants.toCreate.tr.capitalize} ${(itemlistType?.name ?? AppFlavour.getDefaultItemlistType().name).tr}'),
                   leading: SizedBox.square(
                     dimension: 40,
                     child: Center(
