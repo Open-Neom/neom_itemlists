@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/mappers/app_media_item_mapper.dart';
@@ -23,9 +23,9 @@ import '../../domain/use_cases/app_item_service.dart';
 import '../../utils/constants/itemlist_translation_constants.dart';
 import '../itemlist_controller.dart';
 
-class AppMediaItemController extends GetxController implements AppItemService {
+class AppMediaItemController extends SintController implements AppItemService {
 
-  final userServiceImpl = Get.find<UserService>();
+  final userServiceImpl = Sint.find<UserService>();
 
   AppMediaItem appMediaItem = AppMediaItem();
   Itemlist itemlist = Itemlist();
@@ -51,8 +51,8 @@ class AppMediaItemController extends GetxController implements AppItemService {
       band = userServiceImpl.band;
       itemlistOwner = userServiceImpl.itemlistOwnerType;
 
-      if(Get.arguments != null) {
-        List<dynamic> arguments = Get.arguments;
+      if(Sint.arguments != null) {
+        List<dynamic> arguments = Sint.arguments;
         if(arguments[0] is Itemlist) {
           itemlist =  arguments[0];
         } else if(arguments[0] is String) {
@@ -129,7 +129,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
         AppConfig.logger.e(e.toString());
       }
 
-      Get.back();
+      Sint.back();
       update([AppPageIdConstants.itemlistItem]);
     }
   }
@@ -225,8 +225,8 @@ class AppMediaItemController extends GetxController implements AppItemService {
           }
         }
 
-        if(Get.getInstanceInfo<ItemlistController>().isInit ?? false) {
-          Get.find<ItemlistController>().onInit();
+        if(Sint.getInstanceInfo<ItemlistController>().isInit ?? false) {
+          Sint.find<ItemlistController>().onInit();
         }
       } else {
         AppConfig.logger.d("ItemlistItem not removed");
@@ -237,7 +237,7 @@ class AppMediaItemController extends GetxController implements AppItemService {
       return false;
     }
 
-    Get.back();
+    Sint.back();
     update([AppPageIdConstants.itemlistItem, AppPageIdConstants.itemlist]);
     return true;
   }
@@ -273,20 +273,20 @@ class AppMediaItemController extends GetxController implements AppItemService {
 
       switch(AppConfig.instance.appInUse) {
         case AppInUse.c:
-          Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
+          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
           break;
         case AppInUse.g:
-          Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
+          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
           break;
         case AppInUse.e:
           if(itemlist.type == ItemlistType.readlist) {
-            Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
+            Sint.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
           } else {
-            Get.toNamed(AppFlavour.getSecondaryItemDetailsRoute(), arguments: [mediaItem]);
+            Sint.toNamed(AppFlavour.getSecondaryItemDetailsRoute(), arguments: [mediaItem]);
           }
           break;
         default:
-          Get.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
+          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
           break;
       }
     } catch(e) {

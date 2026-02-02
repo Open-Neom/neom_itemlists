@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/appbar_child.dart';
@@ -17,7 +17,7 @@ class ItemlistItemsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemlistItemsController>(
+    return SintBuilder<ItemlistItemsController>(
       id: AppPageIdConstants.itemlistItem,
       init: ItemlistItemsController(),
       builder: (controller) => Scaffold(
@@ -36,7 +36,7 @@ class ItemlistItemsPage extends StatelessWidget {
             : FloatingActionButton(
           tooltip: CommonTranslationConstants.addItem.tr,
           ///IMPROVE FILTER TO ADD ITEM TO DIFFERENT LISTS
-          onPressed: ()=> Get.toNamed(AppRouteConstants.itemSearch,
+          onPressed: ()=> Sint.toNamed(AppRouteConstants.itemSearch,
               arguments: [ItemlistUtilities.getMediaSearchType(controller.itemlist.type), controller.itemlist]
           ),
           child: const Icon(Icons.playlist_add),

@@ -1,6 +1,6 @@
 
 import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
@@ -25,19 +25,19 @@ import 'package:neom_core/utils/enums/owner_type.dart';
 import '../utils/constants/itemlist_translation_constants.dart';
 import 'itemlist_items_controller.dart';
 
-class ItemlistController extends GetxController implements ItemlistService {
+class ItemlistController extends SintController implements ItemlistService {
 
   ItemlistController({ItemlistType? type}) :
         itemlistType = type ?? AppFlavour.getDefaultItemlistType(),
         super() {
-          if(Get.find<UserService>().currentItemlistType != null && type == null) {
-            itemlistType = Get.find<UserService>().currentItemlistType!;
+          if(Sint.find<UserService>().currentItemlistType != null && type == null) {
+            itemlistType = Sint.find<UserService>().currentItemlistType!;
           } else {
-            Get.find<UserService>().setCurrentItemlistType(itemlistType);
+            Sint.find<UserService>().setCurrentItemlistType(itemlistType);
           }
         }
 
-  final userServiceImpl = Get.find<UserService>();
+  final userServiceImpl = Sint.find<UserService>();
 
   Itemlist currentItemlist = Itemlist();
 
@@ -75,18 +75,18 @@ class ItemlistController extends GetxController implements ItemlistService {
       ownerId = profile.id;
       ownerName = profile.name;
 
-      if(Get.arguments != null) {
-        if(Get.arguments.isNotEmpty && Get.arguments[0] is Band) {
-          if(Get.arguments[0] is Band) {
-            band = Get.arguments[0];
+      if(Sint.arguments != null) {
+        if(Sint.arguments.isNotEmpty && Sint.arguments[0] is Band) {
+          if(Sint.arguments[0] is Band) {
+            band = Sint.arguments[0];
             ownerId = band.id;
             ownerName = band.name;
             ownerType = OwnerType.band;
 
             userServiceImpl.band = band;
             userServiceImpl.itemlistOwnerType = OwnerType.band;
-          } else if(Get.arguments[0] is ItemlistType) {
-            itemlistType = Get.arguments[0];
+          } else if(Sint.arguments[0] is ItemlistType) {
+            itemlistType = Sint.arguments[0];
           }
         }
       }
@@ -364,10 +364,10 @@ class ItemlistController extends GetxController implements ItemlistService {
         if(itemlistId.isEmpty) itemlistId.value = itemlists.values.first.id;
 
         ItemlistItemsController itemController;
-        if (Get.isRegistered<ItemlistItemsController>()) {
-          itemController = Get.find<ItemlistItemsController>();
+        if (Sint.isRegistered<ItemlistItemsController>()) {
+          itemController = Sint.find<ItemlistItemsController>();
         } else {
-          itemController = Get.put(ItemlistItemsController());
+          itemController = Sint.put(ItemlistItemsController());
         }
 
         AppMediaItemFirestore().existsOrInsert(appMediaItem);
@@ -392,7 +392,7 @@ class ItemlistController extends GetxController implements ItemlistService {
 
       try {
         if(goHome) {
-          Get.offAllNamed(AppRouteConstants.home);
+          Sint.offAllNamed(AppRouteConstants.home);
         } else {
           Navigator.pop(context);
         }
@@ -400,8 +400,8 @@ class ItemlistController extends GetxController implements ItemlistService {
             message: '"${appMediaItem.name}" ${ItemlistTranslationConstants.wasAddedToItemList.tr}.'
         );
       } catch (e) {
-        Get.offAllNamed(AppRouteConstants.home);
-        Get.toNamed(AppRouteConstants.listItems);
+        Sint.offAllNamed(AppRouteConstants.home);
+        Sint.toNamed(AppRouteConstants.listItems);
       }
     }
 

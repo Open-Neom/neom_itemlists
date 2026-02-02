@@ -1,6 +1,6 @@
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
@@ -24,7 +24,7 @@ class ItemlistPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<ItemlistController>(
+    return SintBuilder<ItemlistController>(
         id: AppPageIdConstants.itemlist,
         init: ItemlistController(type: itemlistType),
         builder: (controller) {

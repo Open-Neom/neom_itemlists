@@ -1,7 +1,7 @@
 //DEPRECATED
 // import 'package:animated_text_kit/animated_text_kit.dart';
 // import 'package:flutter/material.dart';
-// import 'package:get/get.dart';
+// import 'package:sint/sint.dart';
 // import 'package:neom_commons/app_flavour.dart';
 // import 'package:neom_commons/ui/theme/app_color.dart';
 // import 'package:neom_commons/ui/theme/app_theme.dart';
@@ -21,7 +21,7 @@
 //
 //   @override
 //   Widget build(BuildContext context) {
-//     return GetBuilder<ItemlistController>(
+//     return SintBuilder<ItemlistController>(
 //         id: AppPageIdConstants.itemlist,
 //         init: ItemlistController(),
 //         builder: (controller) => Scaffold(

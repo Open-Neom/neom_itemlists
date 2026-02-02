@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/datetime_utilities.dart';
@@ -28,9 +28,9 @@ import '../../utils/constants/itemlist_translation_constants.dart';
 import 'app_media_item_controller.dart';
 
 
-class AppMediaItemDetailsController extends GetxController implements AppMediaItemDetailsService {
+class AppMediaItemDetailsController extends SintController implements AppMediaItemDetailsService {
   
-  final userServiceImpl = Get.find<UserService>();
+  final userServiceImpl = Sint.find<UserService>();
 
   AppProfile profile = AppProfile();
   Band band = Band();
@@ -72,14 +72,14 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
         itemlists.assignAll(band.itemlists ?? {});
       }
 
-      List<dynamic> arguments  = Get.arguments ?? [];
+      List<dynamic> arguments  = Sint.arguments ?? [];
 
       if(arguments.isNotEmpty) {
-        if(Get.arguments[0] is AppMediaItem) {
+        if(Sint.arguments[0] is AppMediaItem) {
           appMediaItem =  arguments.elementAt(0);
           releasedItemId = appMediaItem.id;
-        } else if(Get.arguments[0] is String) {
-          releasedItemId = Get.arguments[0];
+        } else if(Sint.arguments[0] is String) {
+          releasedItemId = Sint.arguments[0];
         }
 
         existsInItemlist.value = itemAlreadyInList();
@@ -124,7 +124,7 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
       }
 
       if(itemlists.isEmpty) {
-        Get.offAllNamed(AppRouteConstants.home);
+        Sint.offAllNamed(AppRouteConstants.home);
         AppUtilities.showSnackBar(title: ItemlistTranslationConstants.noItemlistsMsg, message: ItemlistTranslationConstants.noItemlistsMsg2);
       }
     } catch(e) {
@@ -191,10 +191,10 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
 
     AppMediaItemController appMediaItemController;
 
-    if(Get.isRegistered<AppMediaItemController>()) {
-      appMediaItemController = Get.find<AppMediaItemController>();
+    if(Sint.isRegistered<AppMediaItemController>()) {
+      appMediaItemController = Sint.find<AppMediaItemController>();
     } else {
-      appMediaItemController = Get.put(AppMediaItemController());
+      appMediaItemController = Sint.put(AppMediaItemController());
     }
 
     try {
@@ -218,22 +218,22 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
 
     try {
       if(itemlistOwner == OwnerType.profile) {
-        EventDetailsService? eventDetailsService = Get.find<EventDetailsService?>();
+        EventDetailsService? eventDetailsService = Sint.find<EventDetailsService?>();
         if(eventDetailsService != null) {
           eventDetailsService.addToMatchedItems(appMediaItem.id, CoreUtilities.getItemState(appMediaItem.state));
           Navigator.of(context).popUntil(ModalRoute.withName(AppRouteConstants.eventDetails));
         } else {
-          Get.offAllNamed(AppRouteConstants.home);
-          Get.toNamed(AppRouteConstants.listItems);
+          Sint.offAllNamed(AppRouteConstants.home);
+          Sint.toNamed(AppRouteConstants.listItems);
         }
       } else {
-        Get.offAllNamed(AppRouteConstants.home);
-        Get.toNamed(AppRouteConstants.bandsRoom);
-        Get.toNamed(AppRouteConstants.bandLists);
+        Sint.offAllNamed(AppRouteConstants.home);
+        Sint.toNamed(AppRouteConstants.bandsRoom);
+        Sint.toNamed(AppRouteConstants.bandLists);
       }
     } catch (e) {
-      Get.offAllNamed(AppRouteConstants.home);
-      Get.toNamed(AppRouteConstants.listItems);
+      Sint.offAllNamed(AppRouteConstants.home);
+      Sint.toNamed(AppRouteConstants.listItems);
     }
 
   }
@@ -246,9 +246,9 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
 
     AppMediaItemController appMediaItemController;
     try {
-      appMediaItemController = Get.find<AppMediaItemController>();
+      appMediaItemController = Sint.find<AppMediaItemController>();
     } catch (e) {
-      appMediaItemController = Get.put(AppMediaItemController());
+      appMediaItemController = Sint.put(AppMediaItemController());
     }
 
 
@@ -262,7 +262,7 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
       AppConfig.logger.d(e.toString());
     }
 
-    Get.back();
+    Sint.back();
     update([AppPageIdConstants.appItemDetails]);
   }
 
@@ -289,7 +289,7 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
     AppConfig.logger.d("Previewing appMediaItem ${appMediaItem.name}");
 
     try {
-      await Get.find<AudioPlayerInvokerService>().updateNowPlaying(items: [appMediaItem], index: 1);
+      await Sint.find<AudioPlayerInvokerService>().updateNowPlaying(items: [appMediaItem], index: 1);
       isPlaying.value = true;
     } catch(e) {
       AppConfig.logger.e(e.toString());
@@ -301,7 +301,7 @@ class AppMediaItemDetailsController extends GetxController implements AppMediaIt
   Future<void> pausePreview() async {
     try {
       ///DEPRECATED - INTEGRATE WITH NEOM AUDIO PLAYER SERVICE AS CONTRACT
-      Get.find<AudioPlayerInvokerService>().pause();
+      Sint.find<AudioPlayerInvokerService>().pause();
       isPlaying.value = false;
     } catch(e) {
       AppConfig.logger.e(e.toString());

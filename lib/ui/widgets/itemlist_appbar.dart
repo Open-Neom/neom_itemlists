@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
@@ -32,7 +32,7 @@ class ItemlistAppBar extends StatelessWidget implements PreferredSizeWidget {
             icon: const Icon(Icons.search),
             onPressed: () async {
               if(controller.itemlists.isNotEmpty) {
-                Get.toNamed(AppRouteConstants.itemSearch,
+                Sint.toNamed(AppRouteConstants.itemSearch,
                     arguments: [MediaSearchType.song]
                 );
               } else {

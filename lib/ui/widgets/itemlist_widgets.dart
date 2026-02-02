@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
@@ -65,15 +65,15 @@ Widget buildItemlistList(BuildContext context, ItemlistController controller) {
           label: Icon(AppFlavour.getAppItemIcon(), color: AppColor.white80),
           onPressed: () async {
             if(AppConfig.instance.appInUse == AppInUse.c || !itemlist.isModifiable) {
-              Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
+              Sint.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
             } else {
-              Get.toNamed(AppRouteConstants.itemSearch,
+              Sint.toNamed(AppRouteConstants.itemSearch,
                   arguments: [ItemlistUtilities.getMediaSearchType(itemlist.type), itemlist]
               );
             }
           },
         ),
-        onTap: () => Get.toNamed(AppRouteConstants.listItems, arguments: [itemlist]),
+        onTap: () => Sint.toNamed(AppRouteConstants.listItems, arguments: [itemlist]),
         onLongPress: () async {
           (await showDialog(
               context: context,

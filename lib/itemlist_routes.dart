@@ -1,4 +1,4 @@
-import 'package:get/get.dart';
+import 'package:sint/sint.dart';
 import 'package:neom_commons/ui/splash_page.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'ui/app_media_item/app_media_item_details_page.dart';
@@ -7,27 +7,27 @@ import 'ui/itemlist_page.dart';
 
 class ItemlistRoutes {
 
-  static final List<GetPage<dynamic>> routes = [
-    GetPage(
+  static final List<SintPage<dynamic>> routes = [
+    SintPage(
       name: AppRouteConstants.lists,
       page: () => ItemlistPage(),
     ),
     ///DEPRECATED
-    // GetPage(
+    // SintPage(
     //   name: AppRouteConstants.readlists,
     //   page: () => const ReadlistPage(),
     // ),
-    GetPage(
+    SintPage(
       name: AppRouteConstants.itemDetails,
       page: () => const AppMediaItemDetailsPage(),
       transition: Transition.leftToRightWithFade,
     ),
-    GetPage(
+    SintPage(
         name: AppRouteConstants.listItems,
         page: () => const ItemlistItemsPage(),
         transition: Transition.zoom
     ),
-    GetPage(
+    SintPage(
         name: AppRouteConstants.finishingSpotifySync,
         page: () => const SplashPage(),
     ),
