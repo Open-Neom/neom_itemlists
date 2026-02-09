@@ -1,4 +1,3 @@
-import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_core/app_config.dart';
@@ -16,11 +15,13 @@ import 'package:neom_core/utils/enums/app_item_state.dart';
 import 'package:neom_core/utils/enums/itemlist_type.dart';
 import 'package:neom_core/utils/enums/owner_type.dart';
 import 'package:neom_core/utils/enums/push_notification_type.dart';
+import 'package:sint/sint.dart';
 
 import '../../utils/constants/itemlist_translation_constants.dart';
+import '../domain/use_cases/itemlist_items_service.dart';
 import 'itemlist_controller.dart';
 
-class ItemlistItemsController extends SintController {
+class ItemlistItemsController extends SintController implements ItemlistItemService {
 
   final userServiceImpl = Sint.find<UserService>();
 
