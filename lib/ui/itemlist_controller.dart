@@ -175,14 +175,21 @@ class ItemlistController extends SintController implements ItemlistService {
 
         if(newItemlistId.isNotEmpty) {
           itemlists[newItemlistId] = newItemlist;
-          if(userServiceImpl.profile.itemlists == null) {
-            userServiceImpl.profile.itemlists = {};
+
+          // Update the correct owner's itemlists based on ownerType
+          if(ownerType == OwnerType.profile) {
+            if(userServiceImpl.profile.itemlists == null) {
+              userServiceImpl.profile.itemlists = {};
+            }
             userServiceImpl.profile.itemlists![newItemlistId] = newItemlist;
-          } else {
-            userServiceImpl.profile.itemlists![newItemlistId] = newItemlist;
+          } else if(ownerType == OwnerType.band) {
+            if(userServiceImpl.band.itemlists == null) {
+              userServiceImpl.band.itemlists = {};
+            }
+            userServiceImpl.band.itemlists![newItemlistId] = newItemlist;
           }
 
-          AppConfig.logger.t("Itemlists $itemlists");
+          AppConfig.logger.t("Itemlists $itemlists for ${ownerType.name}");
 
           clearNewItemlist();
           AppUtilities.showSnackBar(

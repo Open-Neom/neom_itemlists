@@ -96,8 +96,10 @@ class ItemlistItemsController extends SintController {
   }
 
   @override
-  Future<bool> addItemToItemlist(dynamic item, String itemlistId) async {
-    AppConfig.logger.d("Item ${appMediaItem.name} would be added as $itemState for Itemlist $itemlistId");
+  Future<bool> addItemToItemlist(dynamic item, String targetItemlistId) async {
+    // Use targetItemlistId if provided, otherwise fall back to itemlist.id
+    final String listId = targetItemlistId.isNotEmpty ? targetItemlistId : itemlist.id;
+    AppConfig.logger.d("Item ${appMediaItem.name} would be added as $itemState for Itemlist $listId (owner: ${itemlistOwner.name})");
 
     String itemId = '';
     String itemImgUrl = '';
@@ -106,35 +108,36 @@ class ItemlistItemsController extends SintController {
     try {
 
       if(item is AppReleaseItem) {
-        wasAdded = await ItemlistFirestore().addReleaseItem(itemlist.id, item);
+        wasAdded = await ItemlistFirestore().addReleaseItem(listId, item);
         itemId = item.id;
         itemImgUrl = item.imgUrl;
       } else if(item is AppMediaItem) {
-        wasAdded = await ItemlistFirestore().addMediaItem(itemlist.id, item);
+        wasAdded = await ItemlistFirestore().addMediaItem(listId, item);
         itemId = item.id;
         itemImgUrl = item.imgUrl;
       } else if(item is ExternalItem) {
-        wasAdded = await ItemlistFirestore().addExternalItem(itemlist.id, item);
+        wasAdded = await ItemlistFirestore().addExternalItem(listId, item);
         itemId = item.id;
         itemImgUrl = item.imgUrl;
       }
 
       if(wasAdded) {
         if (itemlistOwner == OwnerType.profile) {
-          if (await ProfileFirestore().addFavoriteItem(
-              profileId, appMediaItem.id)) {
+          if (await ProfileFirestore().addFavoriteItem(profileId, appMediaItem.id)) {
             if (userServiceImpl.profile.itemlists?.isNotEmpty ?? false) {
-              AppConfig.logger.d("Adding item to global itemlist from userController");
+              AppConfig.logger.d("Adding item to profile itemlist: $listId");
               if(item is AppReleaseItem) {
-                userServiceImpl.profile.itemlists![itemlist.id]!.appReleaseItems!.add(item);
+                userServiceImpl.profile.itemlists![listId]?.appReleaseItems?.add(item);
               } else if(item is AppMediaItem) {
-                userServiceImpl.profile.itemlists![itemlist.id]!.appMediaItems!.add(item);
+                userServiceImpl.profile.itemlists![listId]?.appMediaItems?.add(item);
               } else if(item is ExternalItem) {
-                userServiceImpl.profile.itemlists![itemlist.id]!.externalItems!.add(item);
+                userServiceImpl.profile.itemlists![listId]?.externalItems?.add(item);
               }
 
-              itemlist = userServiceImpl.profile.itemlists![itemlistId]!;
-              loadItemsFromList();
+              if(userServiceImpl.profile.itemlists![listId] != null) {
+                itemlist = userServiceImpl.profile.itemlists![listId]!;
+                loadItemsFromList();
+              }
             }
 
             FirebaseMessagingCalls.sendPublicPushNotification(
@@ -149,18 +152,20 @@ class ItemlistItemsController extends SintController {
             return true;
           }
         } else if (itemlistOwner == OwnerType.band) {
-          if (userServiceImpl.band.itemlists!.isNotEmpty) {
-            AppConfig.logger.d("Adding item to global itemlist from userController");
+          if (userServiceImpl.band.itemlists?.isNotEmpty ?? false) {
+            AppConfig.logger.d("Adding item to band itemlist: $listId");
             if(item is AppReleaseItem) {
-              userServiceImpl.band.itemlists![itemlistId]!.appReleaseItems!.add(item);
+              userServiceImpl.band.itemlists![listId]?.appReleaseItems?.add(item);
             } else if(item is AppMediaItem) {
-              userServiceImpl.band.itemlists![itemlistId]!.appMediaItems!.add(item);
+              userServiceImpl.band.itemlists![listId]?.appMediaItems?.add(item);
             } else if(item is ExternalItem) {
-              userServiceImpl.band.itemlists![itemlistId]!.externalItems!.add(item);
+              userServiceImpl.band.itemlists![listId]?.externalItems?.add(item);
             }
 
-            itemlist = userServiceImpl.band.itemlists![itemlistId]!;
-            loadItemsFromList();
+            if(userServiceImpl.band.itemlists![listId] != null) {
+              itemlist = userServiceImpl.band.itemlists![listId]!;
+              loadItemsFromList();
+            }
           }
           return true;
         }
@@ -175,25 +180,26 @@ class ItemlistItemsController extends SintController {
 
   @override
   Future<void> updateItemlistItem(dynamic updatedItem) async {
-    AppConfig.logger.d("Preview state ${updatedItem.state}");
+    AppConfig.logger.d("Preview state ${updatedItem.state} for owner: ${itemlistOwner.name}");
     if(updatedItem.state == itemState.value) {
       AppConfig.logger.d("Trying to set same status");
     } else {
       try {
         bool oldVersionDeleted = false;
 
+        // Delete old version from Firestore
         if(updatedItem is AppReleaseItem) {
           oldVersionDeleted = await ItemlistFirestore().deleteReleaseItem(itemlistId: itemlist.id, itemId: updatedItem.id);
-          userServiceImpl.profile.itemlists![itemlist.id]!.appReleaseItems!.remove(updatedItem);
         } else if(updatedItem is AppMediaItem) {
           oldVersionDeleted = await ItemlistFirestore().deleteMediaItem(itemlistId: itemlist.id, itemId: updatedItem.id);
-          userServiceImpl.profile.itemlists![itemlist.id]!.appMediaItems!.remove(updatedItem);
         } else if(updatedItem is ExternalItem) {
           oldVersionDeleted = await ItemlistFirestore().deleteExternalItem(itemlistId: itemlist.id, itemId: updatedItem.id);
-          userServiceImpl.profile.itemlists![itemlist.id]!.externalItems!.remove(updatedItem);
         }
 
+        // Remove from local state based on owner type
         if(oldVersionDeleted) {
+          _removeItemFromOwnerState(updatedItem);
+
           AppConfig.logger.d("ItemlistItem old version was deleted.");
           updatedItem.state = itemState.value;
           AppConfig.logger.d("updating itemlistItem ${updatedItem.toString()}");
@@ -208,16 +214,7 @@ class ItemlistItemsController extends SintController {
           }
 
           if(wasUpdated) {
-            if(userServiceImpl.profile.itemlists != null) {
-              if(updatedItem is AppReleaseItem) {
-                userServiceImpl.profile.itemlists![itemlist.id]!.appReleaseItems!.add(updatedItem);
-              } else if(updatedItem is AppMediaItem) {
-                userServiceImpl.profile.itemlists![itemlist.id]!.appMediaItems!.add(updatedItem);
-              } else if(updatedItem is ExternalItem) {
-                userServiceImpl.profile.itemlists![itemlist.id]!.externalItems!.add(updatedItem);
-              }
-            }
-
+            _addItemToOwnerState(updatedItem);
             itemlistItems.update(updatedItem.id, (itemlistItem) => itemlistItem = updatedItem);
           } else {
             AppConfig.logger.e("ItemlistItem not updated");
@@ -231,6 +228,48 @@ class ItemlistItemsController extends SintController {
 
       Sint.back();
       update([AppPageIdConstants.itemlistItem]);
+    }
+  }
+
+  /// Helper to remove item from the correct owner's state
+  void _removeItemFromOwnerState(dynamic item) {
+    Map<String, Itemlist>? ownerItemlists;
+
+    if(itemlistOwner == OwnerType.profile) {
+      ownerItemlists = userServiceImpl.profile.itemlists;
+    } else if(itemlistOwner == OwnerType.band) {
+      ownerItemlists = userServiceImpl.band.itemlists;
+    }
+
+    if(ownerItemlists != null && ownerItemlists[itemlist.id] != null) {
+      if(item is AppReleaseItem) {
+        ownerItemlists[itemlist.id]!.appReleaseItems?.remove(item);
+      } else if(item is AppMediaItem) {
+        ownerItemlists[itemlist.id]!.appMediaItems?.remove(item);
+      } else if(item is ExternalItem) {
+        ownerItemlists[itemlist.id]!.externalItems?.remove(item);
+      }
+    }
+  }
+
+  /// Helper to add item to the correct owner's state
+  void _addItemToOwnerState(dynamic item) {
+    Map<String, Itemlist>? ownerItemlists;
+
+    if(itemlistOwner == OwnerType.profile) {
+      ownerItemlists = userServiceImpl.profile.itemlists;
+    } else if(itemlistOwner == OwnerType.band) {
+      ownerItemlists = userServiceImpl.band.itemlists;
+    }
+
+    if(ownerItemlists != null && ownerItemlists[itemlist.id] != null) {
+      if(item is AppReleaseItem) {
+        ownerItemlists[itemlist.id]!.appReleaseItems?.add(item);
+      } else if(item is AppMediaItem) {
+        ownerItemlists[itemlist.id]!.appMediaItems?.add(item);
+      } else if(item is ExternalItem) {
+        ownerItemlists[itemlist.id]!.externalItems?.add(item);
+      }
     }
   }
 

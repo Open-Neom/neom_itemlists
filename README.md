@@ -1,90 +1,207 @@
 # neom_itemlists
-**Item Management for Open Neom**
 
-`neom_itemlists` is a core module within the Open Neom ecosystem that provides comprehensive functionality
-for creating, organizing, and managing collections of media items (playlists, readlists, etc.).
-It implements the itemlist management features used across the Open Neom platform.
+Item Collection Management Module for the Open Neom ecosystem.
 
-## 🌟 Features
+neom_itemlists provides comprehensive functionality for creating, organizing, and managing collections of media items (playlists, readlists, giglist, etc.). It supports both personal profile collections and band/group collections with proper owner type distinction.
 
-### Core Capabilities
-- **Multi-type Itemlists**: Supports playlists, readlists, and custom collection types
-- **CRUD Operations**: Full lifecycle management for itemlists and their contents
-- **Cross-module Integration**: Seamless interaction with `neom_core` models and `neom_commons` UI components
-- **State Management**: Built with GetX for reactive state handling
-- **Cloud Sync**: Automatic synchronization with Firestore backend
+## Features & Components
 
-### Key Functionalities
-- Create and manage itemlists with customizable metadata (name, description, privacy)
-- Add/remove media items (songs, books, etc.) to/from itemlists
-- Item state tracking (ratings, play counts)
+### Multi-Type Collections
+- **Playlist**: Music and audio collections
+- **Readlist**: Book and reading collections
+- **Giglist**: Event and performance collections
+- **Publication**: Released content collections
+- **Album/EP/Single**: Music release formats
+
+### Owner Type Support
+- **Profile**: Personal user collections
+- **Band**: Group/band shared collections
+- Proper state management per owner type
+- Cross-owner item sharing capabilities
+
+### Item Management
+- **AppMediaItem**: Audio/video media items
+- **AppReleaseItem**: Published release items
+- **ExternalItem**: Third-party linked items
+- State tracking (ratings, play counts)
+
+### Core Functionalities
+- Create and manage itemlists with customizable metadata
+- Add/remove items to/from itemlists
 - Bulk operations and intelligent item deduplication
-- Responsive UI with adaptive layouts for all device sizes
+- Cloud sync with Firestore backend
+- Push notifications on item additions
 
-## 📦 Installation
+## Architecture
 
-Add to your `pubspec.yaml`:
+```
+lib/
+├── domain/
+│   └── use_cases/
+│       ├── app_item_service.dart
+│       └── app_media_item_details_service.dart
+├── ui/
+│   ├── itemlist_controller.dart
+│   ├── itemlist_items_controller.dart
+│   ├── itemlist_page.dart
+│   ├── itemlist_items_page.dart
+│   ├── app_media_item/
+│   │   ├── app_media_item_controller.dart
+│   │   ├── app_media_item_details_controller.dart
+│   │   └── app_media_item_details_page.dart
+│   └── widgets/
+│       ├── itemlist_widgets.dart
+│       ├── itemlist_action_button.dart
+│       ├── itemlist_appbar.dart
+│       └── readlist_page.dart
+├── utils/
+│   ├── constants/
+│   │   └── itemlist_translation_constants.dart
+│   └── itemlist_utilities.dart
+└── itemlist_routes.dart
+```
 
+## Dependencies
+
+```yaml
 dependencies:
-  neom_itemlists:
-    git:
-      url: https://github.com/Open-Neom/neom_itemlists.git
+  neom_core: ^2.0.0      # Core services, models, Firebase
+  neom_commons: ^1.0.0   # Shared UI components
+```
 
-Then, run flutter pub get in your project's root directory.
+## Usage
 
-🚀 Usage
-Basic Integration
-dart
-// 1. Add to your app's routes
-GetPage(
-  name: AppRouteConstants.lists,
-  page: () => const ItemlistPage(),
-  binding: ItemlistBinding(),
-)
+### Navigating to Itemlists
 
-// 2. Navigate to itemlist features
-Get.toNamed(AppRouteConstants.lists);
-Core Components
-Controllers
-•	ItemlistController: Main business logic for itemlist management
-•	AppMediaItemController: Handles media item operations within lists
-•	AppMediaItemDetailsController: Manages detailed item views
-Pages
-•	ItemlistPage: Main itemlist dashboard
-•	ItemlistItemsPage: Displays contents of a specific itemlist
-•	AppMediaItemDetailsPage: Detailed media item view
-Widgets
-•	Reusable components for itemlist display and interaction
-•	Custom list tiles with rich media previews
-•	State-aware action buttons
-🛠️ Dependencies
-Core Modules
-•	neom_core: For base models and services
-•	neom_commons: For shared UI components and utilities
-External Packages
-•	get: State management and dependency injection
-•	cached_network_image: Efficient image loading
-•	rflutter_alert: Custom alert dialogs
-•	enum_to_string: Enum serialization
+```dart
+import 'package:neom_itemlists/itemlist_routes.dart';
 
-🏗️ Architecture
-Clean Architecture Layers
-Layer|	Components
-Domain|	Models, Interfaces, Use Cases
-Data|	Repositories, Data Sources
-UI|	Pages, Controllers, Widgets
+// View profile itemlists
+Sint.toNamed(AppRouteConstants.lists);
 
-Key Design Patterns
-•	Repository pattern for data access
-•	Dependency Injection via GetX
-•	Reactive programming with GetX Observables
-•	SOLID principles throughout
+// View band itemlists
+Sint.toNamed(AppRouteConstants.lists, arguments: [band]);
 
-🤝 Contributing
-We welcome contributions! Please see:
-•	Open Neom Contribution Guidelines
-•	Module-Specific Development Guide
+// View specific itemlist items
+Sint.toNamed(AppRouteConstants.listItems, arguments: [itemlist]);
+```
 
-📄 License
-Apache License 2.0 - See LICENSE for details.
-text
+### Using Itemlist Controller
+
+```dart
+import 'package:sint/sint.dart';
+import 'package:neom_itemlists/ui/itemlist_controller.dart';
+
+class MyController extends SintController {
+  final itemlistController = Sint.find<ItemlistController>();
+
+  Future<void> createNewPlaylist() async {
+    itemlistController.newItemlistNameController.text = "My Playlist";
+    await itemlistController.createItemlist(type: ItemlistType.playlist);
+  }
+}
+```
+
+### Adding Items to Itemlist
+
+```dart
+final itemsController = Sint.find<ItemlistItemsController>();
+
+// Add media item to itemlist
+await itemsController.addItemToItemlist(appMediaItem, itemlistId);
+
+// Update item state
+itemsController.setItemState(AppItemState.favorite);
+await itemsController.updateItemlistItem(item);
+```
+
+## Owner Type Handling
+
+The module correctly handles items based on owner type:
+
+```dart
+// Profile-owned itemlists
+if(ownerType == OwnerType.profile) {
+  userServiceImpl.profile.itemlists![listId] = newItemlist;
+}
+
+// Band-owned itemlists
+else if(ownerType == OwnerType.band) {
+  userServiceImpl.band.itemlists![listId] = newItemlist;
+}
+```
+
+## Itemlist Types
+
+| Type | Description | Use Case |
+|------|-------------|----------|
+| `playlist` | Audio/music collection | Songs, podcasts |
+| `readlist` | Reading collection | Books, articles |
+| `giglist` | Performance list | Concert setlists |
+| `publication` | Published content | Releases |
+| `album` | Full album release | Music albums |
+| `ep` | Extended play | Short releases |
+| `single` | Single track | Individual songs |
+| `audiobook` | Spoken word | Audiobooks |
+| `podcast` | Podcast series | Episodes |
+
+## ROADMAP 2026
+
+### Q1 2026 - Enhanced Item Management
+- [ ] Drag-and-drop reordering
+- [ ] Batch item operations (bulk add/remove)
+- [ ] Item duplicate detection
+- [ ] Smart playlist auto-generation
+
+### Q2 2026 - Collaboration Features
+- [ ] Shared itemlists between profiles
+- [ ] Collaborative editing permissions
+- [ ] Real-time sync for shared lists
+- [ ] Comment/annotation support
+
+### Q3 2026 - Discovery & Recommendations
+- [ ] AI-powered item recommendations
+- [ ] Similar itemlist suggestions
+- [ ] Trending items integration
+- [ ] Cross-user discovery
+
+### Q4 2026 - Advanced Analytics
+- [ ] Play/read statistics
+- [ ] Item engagement metrics
+- [ ] Collection insights dashboard
+- [ ] Export/import capabilities
+
+## Technical Highlights
+
+### Service Injection Pattern
+```dart
+class ItemlistController extends SintController implements ItemlistService {
+  final userServiceImpl = Sint.find<UserService>();
+
+  OwnerType ownerType = OwnerType.profile;
+  ItemlistType itemlistType;
+}
+```
+
+### Owner-Aware State Updates
+```dart
+void _addItemToOwnerState(dynamic item) {
+  Map<String, Itemlist>? ownerItemlists;
+
+  if(itemlistOwner == OwnerType.profile) {
+    ownerItemlists = userServiceImpl.profile.itemlists;
+  } else if(itemlistOwner == OwnerType.band) {
+    ownerItemlists = userServiceImpl.band.itemlists;
+  }
+
+  ownerItemlists?[itemlist.id]?.appMediaItems?.add(item);
+}
+```
+
+## Contributing
+
+We welcome contributions to neom_itemlists! If you're interested in media management, playlist features, or collection UX, your contributions can significantly enhance the Open Neom ecosystem.
+
+## License
+
+This project is licensed under the Apache License, Version 2.0, January 2004. See the LICENSE file for details.
