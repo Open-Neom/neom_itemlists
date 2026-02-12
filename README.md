@@ -1,5 +1,9 @@
 # neom_itemlists
 
+[![Version](https://img.shields.io/badge/version-2.0.0-blue.svg)](https://github.com/Open-Neom/neom_itemlists)
+[![Flutter](https://img.shields.io/badge/Flutter-3.19+-02569B.svg)](https://flutter.dev)
+[![License](https://img.shields.io/badge/license-Apache%202.0-green.svg)](LICENSE)
+
 Item Collection Management Module for the Open Neom ecosystem.
 
 neom_itemlists provides comprehensive functionality for creating, organizing, and managing collections of media items (playlists, readlists, giglist, etc.). It supports both personal profile collections and band/group collections with proper owner type distinction.
@@ -180,21 +184,34 @@ class ItemlistController extends SintController implements ItemlistService {
 
   OwnerType ownerType = OwnerType.profile;
   ItemlistType itemlistType;
+
+  @override
+  Future<void> restart() async {
+    AppConfig.logger.t("Reinitializing Itemlist Controller");
+    onInit();
+  }
 }
 ```
 
 ### Owner-Aware State Updates
 ```dart
-void _addItemToOwnerState(dynamic item) {
-  Map<String, Itemlist>? ownerItemlists;
+// Clean null-coalescing pattern (v2.0.0+)
+if(ownerType == OwnerType.profile) {
+  userServiceImpl.profile.itemlists ??= {};
+  userServiceImpl.profile.itemlists![newItemlistId] = newItemlist;
+} else if(ownerType == OwnerType.band) {
+  userServiceImpl.band.itemlists ??= {};
+  userServiceImpl.band.itemlists![newItemlistId] = newItemlist;
+}
+```
 
-  if(itemlistOwner == OwnerType.profile) {
-    ownerItemlists = userServiceImpl.profile.itemlists;
-  } else if(itemlistOwner == OwnerType.band) {
-    ownerItemlists = userServiceImpl.band.itemlists;
-  }
-
-  ownerItemlists?[itemlist.id]?.appMediaItems?.add(item);
+### Service Interface Pattern
+```dart
+// ItemlistItemService interface for dependency injection
+abstract class ItemlistItemService {
+  Future<void> addItemToItemlist(dynamic item, String itemlistId);
+  Future<void> removeItemFromItemlist(dynamic item);
+  Future<void> updateItemlistItem(dynamic item);
 }
 ```
 

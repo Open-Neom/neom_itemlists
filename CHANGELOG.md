@@ -2,6 +2,29 @@
 
 All notable changes to neom_itemlists will be documented in this file.
 
+## [2.0.0] - 2026-02-12
+
+### Added
+- **restart() method**: New method to reinitialize the controller when needed
+- **ItemlistItemService interface**: Added service abstraction for better dependency injection
+
+### Changed
+- **Null-coalescing assignment**: Refactored null checks to use `??=` operator for cleaner code
+  - `userServiceImpl.profile.itemlists ??= {}` instead of verbose if-null blocks
+- **Import ordering**: Reorganized imports to follow Dart conventions (package imports before relative)
+- **Code cleanup**: Removed unnecessary blank lines and improved formatting
+
+### Technical
+- Better separation of concerns with service interfaces
+- Improved testability through dependency inversion
+- SINT framework integration refinements
+
+### Migration Guide
+- No breaking changes from 1.7.0
+- Service interfaces are optional but recommended for new implementations
+
+---
+
 ## [1.7.0] - 2026-02-08
 
 ### Fixed

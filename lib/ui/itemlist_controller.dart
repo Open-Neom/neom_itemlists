@@ -1,6 +1,5 @@
 
 import 'package:flutter/cupertino.dart';
-import 'package:sint/sint.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
@@ -21,6 +20,7 @@ import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/enums/app_item_state.dart';
 import 'package:neom_core/utils/enums/itemlist_type.dart';
 import 'package:neom_core/utils/enums/owner_type.dart';
+import 'package:sint/sint.dart';
 
 import '../utils/constants/itemlist_translation_constants.dart';
 import 'itemlist_items_controller.dart';
@@ -90,12 +90,15 @@ class ItemlistController extends SintController implements ItemlistService {
           }
         }
       }
-
-
     } catch (e) {
       AppConfig.logger.e(e.toString());
     }
+  }
 
+  @override
+  Future<void> restart() async {
+    AppConfig.logger.t("initialize Itemlist Controller");
+    onInit();
   }
 
   @override
@@ -178,14 +181,10 @@ class ItemlistController extends SintController implements ItemlistService {
 
           // Update the correct owner's itemlists based on ownerType
           if(ownerType == OwnerType.profile) {
-            if(userServiceImpl.profile.itemlists == null) {
-              userServiceImpl.profile.itemlists = {};
-            }
+            userServiceImpl.profile.itemlists ??= {};
             userServiceImpl.profile.itemlists![newItemlistId] = newItemlist;
           } else if(ownerType == OwnerType.band) {
-            if(userServiceImpl.band.itemlists == null) {
-              userServiceImpl.band.itemlists = {};
-            }
+            userServiceImpl.band.itemlists ??= {};
             userServiceImpl.band.itemlists![newItemlistId] = newItemlist;
           }
 
