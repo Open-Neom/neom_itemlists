@@ -3,10 +3,10 @@ import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
-import 'package:neom_core/utils/enums/media_search_type.dart';
 import 'package:sint/sint.dart';
 
 import '../../utils/constants/itemlist_translation_constants.dart';
+import '../../utils/itemlist_utilities.dart';
 import '../itemlist_controller.dart';
 
 
@@ -33,7 +33,7 @@ class ItemlistAppBar extends StatelessWidget implements PreferredSizeWidget {
             onPressed: () async {
               if(controller.itemlists.isNotEmpty) {
                 Sint.toNamed(AppRouteConstants.itemSearch,
-                    arguments: [MediaSearchType.song]
+                    arguments: [ItemlistUtilities.getMediaSearchType(controller.itemlistType)]
                 );
               } else {
                 AppUtilities.showSnackBar(
@@ -52,7 +52,7 @@ class ItemlistAppBar extends StatelessWidget implements PreferredSizeWidget {
         ),
       ),
       centerTitle: true,
-      backgroundColor: AppColor.main75,
+      backgroundColor: AppColor.surfaceElevated,
       elevation: 0,
       automaticallyImplyLeading: false,
       leading: Padding(

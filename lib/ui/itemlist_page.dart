@@ -5,6 +5,7 @@ import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
+import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
 import 'package:neom_core/utils/enums/itemlist_type.dart';
 import 'package:neom_core/utils/enums/owner_type.dart';
@@ -49,9 +50,9 @@ class ItemlistPage extends StatelessWidget {
                       ),
                     ),
                   ),
-                  onTap: () async {
+                  onTap: () => AuthGuard.protect(context, () async {
                     await showAddItemlistDialog(context, controller);
-                  },
+                  }),
                 ),
                 Expanded(
                   child: buildItemlistList(context, controller),
@@ -70,7 +71,7 @@ class ItemlistPage extends StatelessWidget {
     (await showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        backgroundColor: AppColor.main75,
+        backgroundColor: AppColor.surfaceElevated,
         title: Text(CommonTranslationConstants.addNewItemlist.tr,),
         content: Obx(() => SizedBox(
           height: AppTheme.fullHeight(context)*0.3,
@@ -122,10 +123,10 @@ class ItemlistPage extends StatelessWidget {
           DialogButton(
             height: 50,
             color: AppColor.bondiBlue75,
-            onPressed: () async {
+            onPressed: () => AuthGuard.protect(ctx, () async {
               await controller.createItemlist(type: itemlistType);
               if(controller.errorMsg.value.isEmpty) Navigator.pop(ctx);
-            },
+            }),
             child: Text(
               AppTranslationConstants.add.tr,
               style: const TextStyle(fontSize: 14),

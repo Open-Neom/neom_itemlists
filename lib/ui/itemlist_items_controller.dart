@@ -359,20 +359,20 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
 
       switch(AppConfig.instance.appInUse) {
         case AppInUse.c:
-          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
+          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? ''), arguments: [releaseItem]);
           break;
         case AppInUse.g:
-          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
+          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? ''), arguments: [releaseItem]);
           break;
         case AppInUse.e:
           if(itemlist.type == ItemlistType.readlist) {
-            Sint.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem ?? externalItem]);
+            Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? externalItem?.id ?? ''), arguments: [releaseItem ?? externalItem]);
           } else {
-            Sint.toNamed(AppFlavour.getSecondaryItemDetailsRoute(), arguments: [mediaItem]);
+            Sint.toNamed(AppFlavour.getSecondaryItemDetailsRoute(mediaItem?.id ?? ''), arguments: [mediaItem]);
           }
           break;
         default:
-          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(), arguments: [releaseItem]);
+          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? ''), arguments: [releaseItem]);
           break;
       }
     } catch(e) {

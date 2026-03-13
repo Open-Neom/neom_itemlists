@@ -58,6 +58,13 @@ class AppMediaItemDetailsController extends SintController implements AppMediaIt
   @override
   void onInit() async {
     super.onInit();
+
+    // Read route parameter for deep linking / web URL state
+    final routeId = Sint.routeParam;
+    if (routeId != null && routeId.isNotEmpty) {
+      releasedItemId = routeId;
+    }
+
     AppConfig.logger.d("AppMediaItem Details Controller init");
 
     try {
@@ -197,7 +204,9 @@ class AppMediaItemDetailsController extends SintController implements AppMediaIt
     }
 
     try {
-      AppMediaItemFirestore().existsOrInsert(appMediaItem);
+      if (appMediaItem.isAudioContent) {
+        AppMediaItemFirestore().existsOrInsert(appMediaItem);
+      }
       if(!existsInItemlist.value) {
         appMediaItem.state = appItemState.value;
         if(await appMediaItemController.addItemToItemlist(appMediaItem, itemlistId.value)){
@@ -220,7 +229,7 @@ class AppMediaItemDetailsController extends SintController implements AppMediaIt
         EventDetailsService? eventDetailsService = Sint.find<EventDetailsService?>();
         if(eventDetailsService != null) {
           eventDetailsService.addToMatchedItems(appMediaItem.id, CoreUtilities.getItemState(appMediaItem.state));
-          Navigator.of(context).popUntil(ModalRoute.withName(AppRouteConstants.eventDetails));
+          Navigator.of(context).popUntil((route) => route.settings.name?.startsWith('/event/') ?? false);
         } else {
           Sint.offAllNamed(AppRouteConstants.home);
           Sint.toNamed(AppRouteConstants.listItems);

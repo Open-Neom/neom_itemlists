@@ -155,6 +155,7 @@ class ItemlistController extends SintController implements ItemlistService {
       errorMsg.value = '';
       if((isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty)
           || (!isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty)) {
+        final now = DateTime.now().millisecondsSinceEpoch;
         Itemlist newItemlist = Itemlist(
           name: newItemlistNameController.text,
           description: newItemlistDescController.text,
@@ -163,6 +164,8 @@ class ItemlistController extends SintController implements ItemlistService {
           ownerType: ownerType,
           type: type ?? itemlistType,
           public: isPublicNewItemlist.value,
+          createdTime: now,
+          modifiedTime: now,
         );
 
         String newItemlistId = "";
@@ -334,8 +337,11 @@ class ItemlistController extends SintController implements ItemlistService {
 
   @override
   Future<Itemlist> createBasicItemlist() async {
-    Itemlist newItemlist = Itemlist.createBasic(ItemlistTranslationConstants.myFirstPlaylist.tr, ItemlistTranslationConstants.myFirstPlaylistDesc.tr,
-        profile.id, profile.name, ItemlistType.playlist);
+    final isReadlist = itemlistType == ItemlistType.readlist;
+    Itemlist newItemlist = Itemlist.createBasic(
+        isReadlist ? ItemlistTranslationConstants.myFirstReadlist.tr : ItemlistTranslationConstants.myFirstPlaylist.tr,
+        isReadlist ? ItemlistTranslationConstants.myFirstReadlistDesc.tr : ItemlistTranslationConstants.myFirstPlaylistDesc.tr,
+        profile.id, profile.name, itemlistType);
 
     String listId = await ItemlistFirestore().insert(newItemlist);
     newItemlist.id = listId;
@@ -376,7 +382,9 @@ class ItemlistController extends SintController implements ItemlistService {
           itemController = Sint.put(ItemlistItemsController());
         }
 
-        AppMediaItemFirestore().existsOrInsert(appMediaItem);
+        if (appMediaItem.isAudioContent) {
+          AppMediaItemFirestore().existsOrInsert(appMediaItem);
+        }
 
         if(!existsInItemlist.value) {
           appMediaItem.state = appItemState.value;

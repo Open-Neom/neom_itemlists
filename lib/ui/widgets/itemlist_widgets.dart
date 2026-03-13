@@ -1,4 +1,3 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:neom_commons/app_flavour.dart';
@@ -8,6 +7,7 @@ import 'package:neom_commons/ui/widgets/images/handled_cached_network_image.dart
 import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/utils/app_alerts.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
+import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
@@ -40,10 +40,11 @@ Widget buildItemlistList(BuildContext context, ItemlistController controller) {
         contentPadding: const EdgeInsets.symmetric(horizontal: 10),
         leading: SizedBox(
           width: 50,
-          child: CachedNetworkImage(
-            imageUrl: itemlist.getImgUrls().isNotEmpty
+          child: HandledCachedNetworkImage(
+            itemlist.getImgUrls().isNotEmpty
               ? itemlist.getImgUrls().first
-              : AppProperties.getAppLogoUrl()
+              : AppProperties.getAppLogoUrl(),
+            enableFullScreen: false,
           )
         ),
         title: Row(
@@ -55,7 +56,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController controller) {
         subtitle: itemlist.description.isNotEmpty ? Text(TextUtilities.capitalizeFirstLetter(itemlist.description), maxLines: 3, overflow: TextOverflow.ellipsis,) : null,
         trailing: ActionChip(
           labelPadding: EdgeInsets.zero,
-          backgroundColor: AppColor.main25,
+          backgroundColor: AppColor.surfaceDim,
           avatar: CircleAvatar(
             backgroundColor: AppColor.white80,
             child: Text(itemlist.allItems.length.toString(),
@@ -78,7 +79,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController controller) {
           (await showDialog(
               context: context,
               builder: (ctx) => AlertDialog(
-            backgroundColor: AppColor.main75,
+            backgroundColor: AppColor.surfaceElevated,
             title: Text(CommonTranslationConstants.itemlistName.tr,),
             content: SizedBox(
               height: AppTheme.fullHeight(context)*0.25,
@@ -109,10 +110,10 @@ Widget buildItemlistList(BuildContext context, ItemlistController controller) {
             actions: <Widget>[
               DialogButton(
                 color: AppColor.bondiBlue75,
-                onPressed: () async {
+                onPressed: () => AuthGuard.protect(ctx, () async {
                   await controller.updateItemlist(itemlist.id, itemlist);
                   Navigator.pop(ctx);
-                },
+                }),
                 child: Text(AppTranslationConstants.update.tr,
                   style: const TextStyle(fontSize: 14),
                 ),
@@ -122,7 +123,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController controller) {
                 child: Text(AppTranslationConstants.remove.tr,
                   style: const TextStyle(fontSize: 14),
                 ),
-                onPressed: () async {
+                onPressed: () => AuthGuard.protect(ctx, () async {
                   if(controller.itemlists.length == 1) {
                     AppAlerts.showAlert(context,
                         title: CommonTranslationConstants.itemlistPrefs.tr,
@@ -131,7 +132,7 @@ Widget buildItemlistList(BuildContext context, ItemlistController controller) {
                     await controller.deleteItemlist(itemlist);
                     Navigator.pop(ctx);
                   }
-                },
+                }),
               ),
             ],
           ),
@@ -183,7 +184,7 @@ Widget buildItemListItems(BuildContext context, ItemlistItemsController controll
               context: context,
               title: CommonTranslationConstants.appItemPrefs.tr,
               style: AlertStyle(
-                  backgroundColor: AppColor.main50,
+                  backgroundColor: AppColor.scaffold,
                   titleStyle: const TextStyle(color: Colors.white)
               ),
               content: Column(
@@ -227,16 +228,16 @@ Widget buildItemListItems(BuildContext context, ItemlistItemsController controll
                   child: Text(AppTranslationConstants.update.tr,
                     style: const TextStyle(fontSize: 15),
                   ),
-                  onPressed: () => controller.updateItemlistItem(item),
+                  onPressed: () => AuthGuard.protect(context, () => controller.updateItemlistItem(item)),
                 ),
                 DialogButton(
                   color: AppColor.bondiBlue75,
                   child: Text(AppTranslationConstants.remove.tr,
                     style: const TextStyle(fontSize: 15),
                   ),
-                  onPressed: () async => {
-                    await controller.removeItemFromList(baseItem.id)
-                  },
+                  onPressed: () => AuthGuard.protect(context, () async {
+                    await controller.removeItemFromList(baseItem.id);
+                  }),
                 ),
               ]
           ).show() : {}

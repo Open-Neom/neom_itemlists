@@ -10,6 +10,7 @@ import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
+import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/constants/core_constants.dart';
@@ -130,14 +131,14 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                             controller.existsInItemlist.value ? Text(CommonTranslationConstants.removeFromItemlist.tr)
                                 : Text(AppTranslationConstants.releaseItem.tr)],
                         ),
-                      onPressed: () async => {
+                      onPressed: () => AuthGuard.protect(context, () async => {
                         if (controller.existsInItemlist.value) {
                           await controller.removeItem()
                         } else {
                           controller.itemlists.isNotEmpty ? Alert(
                             context: context,
                             style: AlertStyle(
-                              backgroundColor: AppColor.main50,
+                              backgroundColor: AppColor.scaffold,
                               titleStyle: const TextStyle(color: Colors.white)
                             ),
                             title: CommonTranslationConstants.appItemPrefs.tr,
@@ -169,7 +170,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                     iconSize: 20,
                                     elevation: 16,
                                     style: const TextStyle(color: Colors.white),
-                                    dropdownColor: AppColor.main75,
+                                    dropdownColor: AppColor.surfaceElevated,
                                     underline: Container(
                                       height: 1,
                                       color: Colors.grey,
@@ -197,7 +198,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                   iconSize: 20,
                                   elevation: 16,
                                   style: const TextStyle(color: Colors.white),
-                                  dropdownColor: AppColor.main75,
+                                  dropdownColor: AppColor.surfaceElevated,
                                   underline: Container(
                                     height: 1,
                                     color: Colors.grey,
@@ -211,7 +212,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                 child: Obx(()=>controller.isLoading.value ? const Center(child: CircularProgressIndicator())
                                     : Text(AppTranslationConstants.add.tr,
                                 )),
-                                onPressed: () async => {
+                                onPressed: () => AuthGuard.protect(context, () async => {
                                   controller.userServiceImpl.profile.type == ProfileType.appArtist ?
                                   (controller.appItemState > 0 ? await controller.addItemlistItem(context, fanItemState: controller.appItemState.value) :
                                     AppUtilities.showSnackBar(
@@ -220,12 +221,12 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                     )
                                   ) : await controller.addItemlistItem(context,
                                       fanItemState: AppItemState.heardIt.value)
-                                },
+                                }),
                               )],
                           ).show() : await controller.addItemlistItem(context,
                             fanItemState: AppItemState.heardIt.value)
                         }
-                      }
+                      }),
                     ),
                   ],
                 ),

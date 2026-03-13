@@ -94,7 +94,7 @@
 //     (await showDialog(
 //       context: context,
 //       builder: (ctx) => AlertDialog(
-//         backgroundColor: AppColor.main75,
+//         backgroundColor: AppColor.surfaceElevated,
 //         title: Text(CommonTranslationConstants.addNewItemlist.tr,),
 //         content: Obx(() => SizedBox(
 //           height: AppTheme.fullHeight(context)*0.3,
