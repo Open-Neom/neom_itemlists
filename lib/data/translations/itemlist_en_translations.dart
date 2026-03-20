@@ -19,6 +19,12 @@ class ItemlistEnTranslations {
     ItemlistTranslationConstants.noItemlistsMsg: 'No Neomlists',
     ItemlistTranslationConstants.synchronizePlaylists: 'Synchronize your playlists',
     ItemlistTranslationConstants.wasAddedToItemList: 'was added to the Playlist',
+    ItemlistTranslationConstants.selectList: 'Select list',
+    ItemlistTranslationConstants.addToList: 'Add to list',
+    ItemlistTranslationConstants.noItemsYet: 'No items yet',
+    ItemlistTranslationConstants.tapToAddItems: 'Tap + to add content',
+    ItemlistTranslationConstants.swipeToRemove: 'Swipe to remove',
+    ItemlistTranslationConstants.itemRemoved: 'Item removed',
   };
 
 }

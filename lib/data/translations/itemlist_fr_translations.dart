@@ -19,6 +19,12 @@ class ItemlistFrTranslations {
     ItemlistTranslationConstants.noItemlistsMsg: 'Aucune liste Neom',
     ItemlistTranslationConstants.synchronizePlaylists: 'Synchroniser vos listes de lecture',
     ItemlistTranslationConstants.wasAddedToItemList: 'a été ajouté à la liste de lecture',
+    ItemlistTranslationConstants.selectList: 'Sélectionner la liste',
+    ItemlistTranslationConstants.addToList: 'Ajouter à la liste',
+    ItemlistTranslationConstants.noItemsYet: 'Aucun élément pour le moment',
+    ItemlistTranslationConstants.tapToAddItems: 'Appuyez sur + pour ajouter du contenu',
+    ItemlistTranslationConstants.swipeToRemove: 'Glissez pour supprimer',
+    ItemlistTranslationConstants.itemRemoved: 'Élément supprimé',
   };
 
 }

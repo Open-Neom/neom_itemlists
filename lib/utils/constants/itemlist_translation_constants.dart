@@ -20,5 +20,11 @@ class ItemlistTranslationConstants {
   static const String myFirstPlaylistDesc = 'myFirstPlaylistDesc';
   static const String myFirstReadlist = 'myFirstReadlist';
   static const String myFirstReadlistDesc = 'myFirstReadlistDesc';
+  static const String selectList = 'selectList';
+  static const String addToList = 'addToList';
+  static const String noItemsYet = 'noItemsYet';
+  static const String tapToAddItems = 'tapToAddItems';
+  static const String swipeToRemove = 'swipeToRemove';
+  static const String itemRemoved = 'itemRemoved';
 
 }

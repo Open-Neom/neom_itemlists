@@ -2,6 +2,7 @@ import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/data/api_services/push_notification/firebase_messaging_calls.dart';
+import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
@@ -78,8 +79,8 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
       if(AppConfig.instance.appInUse == AppInUse.c) {
         isFixed = true;
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'onInit');
     }
 
   }
@@ -171,8 +172,8 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
           return true;
         }
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'addItemToItemlist');
     }
 
     update([AppPageIdConstants.itemlistItem, AppPageIdConstants.itemlist, AppPageIdConstants.appMediaItemDetails]);
@@ -223,8 +224,8 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
         } else {
           AppConfig.logger.d("ItemlistItem old version was not deleted.");
         }
-      } catch (e) {
-        AppConfig.logger.e(e.toString());
+      } catch (e, st) {
+        NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'updateItemlistItem');
       }
 
       Sint.back();
@@ -276,12 +277,11 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
 
   @override
   Future<bool> removeItemFromList(String itemId) async {
-    AppConfig.logger.d("removing itemlistItem ${appMediaItem.toString()}");
+    AppConfig.logger.d("removing itemlistItem $itemId");
 
     dynamic item = itemlistItems[itemId];
     bool wasRemoved = false;
     try {
-
       if(item is AppReleaseItem) {
         wasRemoved = await ItemlistFirestore().deleteReleaseItem(itemlistId: itemlist.id, itemId: itemId);
       } else if(item is AppMediaItem) {
@@ -292,6 +292,7 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
 
       if(wasRemoved) {
         AppConfig.logger.d("Item was deleted from itemlist: ${itemlist.id}");
+        itemlistItems.remove(itemId);
 
         if(itemlistOwner == OwnerType.profile) {
           if(await ProfileFirestore().removeFavoriteItem(profileId, itemId)) {
@@ -307,8 +308,12 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
             } else if(item is ExternalItem) {
               userServiceImpl.band.itemlists![itemlist.id]!.externalItems!.remove(item);
             }
-
           }
+        }
+
+        // Refresh the local itemlist from owner state
+        if(itemlistOwner == OwnerType.profile && userServiceImpl.profile.itemlists?[itemlist.id] != null) {
+          itemlist = userServiceImpl.profile.itemlists![itemlist.id]!;
         }
 
         if(Sint.getInstanceInfo<ItemlistController>().isInit ?? false) {
@@ -317,14 +322,13 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
       } else {
         AppConfig.logger.d("Item was not deleted from itemlist: ${itemlist.id}");
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'removeItemFromList');
       return false;
     }
 
-    Sint.back();
     update([AppPageIdConstants.itemlistItem, AppPageIdConstants.itemlist]);
-    return true;
+    return wasRemoved;
   }
 
 
@@ -375,8 +379,8 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
           Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? ''), arguments: [releaseItem]);
           break;
       }
-    } catch(e) {
-      AppConfig.logger.e(e.toString());
+    } catch(e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'getItemlistItemDetails');
     }
 
     update([AppPageIdConstants.itemlistItem]);

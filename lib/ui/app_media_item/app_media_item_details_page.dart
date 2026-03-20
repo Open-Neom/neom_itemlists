@@ -2,7 +2,6 @@ import 'package:enum_to_string/enum_to_string.dart';
 import 'package:flutter/material.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/ui/widgets/appbar_child.dart';
 import 'package:neom_commons/ui/widgets/images/handled_cached_network_image.dart';
 import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
@@ -33,7 +32,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
       id: AppPageIdConstants.appMediaItemDetails,
       init: AppMediaItemDetailsController(),
       builder: (controller) => Scaffold(
-        appBar: AppBarChild(),
+        appBar: SintAppBar(),
         body: SingleChildScrollView(
           child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 30),

@@ -7,6 +7,7 @@ import 'package:neom_commons/utils/constants/translations/common_translation_con
 import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/data/firestore/app_media_item_firestore.dart';
+import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
@@ -90,8 +91,8 @@ class ItemlistController extends SintController implements ItemlistService {
           }
         }
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'onInit');
     }
   }
 
@@ -211,8 +212,8 @@ class ItemlistController extends SintController implements ItemlistService {
           message: MessageTranslationConstants.pleaseFillItemlistInfo.tr,
         );
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'createItemlist');
     }
 
     update([AppPageIdConstants.itemlist]);
@@ -254,8 +255,8 @@ class ItemlistController extends SintController implements ItemlistService {
         );
         AppConfig.logger.e("Something happens trying to remove itemlist");
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'deleteItemlist');
     }
 
     isLoading.value = false;
@@ -305,8 +306,8 @@ class ItemlistController extends SintController implements ItemlistService {
             message: CommonTranslationConstants.itemlistUpdateSameInfo.tr
         );
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'updateItemlist');
       AppUtilities.showSnackBar(
           title: CommonTranslationConstants.itemlistPrefs.tr,
           message: MessageTranslationConstants.itemlistUpdatedErrorMsg.tr
@@ -359,9 +360,8 @@ class ItemlistController extends SintController implements ItemlistService {
   }
 
   @override
-  Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0, bool goHome = true}) async {
+  Future<void> addItemlistItem(BuildContext context, {int fanItemState = 0}) async {
     AppConfig.logger.t("addItemlistItem ${appMediaItem.id}");
-
 
     if(existsInItemlist.value) {
       AppUtilities.showSnackBar(message: '"${appMediaItem.name}" ${ItemlistTranslationConstants.isAlreadyInPlaylist.tr} ${itemFoundInList?.listName}');
@@ -371,7 +371,6 @@ class ItemlistController extends SintController implements ItemlistService {
       AppConfig.logger.i("AppMediaItem ${appMediaItem.name} would be added as $appItemState for Itemlist $itemlistId");
 
       try {
-
         if(fanItemState > 0) appItemState.value = fanItemState;
         if(itemlistId.isEmpty) itemlistId.value = itemlists.values.first.id;
 
@@ -394,31 +393,20 @@ class ItemlistController extends SintController implements ItemlistService {
             wasAdded.value = true;
           }
         }
-
       } catch (e) {
         AppConfig.logger.d(e.toString());
       }
 
+      isLoading.value = false;
       update([AppPageIdConstants.itemlistItem,
         AppPageIdConstants.itemlist,
         AppPageIdConstants.appItemDetails,
         AppPageIdConstants.profile]);
 
-      try {
-        if(goHome) {
-          Sint.offAllNamed(AppRouteConstants.home);
-        } else {
-          Navigator.pop(context);
-        }
-        AppUtilities.showSnackBar(
-            message: '"${appMediaItem.name}" ${ItemlistTranslationConstants.wasAddedToItemList.tr}.'
-        );
-      } catch (e) {
-        Sint.offAllNamed(AppRouteConstants.home);
-        Sint.toNamed(AppRouteConstants.listItems);
-      }
+      AppUtilities.showSnackBar(
+          message: '"${appMediaItem.name}" ${ItemlistTranslationConstants.wasAddedToItemList.tr}.'
+      );
     }
-
   }
 
   @override

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
-import 'package:neom_commons/ui/widgets/appbar_child.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
@@ -22,7 +21,7 @@ class ItemlistItemsPage extends StatelessWidget {
       init: ItemlistItemsController(),
       builder: (controller) => Scaffold(
         backgroundColor: AppFlavour.getBackgroundColor(),
-        appBar: AppBarChild(title: controller.itemlist.name.length > AppConstants.maxItemlistNameLength
+        appBar: SintAppBar(title: controller.itemlist.name.length > AppConstants.maxItemlistNameLength
             ? "${controller.itemlist.name.substring(0,AppConstants.maxItemlistNameLength)}..."
             : controller.itemlist.name),
         body: Container(

@@ -5,6 +5,7 @@ import 'package:neom_commons/utils/datetime_utilities.dart';
 import 'package:neom_commons/utils/mappers/app_media_item_mapper.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/data/firestore/app_media_item_firestore.dart';
+import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:neom_core/data/firestore/app_release_item_firestore.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
@@ -99,8 +100,8 @@ class AppMediaItemDetailsController extends SintController implements AppMediaIt
         itemlistId.value = itemlists.values.first.id;
       }
 
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'onInit');
     }
 
   }
@@ -133,8 +134,8 @@ class AppMediaItemDetailsController extends SintController implements AppMediaIt
         Sint.offAllNamed(AppRouteConstants.home);
         AppUtilities.showSnackBar(title: ItemlistTranslationConstants.noItemlistsMsg, message: ItemlistTranslationConstants.noItemlistsMsg2);
       }
-    } catch(e) {
-      AppConfig.logger.e(e.toString());
+    } catch(e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'onReady');
     }
 
     isLoading.value = false;
@@ -299,8 +300,8 @@ class AppMediaItemDetailsController extends SintController implements AppMediaIt
     try {
       await Sint.find<AudioPlayerInvokerService>().updateNowPlaying(items: [appMediaItem], index: 1);
       isPlaying.value = true;
-    } catch(e) {
-      AppConfig.logger.e(e.toString());
+    } catch(e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'playPreview');
     }
 
     update([AppPageIdConstants.appItemDetails]);
@@ -311,8 +312,8 @@ class AppMediaItemDetailsController extends SintController implements AppMediaIt
       ///DEPRECATED - INTEGRATE WITH NEOM AUDIO PLAYER SERVICE AS CONTRACT
       Sint.find<AudioPlayerInvokerService>().pause();
       isPlaying.value = false;
-    } catch(e) {
-      AppConfig.logger.e(e.toString());
+    } catch(e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'pausePreview');
     }
 
     update([AppPageIdConstants.appItemDetails]);

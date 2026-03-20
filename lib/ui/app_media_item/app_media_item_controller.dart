@@ -3,6 +3,7 @@ import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/mappers/app_media_item_mapper.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/data/api_services/push_notification/firebase_messaging_calls.dart';
+import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
@@ -80,8 +81,8 @@ class AppMediaItemController extends SintController implements AppItemService {
       if(AppConfig.instance.appInUse == AppInUse.c) {
         isFixed = true;
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'onInit');
     }
 
   }
@@ -125,8 +126,8 @@ class AppMediaItemController extends SintController implements AppItemService {
         } else {
           AppConfig.logger.e("ItemlistItem not updated");
         }
-      } catch (e) {
-        AppConfig.logger.e(e.toString());
+      } catch (e, st) {
+        NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'updateItemlistItem');
       }
 
       Sint.back();
@@ -174,8 +175,8 @@ class AppMediaItemController extends SintController implements AppItemService {
           return true;
         }
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'addItemToItemlist');
     }
 
     update([AppPageIdConstants.itemlistItem, AppPageIdConstants.itemlist, AppPageIdConstants.appMediaItemDetails]);
@@ -232,8 +233,8 @@ class AppMediaItemController extends SintController implements AppItemService {
         AppConfig.logger.d("ItemlistItem not removed");
         return false;
       }
-    } catch (e) {
-      AppConfig.logger.e(e.toString());
+    } catch (e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'removeItemFromList');
       return false;
     }
 
@@ -289,8 +290,8 @@ class AppMediaItemController extends SintController implements AppItemService {
           Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? ''), arguments: [releaseItem]);
           break;
       }
-    } catch(e) {
-      AppConfig.logger.e(e.toString());
+    } catch(e, st) {
+      NeomErrorLogger.recordError(e, st, module: 'neom_itemlists', operation: 'getItemlistItemDetails');
     }
 
     update([AppPageIdConstants.itemlistItem]);

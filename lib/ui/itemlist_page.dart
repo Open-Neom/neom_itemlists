@@ -55,7 +55,11 @@ class ItemlistPage extends StatelessWidget {
                   }),
                 ),
                 Expanded(
-                  child: buildItemlistList(context, controller),
+                  child: buildItemlistList(context, controller,
+                    onCreateNew: () => AuthGuard.protect(context, () async {
+                      await showAddItemlistDialog(context, controller);
+                    }),
+                  ),
                 ),
               ],
             )
