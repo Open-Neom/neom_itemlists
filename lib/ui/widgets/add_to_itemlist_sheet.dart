@@ -261,7 +261,7 @@ class _AddToItemlistSheetBodyState extends State<_AddToItemlistSheetBody> {
         await widget.itemlistService.addItemlistItem(context, fanItemState: state);
       }
 
-      if (mounted) Navigator.of(context).pop(true);
+      if (mounted) Sint.back(result: true);
     } catch (e) {
       AppConfig.logger.e('AddToItemlistSheet._addItem error: $e');
       if (mounted) {

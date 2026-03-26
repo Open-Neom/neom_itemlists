@@ -274,20 +274,20 @@ class AppMediaItemController extends SintController implements AppItemService {
 
       switch(AppConfig.instance.appInUse) {
         case AppInUse.c:
-          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? ''), arguments: [releaseItem]);
+          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? '', slug: releaseItem?.slug ?? ''), arguments: [releaseItem]);
           break;
         case AppInUse.g:
-          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? ''), arguments: [releaseItem]);
+          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? '', slug: releaseItem?.slug ?? ''), arguments: [releaseItem]);
           break;
         case AppInUse.e:
           if(itemlist.type == ItemlistType.readlist) {
-            Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? ''), arguments: [releaseItem]);
+            Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? '', slug: releaseItem?.slug ?? ''), arguments: [releaseItem]);
           } else {
             Sint.toNamed(AppFlavour.getSecondaryItemDetailsRoute(mediaItem?.id ?? ''), arguments: [mediaItem]);
           }
           break;
         default:
-          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? ''), arguments: [releaseItem]);
+          Sint.toNamed(AppFlavour.getMainItemDetailsRoute(releaseItem?.id ?? '', slug: releaseItem?.slug ?? ''), arguments: [releaseItem]);
           break;
       }
     } catch(e, st) {
