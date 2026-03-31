@@ -14,7 +14,7 @@ class ItemlistUtilities {
         return MediaSearchType.song;
 
       case ItemlistType.podcast:
-        return MediaSearchType.audiobook;
+        return MediaSearchType.podcast;
 
       case ItemlistType.giglist:
         return MediaSearchType.song;
@@ -25,7 +25,10 @@ class ItemlistUtilities {
 
       case ItemlistType.audiobook:
         return MediaSearchType.audiobook;
-      }
+
+      case ItemlistType.meditation:
+        return MediaSearchType.meditation;
+    }
   }
 
 }
