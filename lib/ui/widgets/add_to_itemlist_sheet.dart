@@ -157,7 +157,7 @@ class _AddToItemlistSheetBodyState extends State<_AddToItemlistSheetBody> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<AppItemState>(
-              value: _selectedState,
+              initialValue: _selectedState,
               dropdownColor: AppColor.surfaceCard,
               style: TextStyle(color: AppColor.textPrimary, fontSize: 14),
               decoration: InputDecoration(

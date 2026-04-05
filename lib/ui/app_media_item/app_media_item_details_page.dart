@@ -5,11 +5,11 @@ import 'package:neom_commons/ui/theme/app_theme.dart';
 import 'package:neom_commons/ui/widgets/images/handled_cached_network_image.dart';
 import 'package:neom_commons/ui/widgets/rating_heart_bar.dart';
 import 'package:neom_commons/utils/app_utilities.dart';
+import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:neom_commons/utils/constants/app_constants.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
-import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/constants/core_constants.dart';
@@ -130,9 +130,9 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                             controller.existsInItemlist.value ? Text(CommonTranslationConstants.removeFromItemlist.tr)
                                 : Text(AppTranslationConstants.releaseItem.tr)],
                         ),
-                      onPressed: () => AuthGuard.protect(context, () async => {
+                      onPressed: () => AuthGuard.protect(context, () async {
                         if (controller.existsInItemlist.value) {
-                          await controller.removeItem()
+                          await controller.removeItem();
                         } else {
                           controller.itemlists.isNotEmpty ? Alert(
                             context: context,
@@ -211,7 +211,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                 child: Obx(()=>controller.isLoading.value ? const Center(child: CircularProgressIndicator())
                                     : Text(AppTranslationConstants.add.tr,
                                 )),
-                                onPressed: () => AuthGuard.protect(context, () async => {
+                                onPressed: () => AuthGuard.protect(context, () async {
                                   controller.userServiceImpl.profile.type == ProfileType.appArtist ?
                                   (controller.appItemState > 0 ? await controller.addItemlistItem(context, fanItemState: controller.appItemState.value) :
                                     AppUtilities.showSnackBar(
@@ -219,11 +219,11 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                                       message: MessageTranslationConstants.selectItemStateMsg.tr,
                                     )
                                   ) : await controller.addItemlistItem(context,
-                                      fanItemState: AppItemState.heardIt.value)
+                                      fanItemState: AppItemState.heardIt.value);
                                 }),
                               )],
                           ).show() : await controller.addItemlistItem(context,
-                            fanItemState: AppItemState.heardIt.value)
+                            fanItemState: AppItemState.heardIt.value);
                         }
                       }),
                     ),

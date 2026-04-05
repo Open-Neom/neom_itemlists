@@ -1,4 +1,4 @@
-import 'package:neom_itemlists/utils/constants/itemlist_translation_constants.dart';
+import '../../utils/constants/itemlist_translation_constants.dart';
 
 class ItemlistFrTranslations {
 

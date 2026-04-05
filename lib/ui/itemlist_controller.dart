@@ -7,7 +7,6 @@ import 'package:neom_commons/utils/constants/translations/common_translation_con
 import 'package:neom_commons/utils/constants/translations/message_translation_constants.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/data/firestore/app_media_item_firestore.dart';
-import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
@@ -17,10 +16,10 @@ import 'package:neom_core/domain/model/item_found_in_list.dart';
 import 'package:neom_core/domain/model/item_list.dart';
 import 'package:neom_core/domain/use_cases/itemlist_service.dart';
 import 'package:neom_core/domain/use_cases/user_service.dart';
-import 'package:neom_core/utils/constants/app_route_constants.dart';
 import 'package:neom_core/utils/enums/app_item_state.dart';
 import 'package:neom_core/utils/enums/itemlist_type.dart';
 import 'package:neom_core/utils/enums/owner_type.dart';
+import 'package:neom_core/utils/neom_error_logger.dart';
 import 'package:sint/sint.dart';
 
 import '../utils/constants/itemlist_translation_constants.dart';
@@ -42,8 +41,8 @@ class ItemlistController extends SintController implements ItemlistService {
 
   Itemlist currentItemlist = Itemlist();
 
-  TextEditingController newItemlistNameController = TextEditingController();
-  TextEditingController newItemlistDescController = TextEditingController();
+  TextEditingController _newItemlistNameController = TextEditingController();
+  TextEditingController _newItemlistDescController = TextEditingController();
 
   final RxMap<String, Itemlist> itemlists = <String, Itemlist>{}.obs;
   final RxList<Itemlist> addedItemlists = <Itemlist>[].obs;
@@ -58,7 +57,7 @@ class ItemlistController extends SintController implements ItemlistService {
   final RxBool isLoading = true.obs;
   final RxBool isButtonDisabled = false.obs;
 
-  final RxBool isPublicNewItemlist = true.obs;
+  final RxBool _isPublicNewItemlist = true.obs;
   final RxString errorMsg = "".obs;
 
   RxString itemName = "".obs;
@@ -138,8 +137,8 @@ class ItemlistController extends SintController implements ItemlistService {
 
   @override
   void clearNewItemlist() {
-    newItemlistNameController.clear();
-    newItemlistDescController.clear();
+    _newItemlistNameController.clear();
+    _newItemlistDescController.clear();
   }
 
   void setItemlistType(ItemlistType type) {
@@ -150,21 +149,21 @@ class ItemlistController extends SintController implements ItemlistService {
 
   @override
   Future<void> createItemlist({ItemlistType? type}) async {
-    AppConfig.logger.d("Start ${newItemlistNameController.text} and ${newItemlistDescController.text}");
+    AppConfig.logger.d("Start ${_newItemlistNameController.text} and ${_newItemlistDescController.text}");
 
     try {
       errorMsg.value = '';
-      if((isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty)
-          || (!isPublicNewItemlist.value && newItemlistNameController.text.isNotEmpty)) {
+      if((_isPublicNewItemlist.value && _newItemlistNameController.text.isNotEmpty)
+          || (!_isPublicNewItemlist.value && _newItemlistNameController.text.isNotEmpty)) {
         final now = DateTime.now().millisecondsSinceEpoch;
         Itemlist newItemlist = Itemlist(
-          name: newItemlistNameController.text,
-          description: newItemlistDescController.text,
+          name: _newItemlistNameController.text,
+          description: _newItemlistDescController.text,
           ownerId: ownerId,
           ownerName: ownerName,
           ownerType: ownerType,
           type: type ?? itemlistType,
-          public: isPublicNewItemlist.value,
+          public: _isPublicNewItemlist.value,
           createdTime: now,
           modifiedTime: now,
         );
@@ -204,7 +203,7 @@ class ItemlistController extends SintController implements ItemlistService {
         }
       } else {
         AppConfig.logger.d(MessageTranslationConstants.pleaseFillItemlistInfo.tr);
-        errorMsg.value = newItemlistNameController.text.isEmpty ? MessageTranslationConstants.pleaseAddName
+        errorMsg.value = _newItemlistNameController.text.isEmpty ? MessageTranslationConstants.pleaseAddName
             : MessageTranslationConstants.pleaseAddDescription;
 
         AppUtilities.showSnackBar(
@@ -271,18 +270,18 @@ class ItemlistController extends SintController implements ItemlistService {
     try {
       isLoading.value = true;
       update([AppPageIdConstants.itemlist]);
-      String newName = newItemlistNameController.text;
-      String newDesc = newItemlistDescController.text;
+      String newName = _newItemlistNameController.text;
+      String newDesc = _newItemlistDescController.text;
 
       if((newName.isNotEmpty && newName.toLowerCase() != itemlist.name.toLowerCase())
           || (newDesc.isNotEmpty && newDesc.toLowerCase() != itemlist.description.toLowerCase())) {
 
-        if(newItemlistNameController.text.isNotEmpty) {
-          itemlist.name = newItemlistNameController.text;
+        if(_newItemlistNameController.text.isNotEmpty) {
+          itemlist.name = _newItemlistNameController.text;
         }
 
-        if(newItemlistDescController.text.isNotEmpty) {
-          itemlist.description = newItemlistDescController.text;
+        if(_newItemlistDescController.text.isNotEmpty) {
+          itemlist.description = _newItemlistDescController.text;
         }
 
         if(await ItemlistFirestore().update(itemlist)){
@@ -322,8 +321,8 @@ class ItemlistController extends SintController implements ItemlistService {
   @override
   Future<void> setPrivacyOption() async {
     AppConfig.logger.t('setPrivacyOption for Playlist');
-    isPublicNewItemlist.value = !isPublicNewItemlist.value;
-    AppConfig.logger.d("New Itemlist would be ${isPublicNewItemlist.value ? 'Public':'Private'}");
+    _isPublicNewItemlist.value = !_isPublicNewItemlist.value;
+    AppConfig.logger.d("New Itemlist would be ${_isPublicNewItemlist.value ? 'Public':'Private'}");
     update([AppPageIdConstants.itemlist, AppPageIdConstants.itemlistItem]);
   }
 
@@ -444,6 +443,30 @@ class ItemlistController extends SintController implements ItemlistService {
     AppConfig.logger.d("Setting new appItemState $newState");
     appItemState.value = newState.value;
     update([AppPageIdConstants.appItemDetails]);
+  }
+
+  @override
+  bool get isPublicNewItemlist => _isPublicNewItemlist.value;
+
+  @override
+  set isPublicNewItemlist(bool isPublic) {
+    _isPublicNewItemlist.value = isPublic;
+  }
+
+  @override
+  TextEditingController get newItemlistDescController => _newItemlistDescController;
+
+  @override
+  TextEditingController get newItemlistNameController => _newItemlistNameController;
+
+  @override
+  set newItemlistDescController(TextEditingController newItemlistDescController) {
+    _newItemlistDescController = newItemlistDescController;
+  }
+
+  @override
+  set newItemlistNameController(TextEditingController newItemlistNameController) {
+    _newItemlistNameController = newItemlistNameController;
   }
 
 }

@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/ui/theme/app_color.dart';
 import 'package:neom_commons/ui/theme/app_theme.dart';
+import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
 import 'package:neom_commons/utils/constants/translations/app_translation_constants.dart';
-import 'package:neom_commons/utils/auth_guard.dart';
 import 'package:neom_commons/utils/constants/translations/common_translation_constants.dart';
 import 'package:neom_core/utils/enums/itemlist_type.dart';
 import 'package:neom_core/utils/enums/owner_type.dart';
@@ -104,7 +104,7 @@ class ItemlistPage extends StatelessWidget {
                   child: Row(
                     children: <Widget>[
                       Checkbox(
-                        value: controller.isPublicNewItemlist.value,
+                        value: controller.isPublicNewItemlist,
                         onChanged: (bool? newValue) => controller.setPrivacyOption(),
                       ),
                       Text(AppTranslationConstants.publicList.tr, style: const TextStyle(fontSize: 15)),
