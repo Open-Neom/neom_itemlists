@@ -11,7 +11,7 @@ import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
-import 'package:neom_core/domain/model/band.dart';
+import 'package:neom_core/domain/model/collective.dart';
 import 'package:neom_core/domain/model/item_found_in_list.dart';
 import 'package:neom_core/domain/model/item_list.dart';
 import 'package:neom_core/domain/use_cases/itemlist_service.dart';
@@ -48,7 +48,7 @@ class ItemlistController extends SintController implements ItemlistService {
   final RxList<Itemlist> addedItemlists = <Itemlist>[].obs;
 
   AppProfile profile = AppProfile();
-  Band band = Band();
+  Collective collective = Collective();
   String ownerId = '';
   String ownerName = '';
   OwnerType ownerType = OwnerType.profile;
@@ -76,15 +76,15 @@ class ItemlistController extends SintController implements ItemlistService {
       ownerName = profile.name;
 
       if(Sint.arguments != null) {
-        if(Sint.arguments.isNotEmpty && Sint.arguments[0] is Band) {
-          if(Sint.arguments[0] is Band) {
-            band = Sint.arguments[0];
-            ownerId = band.id;
-            ownerName = band.name;
-            ownerType = OwnerType.band;
+        if(Sint.arguments.isNotEmpty && Sint.arguments[0] is Collective) {
+          if(Sint.arguments[0] is Collective) {
+            collective = Sint.arguments[0];
+            ownerId = collective.id;
+            ownerName = collective.name;
+            ownerType = OwnerType.collective;
 
-            userServiceImpl.band = band;
-            userServiceImpl.itemlistOwnerType = OwnerType.band;
+            userServiceImpl.collective = collective;
+            userServiceImpl.itemlistOwnerType = OwnerType.collective;
           } else if(Sint.arguments[0] is ItemlistType) {
             itemlistType = Sint.arguments[0];
           }
@@ -107,8 +107,8 @@ class ItemlistController extends SintController implements ItemlistService {
     AppConfig.logger.t('Itemlists being loaded from ${ownerType.name}');
     if(ownerType == OwnerType.profile) {
       itemlists.value = Map.from(profile.itemlists ?? {});
-    } else if(ownerType == OwnerType.band){
-      itemlists.value = Map.from(band.itemlists ?? {});
+    } else if(ownerType == OwnerType.collective){
+      itemlists.value = Map.from(collective.itemlists ?? {});
     }
 
     setItemlists();
@@ -186,9 +186,9 @@ class ItemlistController extends SintController implements ItemlistService {
           if(ownerType == OwnerType.profile) {
             userServiceImpl.profile.itemlists ??= {};
             userServiceImpl.profile.itemlists![newItemlistId] = newItemlist;
-          } else if(ownerType == OwnerType.band) {
-            userServiceImpl.band.itemlists ??= {};
-            userServiceImpl.band.itemlists![newItemlistId] = newItemlist;
+          } else if(ownerType == OwnerType.collective) {
+            userServiceImpl.collective.itemlists ??= {};
+            userServiceImpl.collective.itemlists![newItemlistId] = newItemlist;
           }
 
           AppConfig.logger.t("Itemlists $itemlists for ${ownerType.name}");

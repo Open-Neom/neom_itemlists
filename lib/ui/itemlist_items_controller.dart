@@ -6,7 +6,7 @@ import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
 import 'package:neom_core/domain/model/app_release_item.dart';
-import 'package:neom_core/domain/model/band.dart';
+import 'package:neom_core/domain/model/collective.dart';
 import 'package:neom_core/domain/model/external_item.dart';
 import 'package:neom_core/domain/model/item_list.dart';
 import 'package:neom_core/domain/use_cases/user_service.dart';
@@ -37,7 +37,7 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
 
   String profileId = "";
   String itemlistId = "";
-  Band band = Band();
+  Collective collective = Collective();
 
   OwnerType itemlistOwner = OwnerType.profile;
 
@@ -47,7 +47,7 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
     AppConfig.logger.d("ItemlistItem Controller init");
     try {
       profileId = userServiceImpl.profile.id;
-      band = userServiceImpl.band;
+      collective = userServiceImpl.collective;
       itemlistOwner = userServiceImpl.itemlistOwnerType;
 
       if(Sint.arguments != null) {
@@ -153,19 +153,19 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
 
             return true;
           }
-        } else if (itemlistOwner == OwnerType.band) {
-          if (userServiceImpl.band.itemlists?.isNotEmpty ?? false) {
-            AppConfig.logger.d("Adding item to band itemlist: $listId");
+        } else if (itemlistOwner == OwnerType.collective) {
+          if (userServiceImpl.collective.itemlists?.isNotEmpty ?? false) {
+            AppConfig.logger.d("Adding item to collective itemlist: $listId");
             if(item is AppReleaseItem) {
-              userServiceImpl.band.itemlists![listId]?.appReleaseItems?.add(item);
+              userServiceImpl.collective.itemlists![listId]?.appReleaseItems?.add(item);
             } else if(item is AppMediaItem) {
-              userServiceImpl.band.itemlists![listId]?.appMediaItems?.add(item);
+              userServiceImpl.collective.itemlists![listId]?.appMediaItems?.add(item);
             } else if(item is ExternalItem) {
-              userServiceImpl.band.itemlists![listId]?.externalItems?.add(item);
+              userServiceImpl.collective.itemlists![listId]?.externalItems?.add(item);
             }
 
-            if(userServiceImpl.band.itemlists![listId] != null) {
-              itemlist = userServiceImpl.band.itemlists![listId]!;
+            if(userServiceImpl.collective.itemlists![listId] != null) {
+              itemlist = userServiceImpl.collective.itemlists![listId]!;
               loadItemsFromList();
             }
           }
@@ -239,8 +239,8 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
 
     if(itemlistOwner == OwnerType.profile) {
       ownerItemlists = userServiceImpl.profile.itemlists;
-    } else if(itemlistOwner == OwnerType.band) {
-      ownerItemlists = userServiceImpl.band.itemlists;
+    } else if(itemlistOwner == OwnerType.collective) {
+      ownerItemlists = userServiceImpl.collective.itemlists;
     }
 
     if(ownerItemlists != null && ownerItemlists[itemlist.id] != null) {
@@ -260,8 +260,8 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
 
     if(itemlistOwner == OwnerType.profile) {
       ownerItemlists = userServiceImpl.profile.itemlists;
-    } else if(itemlistOwner == OwnerType.band) {
-      ownerItemlists = userServiceImpl.band.itemlists;
+    } else if(itemlistOwner == OwnerType.collective) {
+      ownerItemlists = userServiceImpl.collective.itemlists;
     }
 
     if(ownerItemlists != null && ownerItemlists[itemlist.id] != null) {
@@ -298,15 +298,15 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
           if(await ProfileFirestore().removeFavoriteItem(profileId, itemId)) {
             userServiceImpl.profile.itemlists = await ItemlistFirestore().getByOwnerId(userServiceImpl.profile.id);
           }
-        } else if(itemlistOwner == OwnerType.band) {
-          if (userServiceImpl.band.itemlists != null && userServiceImpl.band.itemlists!.isNotEmpty) {
+        } else if(itemlistOwner == OwnerType.collective) {
+          if (userServiceImpl.collective.itemlists != null && userServiceImpl.collective.itemlists!.isNotEmpty) {
             AppConfig.logger.d("Removing item from global itemlist from userController");
             if(item is AppReleaseItem) {
-              userServiceImpl.band.itemlists![itemlist.id]!.appReleaseItems!.remove(item);
+              userServiceImpl.collective.itemlists![itemlist.id]!.appReleaseItems!.remove(item);
             } else if(item is AppMediaItem) {
-              userServiceImpl.band.itemlists![itemlist.id]!.appMediaItems!.remove(item);
+              userServiceImpl.collective.itemlists![itemlist.id]!.appMediaItems!.remove(item);
             } else if(item is ExternalItem) {
-              userServiceImpl.band.itemlists![itemlist.id]!.externalItems!.remove(item);
+              userServiceImpl.collective.itemlists![itemlist.id]!.externalItems!.remove(item);
             }
           }
         }

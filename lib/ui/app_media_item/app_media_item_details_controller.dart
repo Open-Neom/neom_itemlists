@@ -9,7 +9,7 @@ import 'package:neom_core/data/firestore/app_release_item_firestore.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
 import 'package:neom_core/domain/model/app_profile.dart';
 import 'package:neom_core/domain/model/app_release_item.dart';
-import 'package:neom_core/domain/model/band.dart';
+import 'package:neom_core/domain/model/collective.dart';
 import 'package:neom_core/domain/model/item_found_in_list.dart';
 import 'package:neom_core/domain/model/item_list.dart';
 import 'package:neom_core/domain/use_cases/audio_player_invoker_service.dart';
@@ -33,7 +33,7 @@ class AppMediaItemDetailsController extends SintController implements AppMediaIt
   final userServiceImpl = Sint.find<UserService>();
 
   AppProfile profile = AppProfile();
-  Band band = Band();
+  Collective collective = Collective();
   OwnerType itemlistOwner = OwnerType.profile;
   AppMediaItem appMediaItem = AppMediaItem();
 
@@ -70,13 +70,13 @@ class AppMediaItemDetailsController extends SintController implements AppMediaIt
 
     try {
       profile = userServiceImpl.profile;
-      band = userServiceImpl.band;
+      collective = userServiceImpl.collective;
       itemlistOwner = userServiceImpl.itemlistOwnerType;
 
       if(itemlistOwner == OwnerType.profile) {
         itemlists.assignAll(profile.itemlists ?? {});
-      } else if(itemlistOwner == OwnerType.band) {
-        itemlists.assignAll(band.itemlists ?? {});
+      } else if(itemlistOwner == OwnerType.collective) {
+        itemlists.assignAll(collective.itemlists ?? {});
       }
 
       List<dynamic> arguments  = Sint.arguments ?? [];
@@ -237,8 +237,8 @@ class AppMediaItemDetailsController extends SintController implements AppMediaIt
         }
       } else {
         Sint.offAllNamed(AppRouteConstants.home);
-        Sint.toNamed(AppRouteConstants.bandsRoom);
-        Sint.toNamed(AppRouteConstants.bandLists);
+        Sint.toNamed(AppRouteConstants.collectivesRoom);
+        Sint.toNamed(AppRouteConstants.collectiveLists);
       }
     } catch (e) {
       Sint.offAllNamed(AppRouteConstants.home);

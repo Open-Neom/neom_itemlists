@@ -7,7 +7,7 @@ import 'package:neom_core/data/firestore/itemlist_firestore.dart';
 import 'package:neom_core/data/firestore/profile_firestore.dart';
 import 'package:neom_core/domain/model/app_media_item.dart';
 import 'package:neom_core/domain/model/app_release_item.dart';
-import 'package:neom_core/domain/model/band.dart';
+import 'package:neom_core/domain/model/collective.dart';
 import 'package:neom_core/domain/model/external_item.dart';
 import 'package:neom_core/domain/model/item_list.dart';
 import 'package:neom_core/domain/use_cases/user_service.dart';
@@ -39,7 +39,7 @@ class AppMediaItemController extends SintController implements AppItemService {
 
   String profileId = "";
   String itemlistId = "";
-  Band band = Band();
+  Collective collective = Collective();
   int _prevItemState = 0;
   OwnerType itemlistOwner = OwnerType.profile;
 
@@ -49,7 +49,7 @@ class AppMediaItemController extends SintController implements AppItemService {
     AppConfig.logger.d("ItemlistItem Controller init");
     try {
       profileId = userServiceImpl.profile.id;
-      band = userServiceImpl.band;
+      collective = userServiceImpl.collective;
       itemlistOwner = userServiceImpl.itemlistOwnerType;
 
       if(Sint.arguments != null) {
@@ -165,11 +165,11 @@ class AppMediaItemController extends SintController implements AppItemService {
 
             return true;
           }
-        } else if (itemlistOwner == OwnerType.band) {
-          if (userServiceImpl.band.itemlists!.isNotEmpty) {
+        } else if (itemlistOwner == OwnerType.collective) {
+          if (userServiceImpl.collective.itemlists!.isNotEmpty) {
             AppConfig.logger.d("Adding item to global itemlist from userController");
-            userServiceImpl.band.itemlists![itemlistId]!.appMediaItems!.add(appMediaItem);
-            itemlist = userServiceImpl.band.itemlists![itemlistId]!;
+            userServiceImpl.collective.itemlists![itemlistId]!.appMediaItems!.add(appMediaItem);
+            itemlist = userServiceImpl.collective.itemlists![itemlistId]!;
             loadItemsFromList();
           }
           return true;
@@ -213,13 +213,13 @@ class AppMediaItemController extends SintController implements AppItemService {
               itemlistItems.remove(appMediaItem.id);
             }
           }
-        } else if(itemlistOwner == OwnerType.band) {
-          if (userServiceImpl.band.itemlists != null && userServiceImpl.band.itemlists!.isNotEmpty) {
+        } else if(itemlistOwner == OwnerType.collective) {
+          if (userServiceImpl.collective.itemlists != null && userServiceImpl.collective.itemlists!.isNotEmpty) {
             AppConfig.logger.d("Removing item from global itemlist from userController");
             if(releaseItem != null) {
-              userServiceImpl.band.itemlists![itemlist.id]!.appReleaseItems!.remove(releaseItem);
+              userServiceImpl.collective.itemlists![itemlist.id]!.appReleaseItems!.remove(releaseItem);
             } else {
-              userServiceImpl.band.itemlists![itemlist.id]!.appMediaItems!.remove(appMediaItem);
+              userServiceImpl.collective.itemlists![itemlist.id]!.appMediaItems!.remove(appMediaItem);
             }
 
             itemlistItems.remove(appMediaItem.id);

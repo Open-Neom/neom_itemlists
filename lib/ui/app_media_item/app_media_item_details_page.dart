@@ -233,7 +233,7 @@ class AppMediaItemDetailsPage extends StatelessWidget {
                   padding: const EdgeInsets.only(top: 10),
                   child: ElevatedButton(
                     style: ButtonStyle(
-                      backgroundColor: WidgetStateProperty.all<Color>(AppColor.bondiBlue75)
+                      backgroundColor: WidgetStateProperty.all<Color>(AppColor.getReleaseShelfColor())
                     ),
                     child: SizedBox(
                       width: 100,
