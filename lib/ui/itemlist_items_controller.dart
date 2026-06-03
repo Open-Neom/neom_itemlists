@@ -1,5 +1,6 @@
 import 'package:neom_commons/app_flavour.dart';
 import 'package:neom_commons/utils/constants/app_page_id_constants.dart';
+import 'package:neom_commons/utils/mappers/app_media_item_mapper.dart';
 import 'package:neom_core/app_config.dart';
 import 'package:neom_core/data/api_services/push_notification/firebase_messaging_calls.dart';
 import 'package:neom_core/data/firestore/itemlist_firestore.dart';
@@ -10,6 +11,7 @@ import 'package:neom_core/domain/model/collective.dart';
 import 'package:neom_core/domain/model/external_item.dart';
 import 'package:neom_core/domain/model/item_list.dart';
 import 'package:neom_core/domain/use_cases/user_service.dart';
+import 'package:neom_core/domain/use_cases/audio_player_invoker_service.dart';
 import 'package:neom_core/utils/enums/app_in_use.dart';
 import 'package:neom_core/utils/enums/app_item_state.dart';
 import 'package:neom_core/utils/enums/itemlist_type.dart';
@@ -50,6 +52,8 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
       collective = userServiceImpl.collective;
       itemlistOwner = userServiceImpl.itemlistOwnerType;
 
+      bool autoplay = false;
+
       if(Sint.arguments != null) {
         List<dynamic> arguments = Sint.arguments;
         if(arguments[0] is Itemlist) {
@@ -61,6 +65,9 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
         if(arguments.length > 1) {
           isFixed = arguments[1];
         }
+        if(arguments.length > 2) {
+          autoplay = arguments[2];
+        }
       }
 
       if(itemlist.id.isNotEmpty) {
@@ -69,7 +76,24 @@ class ItemlistItemsController extends SintController implements ItemlistItemServ
         AppConfig.logger.d("${itemlist.appMediaItems?.length ?? 0} media items in itemlist ${itemlist.type}");
         AppConfig.logger.d("${itemlist.externalItems?.length ?? 0} external items in itemlist ${itemlist.type}");
         loadItemsFromList();
-        if(itemlistItems.length == 1) {
+
+        if (autoplay && itemlistItems.isNotEmpty) {
+          final List<AppMediaItem> mediaItems = [];
+          for (var item in itemlistItems.values) {
+            if (item is AppMediaItem) {
+              mediaItems.add(item);
+            } else if (item is AppReleaseItem) {
+              mediaItems.add(AppMediaItemMapper.fromAppReleaseItem(item));
+            }
+          }
+          if (mediaItems.isNotEmpty) {
+            AppConfig.logger.d("Autoplay triggered for itemlist: ${itemlist.name} with ${mediaItems.length} items");
+            Sint.find<AudioPlayerInvokerService>().init(
+              mediaItems: mediaItems,
+              playItem: true,
+            );
+          }
+        } else if(itemlistItems.length == 1) {
           getItemlistItemDetails(itemlistItems.values.first.id);
         }
       } else {
